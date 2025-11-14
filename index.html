@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- titlos -->
+    <title>Cosmic</title>
+    <!--eikona-->
+    <link rel="icon" type="image/svg+xml" href="images/union-2.svg">
+    <!-- Google Font from Figma -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Inter&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Your main CSS file -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+
+  <!-- USER ID DISPLAY -->
+  <div id="user-id-display" class="user-id-display">Loading user ID…</div>
+
+
+  <body>
+   
+
+    <div class="space-container">
+        <!-- stars behind everything -->
+      <div class="stars-wrapper">
+        <div class="stars-layer"></div>
+        <div class="stars-layer"></div>
+        <div class="stars-layer"></div>
+      </div>
+
+     
+
+      <div class="space">
+
+      
+      <!-- rotating SVG halo -->
+      <div class="frame-64-1">
+        <img src="images/union-2.svg" class="union-2" alt="union" />
+      </div>
+
+     <!-- stars.svg background -->
+      <div class="stars-svg"></div>
+        <!-- sun in the center -->
+        <div class="sun"></div>
+
+        <div class="orbit orbit1">
+          <div class="planet planet1" data-planet="1" role="button" aria-label="Mercury"></div>
+        </div>
+
+        <div class="orbit orbit2">
+          <div class="planet planet2" data-planet="2" role="button" aria-label="Venus"></div>
+        </div>
+
+        <div class="orbit orbit3">
+          <div class="planet planet3" data-planet="3" role="button" aria-label="Earth"></div>
+        </div>
+
+        <div class="orbit orbit4">
+          <div class="planet planet4" data-planet="4" role="button" aria-label="Mars"></div>
+        </div>
+
+        <div class="orbit orbit5">
+          <div class="planet planet5" data-planet="5" role="button" aria-label="Jupiter"></div>
+        </div>
+
+        <div class="orbit orbit6">
+          <div class="ring-back"></div>
+          <div class="planet planet6" data-planet="6" role="button" aria-label="Saturn"></div>
+          <div class="ring-front"></div>
+        </div>
+
+        <div class="orbit orbit7">
+          <div class="planet planet7" data-planet="7" role="button" aria-label="Uranus"></div>
+        </div>
+      </div>
+    </div>
+        <!-- Info panels (hidden by default) -->
+
+      <div class="planet-info" id="info-1">
+        <button class="info-close" aria-label="Close info">✕</button>
+        <h2>Mercury</h2>
+        <p>The first planet in the solar system, low gravity light atmosphere and closest to the Sun.</p>
+      </div>
+
+      <div class="planet-info" id="info-2">
+        <button class="info-close" aria-label="Close info">✕</button>
+        <h2>Venus</h2>
+        <p>Second planet has a thicker atmosphere that traps heat, making it the hottest planet.</p>
+      </div>
+
+      <div class="planet-info" id="info-3">
+        <button class="info-close" aria-label="Close info">✕</button>
+        <h2>Earth</h2>
+        <p>The third planet is cool enough for seasonal swings and is rich in silicon.</p>
+      </div>
+
+      <div class="planet-info" id="info-4">
+        <button class="info-close" aria-label="Close info">✕</button>
+        <h2>Mars</h2>
+        <p>The fourth planet has many oceans and various terrain. Its atmosphere is rich in carbon and oxygen.</p>
+      </div>
+
+      <div class="planet-info" id="info-5">
+        <button class="info-close" aria-label="Close info">✕</button>
+        <h2>Jupiter</h2>
+        <p>Planet 5 is bigger than the previous, rich in metals, but colder atmosphere.</p>
+      </div>
+
+      <div class="planet-info" id="info-6">
+        <button class="info-close" aria-label="Close info">✕</button>
+        <h2>Saturn</h2>
+        <p>The biggest planet of the solar system. Has many minerals and is rich in water.</p>
+      </div>
+
+      <div class="planet-info" id="info-7">
+        <button class="info-close" aria-label="Close info">✕</button>
+        <h2>Uranus</h2>
+        <p>Last planet on this solar system, less light but bigger oceans and dense atmosphere.</p>
+      </div>
+
+
+      
+    
+
+    <!-- GDPR NOTICE -->
+     
+     <!--
+      <div id="gdpr-panel" class="gdpr-panel" role="alert">
+        <div class="gdpr-content">
+          <p>
+            We use cookies and local storage to improve your experience and enable interactive features.
+            Your data stays private and is never shared.
+          </p>
+          <button id="gdpr-accept" class="gdpr-btn">Accept</button>
+        </div>
+      </div>
+       
+    <div id="gdpr-modal" class="gdpr-modal hidden">
+      <div class="gdpr-content">
+        <h2>GDPR Notice</h2>
+        <p>
+          Your data is collected and processed in accordance with the General Data Protection Regulation (GDPR).
+          We record the time you spend on the website (based on your IP address) and collect the information you
+          provide through the form below for research purposes related solely to this website. Your data will not
+          be shared with third parties.
+        </p>-->
+        <!--<p>
+          Camera and microphone access are used only within interactive games as part of gameplay. Please do not
+          share passwords or any sensitive personal information while using the games.
+        </p>
+        -->
+        <!--<button id="gdpr-accept-btn" class="gdpr-btn">Accept</button>
+      </div>
+    </div>
+  -->
+       
+
+    
+
+    <!-- RE-CENTER BUTTON -->
+    <div id="recenter-btn" class="recenter-btn">Click to re-center or Press “C”</div>
+    
+    <!-- STORY SUBTITLES -->
+    <div id="story-overlay" class="story-overlay">
+      <div id="story-text" class="story-text"></div>
+    </div>
+
+    <!-- STORY NAVIGATION -->
+    <div class="story-nav">
+      <button id="story-prev" class="story-btn">
+        <img src="images/left.svg" alt="Previous">
+      </button>
+      <button id="story-next" class="story-btn">
+        <img src="images/right.svg" alt="Next">
+      </button>
+    </div>
+
+    <!-- SOUND TOGGLE -->
+    <div id="sound-toggle" class="sound-toggle" title="Toggle sound">
+        <img id="sound-icon" src="images/volume.svg" alt="Sound On">
+    </div>
+      <!-- START BUTTON -->
+    <button id="start-btn" class="start-btn">Press Start</button>
+
+    <script src="script.js"></script>
+
+    <!-- story -->
+    <script src="story-engine.js"></script>
+
+  </body>
+</html>

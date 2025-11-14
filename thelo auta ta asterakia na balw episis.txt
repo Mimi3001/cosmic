@@ -1,0 +1,38 @@
+/* ================================
+   ADD EXTRA STARS
+   ================================ */
+.stars-wrapper::before {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: white;
+  /* added more stars for density */
+  box-shadow:
+    10vw 6vh rgba(247, 151, 151, 0.9),
+    -15vw 8vh rgba(145, 245, 175, 0.8),
+    20vw -10vh rgba(168, 160, 243, 0.9),
+    -25vw -15vh rgba(247, 164, 164, 0.7),
+    30vw 18vh rgba(92, 216, 247, 0.8),
+    40vw 22vh rgba(129, 247, 164, 0.9),
+    -45vw -18vh rgba(243, 180, 180, 0.7),
+    50vw -25vh rgba(149, 151, 248, 0.9),
+    60vw 28vh rgba(80, 208, 247, 0.7),
+    -55vw 10vh rgba(91, 233, 138, 0.8);
+  z-index: -5;
+  animation: twinkle1 6s ease-in-out infinite alternate;
+}
+
+.stars-wrapper::after,
+.stars-layer {
+  /* add a few extra points */
+  box-shadow:
+    8vw -5vh rgba(248, 237, 79, 0.6),
+    -12vw 10vh rgba(232, 71, 247, 0.5),
+    22vw 14vh rgba(245, 109, 215, 0.7),
+    -28vw -8vh rgba(222, 247, 84, 0.6),
+    35vw -20vh rgba(204, 55, 241, 0.5),
+    -38vw 24vh rgba(233, 247, 108, 0.6),
+    42vw -26vh rgba(255, 71, 215, 0.4);
+}

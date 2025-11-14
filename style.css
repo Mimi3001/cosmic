@@ -1,0 +1,889 @@
+/* ===== Figma Variables ===== */
+:root {
+  --font-family-inter: 'Inter', sans-serif;
+}
+
+/* ===== CSS Reset ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+/*-------------------*/
+body {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== Images ===== */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ===== Figma Frame & Union ===== */
+.frame-64-1 {
+  flex-grow: 0;
+  flex-shrink: 1;
+  flex-basis: auto;
+  background-color: rgba(255, 255, 255, 1);
+  padding: 0 24px;
+}.union-2 {
+  flex-grow: 0;
+  flex-shrink: 1;
+  flex-basis: auto;
+  fill: rgba(255, 255, 255, 1);
+  border: none;
+  outline: none;
+}
+
+
+/* ===== BACKGROUND ===== */
+body {
+  margin: 0;
+  overflow: hidden;
+  background-color: #888;
+  background-image: url('images/fonto.png');  /* Set your image as background */
+  background-size: cover;  /* Ensure the image covers the entire viewport */
+  background-position: center center;  /* Center the image in the viewport */
+  /*background-repeat: no-repeat;*/  /* Prevent the image from repeating */
+  background-attachment: fixed;
+  height: 100vh;
+}
+
+
+
+/* ===== CONTAINER ===== */
+/*=========i-need-some-spaceeeeeeee=======*/
+
+/* Scroll + zoom support */
+.space-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: visible; /* enables scrollbars when needed */
+  touch-action: none; /* allows touch zoom */
+  cursor: grab;
+}
+
+.space-container:active {
+  cursor: grabbing;
+}
+
+.space {
+  position:absolute;
+  top: 40%; 
+  left: 59%; 
+  width: 1600px; /* make the solar system wide enough to scroll */
+  height: 1600px;
+  transform: translate(-50%, -50%) scale(1);
+  transform-origin: center center;
+  transition: transform 0.3s ease-out;
+  overflow: visible; /* clip content outside the viewport i mipos visible??????????*/
+  /*display: flex;
+  margin: 0 auto;
+  align-items: center;
+  justify-content: center; den ta xreiazomai pleon */
+}
+
+/* === Prevent accidental selection or dragging === */
+.space-container,
+.space,
+.space * {
+  user-select: none;        /* disable text/image selection */
+  -webkit-user-drag: none;  /* disable dragging of images in WebKit browsers */
+  -webkit-tap-highlight-color: transparent; /* remove tap highlight on mobile */
+}
+
+/* === Fix star visibility when zooming/panning === */
+.space-container .stars-wrapper {
+  transform: translate(-50%, -50%) scale(var(--star-scale, 1));
+  top: 50%;
+  left: 50%;
+  width: 200vw;
+  height: 200vh;
+  pointer-events: none;
+}
+
+
+
+
+
+/* ====== STARFIELD SYSTEM ====== */
+/*============nomizw edw ta astarta me px douleuoun kalitera*=======*/
+.space .stars-wrapper {
+  position:absolute;
+  top: 50%;
+  left: 50%;
+  
+  width: 4000px; /* Fixed large size instead of vw/vh */
+  height: 4000px;
+ /*transform: translate(-50%, -50%);*/
+ transform-origin: center center;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Individual star layers */
+.stars-layer {
+  position:absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+ /*Layer 1: Large bright stars */
+.stars-layer:nth-child(1)::before {
+  content: "";
+  position:absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 51% 56%, rgba(255,255,255,0.9) 1px, transparent 0.5px),
+    radial-gradient(circle at 55% 63%, rgba(255,255,255,0.9) 1px, transparent 0.5px),
+    radial-gradient(circle at 58% 60%, rgba(255,255,255,0.9) 1px, transparent 0.5px),
+    radial-gradient(circle at 62% 80%, rgba(255,255,255,0.9) 1px, transparent 0.5px),
+    radial-gradient(circle at 64% 90%, rgba(255,255,255,0.9) 1px, transparent 0.5px),
+    radial-gradient(circle at 69% 70%, rgba(255,255,255,0.9) 1px, transparent 0.5px),
+    radial-gradient(circle at 72% 80%, rgba(255,255,255,0.9) 1px, transparent 0.5px),
+    radial-gradient(circle at 74% 90%, rgba(255,255,255,0.9) 1px, transparent 0.5px),
+    radial-gradient(circle at 75% 85%, rgba(255,255,255,0.9) 1px, transparent 0.5px),
+    radial-gradient(circle at 77% 53%, rgba(255,255,255,0.9) 1px, transparent 0.5px),
+    radial-gradient(circle at 80% 65%, rgba(255,255,255,0.9) 1px, transparent 0.5px),
+    radial-gradient(circle at 83% 57%, rgba(255,255,255,0.9) 1px, transparent 0.5px),
+    radial-gradient(circle at 88% 85%, rgba(255,255,255,0.9) 1px, transparent 0.5px),
+    radial-gradient(circle at 95% 66%, rgba(255,255,255,0.9) 1px, transparent 0.5px),
+    radial-gradient(circle at 98% 75%, rgba(255,255,255,0.9) 1px, transparent 0.5px);
+  animation: twinkle1 7s ease-in-out infinite alternate;
+  animation-delay: 1s;
+}
+
+/* Layer 2: Medium blue stars */
+.stars-layer:nth-child(2)::before {
+  content: "";
+  position:absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 52% 52%, rgba(0, 255, 255, 0.7) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 60% 60%, rgba(247, 0, 255, 0.7) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 65% 75%, rgba(115, 255, 0, 0.7) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 70% 80%, rgba(0, 255, 255, 0.7) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 75% 60%, rgba(255, 17, 0, 0.7) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 80% 60%, rgba(229, 255, 0, 0.7) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 85% 70%, rgba(0, 255, 255, 0.7) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 85% 85%, rgba(255, 115, 0, 0.7) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 90% 70%, rgba(238, 255, 0, 0.7) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 95% 90%, rgba(255, 0, 179, 0.7) 0.5px, transparent 0.3px);
+
+  animation: twinkle2 5s ease-in-out infinite alternate;
+  animation-delay: 3s;
+}
+
+/* Layer 3: Small yellow stars */ 
+.stars-layer:nth-child(3)::before {
+  content: "";
+  position:absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 55% 57%, rgba(255,255,200,0.8) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 65% 53%, rgba(255,255,200,0.8) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 65% 90%, rgba(255,255,200,0.8) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 67% 64%, rgba(255,255,200,0.8) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 70% 62%, rgba(255,255,200,0.8) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 75% 85%, rgba(255,255,200,0.8) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 77% 84%, rgba(255,255,200,0.8) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 82% 57%, rgba(255,255,200,0.8) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 85% 74%, rgba(255,255,200,0.8) 0.5px, transparent 0.3px),
+    radial-gradient(circle at 87% 68%, rgba(255,255,200,0.8) 0.5px, transparent 0.3px);
+
+  animation: twinkle3 4s ease-in-out infinite alternate;
+  animation-delay: 2s;
+}
+
+/* Twinkle animations */
+@keyframes twinkle1 {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes twinkle2 {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.9; }
+}
+
+@keyframes twinkle3 {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.5; }
+}
+
+
+/* ----------------------------asterakia svg layer----------------*/
+/*=============den kserw an gineai na einai true infinite=======*/
+
+/* === SVG STAR BACKGROUND - FIXED === */
+.space .stars-svg {
+  position:absolute;
+  /* Cover the entire zoomable space with repeating pattern */
+  top: -5000px;
+  left: -5000px;
+  width: 10000px;
+  height: 10000px;
+  background: url("images/stars.svg") repeat;
+  background-size: 800px 800px;
+  z-index: -1;
+  opacity: 0.8;
+  pointer-events: none;
+  /* Remove the transform since we're positioning manually */
+  transform: none;
+}
+/*----------------------------------------------------------------*/
+
+/* ==================================================== SUN ===== */
+/* Position the Figma SVG behind the Sun Z=0*/
+.frame-64-1 {
+  position:absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1; /* behind the sun */
+  background: none; /* remove Figma white background */
+  animation: rotateSVG 100s linear infinite; /* rotation speed */
+}
+@keyframes rotateSVG {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(-360deg); }
+  
+}
+
+.union-2 {
+   display: block;
+  width: 80px; /* adjust size around the sun Z=1*/
+  height: 80px;
+  fill: white;
+  stroke: rgb(109, 109, 105);
+  z-index: 0;
+  pointer-events: none; /* avoid blocking clicks */
+}
+
+/* keep the sun above the svg */
+.sun {
+  z-index: 1;
+}
+
+.sun {
+  position:absolute;
+  top: 50%;
+  left: 50%;
+  width:43px;
+  height: 43px;
+  background: white;
+  border: 1px solid rgb(109, 109, 105);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ===== ORBITS ===== */
+.orbit {
+  position:absolute;
+ /* top: 50%;
+  left: 50%;*/
+  border: 2px solid rgb(52, 52, 53);
+  border-radius: 50%;
+  /*transform: translate(-50%, -50%);*/
+  animation: rotate 60s linear infinite;
+  /**/
+  transform-origin: center center;
+  /**/
+  pointer-events: none;
+}
+
+/* different orbit radii & speeds */
+.orbit1 {
+  width: 220px;
+  height: 220px;
+  /**/
+  top: calc(50% + 15px);   /* slight vertical offset */
+  left: calc(50% - 10px);   /* slight horizontal offset */
+  /**/
+  animation-duration: 32s;
+}
+.orbit2 {
+  width: 300px;
+  height: 300px;
+  /**/
+  top: calc(50% + 35px);
+  left: calc(50% - 18px);
+  /**/
+  animation-duration: 50s;
+}
+.orbit3 {
+  width: 420px;
+  height: 420px;
+  /**/
+  top: calc(50% + 80px);
+  left: calc(50% - 34px);
+  /**/
+  animation-duration: 30s;
+}
+.orbit4 {
+  width: 550px;
+  height: 550px;
+  /**/
+  top: calc(50% + 85px);
+  left: calc(50% - 45px);
+  /**/
+  animation-duration: 40s;
+}
+.orbit5 {
+  width: 580px;
+  height: 580px;
+  /**/
+  top: calc(50% + 35px);
+  left: calc(50% - 30px);
+  /**/
+  animation-duration: 58s;
+}
+.orbit6 {
+  width: 670px;
+  height: 670px;
+  /**/
+  top: calc(50% + 90px);
+  left: calc(50% - 90px);
+  /**/
+  animation-duration: 70s;
+}
+.orbit7 {
+  width: 880px;
+  height: 880px;
+  /**/
+  top: calc(50% + 90px);
+  left: calc(50% - 90px);
+  /**/
+  animation-duration: 90s;
+}
+
+
+/* Keep planets centered within their orbit */
+.orbit > .planet {
+  position:absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center center;
+  
+}
+/* ===== PLANETS ===== */
+.planet {
+  position:absolute;
+   border: 1px solid black;
+  border-radius: 50%;
+  z-index: 5;
+  cursor: pointer; /* makes it obviously hoverable */
+  pointer-events: auto;
+}
+
+.planet::before {
+  content: "";
+  position:absolute;
+  top: 50%;
+  left: 50%;
+  width: 125%;
+  height: 125%;
+  border-radius: 50%;
+  border: 2px solid rgba(60, 206, 250, 0.7);
+  box-shadow:
+    0 0 10px 4px rgba(59, 162, 247, 0.3),
+    0 0 25px 8px rgba(14, 126, 255, 0.2);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  transition: all 0.35s ease-out;
+  pointer-events: none;
+  z-index: 1; /* visible above orbit */
+}
+
+.planet:hover::before {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+/* ============================================= PLANET INFO PANEL ===== */
+.planet-info {
+  position:absolute;
+  top: 10%;
+  right: 15px;
+  width: 280px;
+  padding: 16px 20px;
+  background: rgba(10, 10, 30, 0.85);
+  border: 1px solid rgba(0, 140, 255, 0.4);
+  border-radius: 10px;
+  color: white;
+  font-family: var(--font-family-inter);
+  box-shadow: 0 0 20px rgba(0, 140, 255, 0.3);
+  display: none; /* hidden by default */
+  z-index: 100;
+  user-select: none; /*de mporei na klikarei to keimeno*/
+}
+
+.planet-info.active {
+  display: block; /* show when active */
+}
+
+.planet-info h2 {
+  margin-bottom: 8px;
+  color: rgb(95, 216, 253);
+  font-size: 18px;
+}
+
+.planet-info p {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.planet-info .info-close {
+  position:absolute;
+  top: 8px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: #cdeeff;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+
+/* Planet sizes */
+.planet1 { width: 16px; height: 16px; transform: translateX(102px); 
+background: url("images/1.svg") center/cover no-repeat;
+}
+.planet2 { width: 30px; height: 30px; transform: translateX(135px);
+background: url("images/2.svg") center/cover no-repeat;
+}
+.planet3 { width: 36px; height: 36px; transform: translateX(188px); 
+background: url("images/3.svg") center/cover no-repeat;
+}
+.planet4 { width: 46px; height: 46px; transform: translateX(252px); 
+background: url("images/4.svg") center/cover no-repeat;
+}
+.planet5 { width: 44px; height: 44px; transform: translateX(268px); 
+background: url("images/5.svg") center/cover no-repeat;
+}
+.planet6 { width: 52px; height: 52px; transform: translateX(310px); 
+background: url("images/6.svg") center/cover no-repeat;
+}
+
+.planet7 { width: 44px; height: 44px; transform: translateX(418px); 
+background: url("images/7.svg") center/cover no-repeat;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes rotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.user-id-display {
+  position:absolute;
+  bottom: 10px;
+  left: 15px;
+  background: rgba(10, 10, 30, 0.7);
+  color: #cdeeff;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+  z-index: 8000;
+  user-select: none;
+}
+
+/* === GDPR PANEL === */
+/*
+.gdpr-panel {
+  position:absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 280px;
+  background: rgba(10, 10, 30, 0.9);
+  color: #cdeeff;
+  font-size: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(100,150,255,0.3);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.gdpr-panel.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.gdpr-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gdpr-btn {
+  align-self: flex-end;
+  background: #2147ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.gdpr-btn:hover {
+  background: #3a64ff;
+}
+  
+.gdpr-modal {
+  position:absolute;
+  inset: 0;
+  background: rgba(5, 5, 15, 0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.6s ease forwards;
+}
+
+.gdpr-modal.hidden {
+  display: none;
+}
+
+.gdpr-content {
+  background: radial-gradient(circle at top, #0a0a1a, #050510 70%);
+  color: #e0eaff;
+  max-width: 600px;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 0 25px rgba(0, 200, 255, 0.3), 0 0 60px rgba(0, 150, 255, 0.15);
+  text-align: left;
+  font-family: 'Orbitron', sans-serif;
+  border: 1px solid rgba(0, 200, 255, 0.3);
+}
+
+.gdpr-content h2 {
+  color: #6cf1ff;
+  text-align: center;
+  margin-bottom: 16px;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+}
+
+.gdpr-content p {
+  line-height: 1.6;
+  font-size: 15px;
+  color: #d5e0ff;
+  margin-bottom: 1em;
+  text-shadow: 0 0 4px rgba(0, 255, 255, 0.15);
+}
+
+#gdpr-accept-btn {
+  display: block;
+  width: 100%;
+  padding: 14px 0;
+  background: linear-gradient(90deg, #0099ff, #00ccff);
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 200, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#gdpr-accept-btn:hover {
+  background: linear-gradient(90deg, #00ccff, #33ffff);
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.9);
+  transform: scale(1.05);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+*/
+
+/* === Permission Warning (Camera/Mic) === */
+.permission-warning {
+  position:absolute;
+  bottom: 80px;
+  left: 20px;
+  background: rgba(82, 49, 77, 0.9);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.4s ease;
+  z-index: 10000;
+  pointer-events: none;
+}
+.permission-warning.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* ============================================ Re-center Button === */
+.recenter-btn {
+  position:absolute;
+  bottom: 10px;
+  right: 15px;
+  background: rgba(10, 10, 30, 0.6);
+  color: #cdeeff;
+ /* border: 1px solid rgba(100,150,255,0.3);*/
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 14px; 
+  font-family: 'Helvetica';
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(15px);
+  transition: all 0.3s ease;
+  z-index: 8001;
+  user-select: none; /*de mporei na klikarei to keimeno*/
+ /*pointer-events: none;*/
+}
+.recenter-btn.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* ========================================================= START BUTTON === */
+.start-btn {
+  position:absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background:  rgba(10, 10, 30, 0.7);
+  border: 2px solid #00ccff;
+  color: #00eaff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 26px;
+  padding: 16px 40px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(0, 200, 255, 0.6);
+  transition: all 0.3s ease;
+  z-index: 9999;
+}
+
+.start-btn:hover {
+  background: rgba(10, 10, 30, 0.85);
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.9);
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+.start-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+
+/* === STORY OVERLAY === */
+.story-overlay {
+  position:absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8000;
+}
+
+.story-text { 
+  position:absolute; 
+  bottom: 80px; /* slightly above nav arrows */ 
+  /*width: calc(100% - 200px);*/ /* 150px each side */
+  left: 70px;
+  right: 70px;
+  text-align: center; 
+  font-family: 'Inter', sans-serif; 
+  font-weight: 300; /* thin font */ 
+  font-size: 16px; 
+  color: #fff; 
+  text-shadow: 
+  2px 2px 4px rgba(0, 0, 0, 0.8), 
+  -1px -1px 0 #000, 
+  1px -1px 0 #000, 
+  -1px 1px 0 #000, 
+  1px 1px 0 #000; 
+  opacity: 0; 
+  transition: opacity 0.6s ease; 
+  z-index: 9000; 
+} 
+.story-text.show { opacity: 1; }
+
+#prompt-text {
+  position:absolute;
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center; 
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: #85b1f3;
+  text-shadow: 0 0 8px rgba(0,0,0,0.6);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 8002;
+  pointer-events: none;
+}
+#prompt-text.visible { opacity: 1; }
+
+/* ======================================== NAVIGATION ARROWS === */
+.story-nav {
+  position:absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px; /* space between arrows */
+  z-index: 9001;
+}
+
+.story-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  opacity: 0.8;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.story-btn:hover {
+  opacity: 0.9;
+  transform: scale(1.1);
+}
+
+.story-btn img {
+  width: 100%;
+  height: 100%;
+}
+
+/* =========================================== SOUND TOGGLE === */
+.sound-toggle {
+  position:absolute;
+  bottom: 40px;
+  left: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 9000;
+  opacity: 0.9;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+    padding: 0;
+}
+
+.sound-toggle:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+.sound-toggle img {
+  width: 16px;
+  height: 16px;
+  filter: drop-shadow(0 0 5px rgba(255,255,255,0.6));
+}
+ /*===================================EPILOGH PLANHTH=====*/
+.choose-window {
+  position:absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(10, 10, 30, 0.9);
+  color: white;
+  padding: 30px 50px;
+  border: 2px solid #00ccff;
+  border-radius: 12px;
+  text-align: center;
+  z-index: 10000;
+   box-shadow: 0 0 20px rgba(0, 200, 255, 0.4);
+}
+
+.choose-window p {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.choose-window button {
+  margin-top: 10px;
+  background: #00ccff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+    color: #000;
+  font-weight: bold;
+  color: black;
+  cursor: pointer;
+    transition: background 0.3s;
+}
+
+.choose-window button:hover {
+  background: #00eaff;
+}
+
+.planet.temp-blue::before {
+  transform: translate(-50%, -50%) scale(1.5);
+  opacity: 1;
+  border: 3px solid rgba(0, 180, 255, 0.9);
+  box-shadow: 0 0 20px 8px rgba(0, 180, 255, 0.6);
+}
+
+.planet.chosen-permanent::before {
+  transform: translate(-50%, -50%) scale(1.6);
+  opacity: 1;
+  border: 3px solid rgba(0, 200, 255, 1);
+  box-shadow: 0 0 30px 10px rgba(0, 200, 255, 0.8);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1440px) {
+  .frame-64-1 {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+@media (max-width: 768px) {
+  .frame-64-1 {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .story-nav {
+    gap: 20px;
+  }
+}
