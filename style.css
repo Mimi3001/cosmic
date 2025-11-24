@@ -887,3 +887,26 @@ background: url("images/7.svg") center/cover no-repeat;
     gap: 20px;
   }
 }
+
+.minigame-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.minigame-content {
+  background: #111;
+  width: 85%;
+  height: 85%;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}

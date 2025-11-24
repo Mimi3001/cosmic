@@ -44,7 +44,40 @@ document.addEventListener("DOMContentLoaded", () => {
     // audio: "audio/choose_planet.mp3",
     onEnd: "choosePlanet",
     prompt: "Roll over a planet and click on it"
+  },
+
+  //------------------//
+  //next//
+  //------------------//
+
+   {
+    text: ["Great, you have chosen one!"],
+    prompt: () => `You chose the planet: ${window.selectedPlanet?.name || "[unknown]"}`
+  },
+
+  {
+    text: ["This many users chose it before you:"],
+    prompt: () =>
+      `${window.selectedPlanet?.y || 0} users of ${window.selectedPlanet?.z || 0} total players, last date: ${window.selectedPlanet?.date || ""}`
+  },
+
+  { text: ["Let's dive in and see how the world is in there shall we?"] },
+
+  { text: ["This is your planet right now. A blank canvas!"] },
+
+  { text: ["Will you fill it with your touch of creativity? You are scientist and artist."] },
+
+  { text: ["You can make the terrain, the climate, and a place for a new civilization. Manipulate it with the notion of your hand!"] },
+
+  { text: ["Thus you are the god here. You have limitl—well, not limitless—but still many options to make the planet as you wish!"] },
+
+  {
+    text: ["Let's sculpt this planet—give it lands, oceans, and some pretty clouds, shall we?"],
+    prompt: "Move the bars with mouse. Adjust your terrain, atmosphere and water level",
+    onEnd: "openMiniGame1" // triggers the canvas popup
   }
+
+
 ];
 
 
@@ -71,8 +104,26 @@ document.addEventListener("DOMContentLoaded", () => {
         
     },
     openMiniGame1: () => {
-      console.log(">>> Mini game placeholder");
+      // Create popup container
+      const name = window.selectedPlanet?.name || "Unknown";
+      const popup = document.createElement("div");
+      popup.className = "minigame-popup";
+
+      popup.innerHTML = `
+         <div class="minigame-content">
+          <iframe src="minigames/myplanets/index.html?planet=${encodeURIComponent(name)}" frameborder="0"></iframe>
+          <button class="close-minigame">Close</button>
+        </div>
+      `;
+
+      document.body.appendChild(popup);
+
+      // Close logic
+      popup.querySelector(".close-minigame").addEventListener("click", () => {
+        popup.remove();
+      });
     }
+
   };
 
   // === Core function ===
@@ -92,7 +143,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // update top prompt
     if (entry.prompt) {
-      promptText.textContent = entry.prompt;
+      const value = typeof entry.prompt === "function" ? entry.prompt() : entry.prompt;
+      promptText.textContent = value;
       promptText.classList.add("visible");
     } else {
       promptText.classList.remove("visible");
@@ -133,15 +185,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // === Navigation ===
   btnNext.addEventListener("click", () => {
+      if (!choice && index >= 2) {
+        console.log("User must choose a planet before continuing.");
+        return;
+      }
     if (index < story.length - 1) {
-      document.querySelector(".choose-window") ? document.querySelector(".choose-window").remove() : '';
+        const win = document.querySelector(".choose-window");
+        if (win) win.remove();
+     
       index++;
       showStory(index);
     }
   });
   btnPrev.addEventListener("click", () => {
+    if (choice && index <= 3) {
+      console.log("Cannot go back after confirming a planet.");
+      return;
+    }
+
+
     if (index > 0) {
-      document.querySelector(".choose-window") ? document.querySelector(".choose-window").remove() : '';
+      const win = document.querySelector(".choose-window");
+      if (win) win.remove();
+      
       index--;
       showStory(index);
     }
@@ -154,8 +220,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (soundToggle && soundIcon) {
     soundToggle.addEventListener("click", () => {
       soundEnabled = !soundEnabled;
-
-      // 👇 Make sure these filenames match the actual files
       soundIcon.src = soundEnabled
         ? "images/volume.svg"
         : "images/mute.svg";
@@ -200,13 +264,59 @@ function enablePlanetSelectionGlow() {
       const yes = chooseWindow.querySelector("#confirm-yes");
       const no = chooseWindow.querySelector("#confirm-no");
 
-      yes.addEventListener("click", () => {
-        
+     yes.addEventListener("click", () => {
+
+          // visually mark chosen planet
         document.querySelectorAll(".planet").forEach(el => el.classList.remove("chosen-permanent"));
         planetEl.classList.add("chosen-permanent");
+
+        // mark that a choice has been made
         choice = true;
+
+        //try aria-label ----
+        let name = planetEl.getAttribute("aria-label")?.trim();
+
+        //if not found, try using data-planet to find matching .planet-info #info-{n} ----
+        if (!name) {
+          const dataId = planetEl.dataset.planet; // e.g. "7"
+          if (dataId) {
+            const infoPanel = document.getElementById(`info-${dataId}`);
+            name = infoPanel?.querySelector("h2")?.textContent?.trim();
+          }
+        }
+
+        // try to find any .planet-info that contains the same name text (defensive) ----
+        if (!name) {
+          const ariaGuess = planetEl.getAttribute("aria-label");
+          if (ariaGuess) {
+            const match = Array.from(document.querySelectorAll(".planet-info")).find(pi => {
+              const h = pi.querySelector("h2");
+              return h && h.textContent.trim().toLowerCase() === ariaGuess.trim().toLowerCase();
+            });
+            name = match?.querySelector("h2")?.textContent?.trim();
+          }
+        }
+        name = name || "Unknown Planet";
+               // placeholder values for now
+        const usersBefore = Math.floor(Math.random() * 50) + 1; // akala random 
+        const totalUsers = 200; // akl random Replace the placeholder usersBefore / totalUsers with real values from your backend when you have one.
+        const lastDate = new Date().toLocaleDateString("en-GB"); // dd/mm/yy
+
+        window.selectedPlanet = {
+          id: planetEl.dataset.planet || null,
+           name,
+          y: usersBefore,
+          z: totalUsers,
+          date: lastDate
+        };
+ 
         chooseWindow.remove();
+
+        // move to next story entry (the first new one)
+        index++;
+        showStory(index);
       });
+
 
       no.addEventListener("click", () => {
           chooseWindow.innerHTML = `

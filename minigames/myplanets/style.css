@@ -1,0 +1,59 @@
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0; /* Reset default body margin */
+    overflow: hidden; /* Prevent scrollbars */
+    
+}
+#threeCanvas {
+    display: block; /* Removes extra space below canvas */
+    width: 100vw;
+    height: 100vh;
+}
+/*  -------------------------------------------isws ola auta einai axrista*/
+/* https://discourse.threejs.org/t/how-we-create-a-button-in-scene/36318/6 */
+button {
+	/*-webkit-appearance: none;	*/
+	font-family: Courier;
+	font-size: 12pt;
+	text-align: center;
+	position: absolute;
+	min-width: 100px;
+	border-radius: 0;
+	z-index: 1;
+}
+.endButton {
+	right: 20px;
+	top: 10px;
+}
+/*--------------------------------------------mexri edw*/
+h5 {
+	font-size: 25;
+	color: white;
+  pointer-events: none;
+}
+
+
+#controls {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  z-index: 2;
+  color: white;
+  font-family: Inter, sans-serif;
+  
+  
+}
+
+#heightSlider {
+  width: 200px;
+  margin-left: 10px;
+}
+ #cloudSlider{
+  width: 200px;
+  margin-left: 10px;
+}
+  #waterSlider{
+  width: 200px;
+  margin-left: 10px;
+}
+
