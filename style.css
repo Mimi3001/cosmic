@@ -894,7 +894,7 @@ background: url("images/7.svg") center/cover no-repeat;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.7);/*fonto piso*/
   display: flex;
   justify-content: center;
   align-items: center;
@@ -903,10 +903,65 @@ background: url("images/7.svg") center/cover no-repeat;
 
 .minigame-content {
   background: #111;
-  width: 85%;
+  width: 85%;/*tis othonis*/
   height: 85%;
   border-radius: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+/*pramata*/
+.minigame-buttons {
+  padding: 10px;
+  background: #111;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  border-top: 2px solid #00ccff;
+}
+
+.minigame-buttons button {
+  background: #00ccff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.minigame-buttons button:hover {
+  background: #00eaff;
+}
+
+/* Confirmation window */
+.confirm-submit {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(10, 10, 30, 0.95);
+  padding: 25px 40px;
+  border: 2px solid #00ccff;
+  border-radius: 12px;
+  color: white;
+  text-align: center;
+  z-index: 10000;
+  box-shadow: 0 0 20px rgba(0, 200, 255, 0.4);
+}
+
+.confirm-submit button {
+  margin: 10px;
+  background: #00ccff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: black;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.confirm-submit button:hover {
+  background: #00eaff;
 }

@@ -7,7 +7,7 @@
 */
 
 // ===== PLANET CLICK INFO LOGIC =====
-console.log("🌍 Planet script loaded!");
+console.log("Planet script loaded!");
 
 document.addEventListener('DOMContentLoaded', () => {
   const planets = document.querySelectorAll('.planet');

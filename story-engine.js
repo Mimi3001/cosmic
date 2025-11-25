@@ -21,64 +21,64 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // === Story data ===
   const story = [
-  {
-    text: [
-      "Hello cosmic explorer! Earth seemed boring and trashy, so you’ve been invited to travel to the new world.",
-      "Can you make it interesting and clean?",
-      "Before you stands this new solar system, far away from Earth. Explorers come all the time to attempt what you do right now — build a new home.",
-      "Make a new multiplanet community. Expand, compete, collaborate."
-    ],
-    audio: "audio/intro1.mp3",
-    prompt: "Available planets at this moment [Q]"
-  },
-  {
-    text: [
-      "Here stand 7 planets; and you can choose your own.",
-      "NOTE: if a planet appears colorful, it means there's another explorer on that. choose a white one.",
-      "Oh! and any similarities with your home solar system are purely coincidental!"
-    ],
-    // audio: "audio/intro2.mp3"
-  },
-  {
-    text: ["Pick any planet to conquer!"],
-    // audio: "audio/choose_planet.mp3",
-    onEnd: "choosePlanet",
-    prompt: "Roll over a planet and click on it"
-  },
+    {
+      text: [
+        "Hello cosmic explorer! Earth seemed boring and trashy, so you've been invited to travel to the new world.",
+        "Can you make it interesting and clean?",
+        "Before you stands this new solar system, far away from Earth. Explorers come all the time to attempt what you do right now — build a new home.",
+        "Make a new multiplanet community. Expand, compete, collaborate."
+      ],
+      audio: "audio/intro1.mp3",
+      prompt: "Available planets at this moment [Q]"
+    },
+    {
+      text: [
+        "Here stand 7 planets; and you can choose your own.",
+        "NOTE: if a planet appears colorful, it means there's another explorer on that. choose a white one.",
+        "Oh! and any similarities with your home solar system are purely coincidental!"
+      ],
+      // audio: "audio/intro2.mp3"
+    },
+    {
+      text: ["Pick any planet to conquer!"],
+      // audio: "audio/choose_planet.mp3",
+      onEnd: "choosePlanet",
+      prompt: "Roll over a planet and click on it"
+    },
 
-  //------------------//
-  //next//
-  //------------------//
+    //------------------//
+    //next//
+    //------------------//
 
-   {
-    text: ["Great, you have chosen one!"],
-    prompt: () => `You chose the planet: ${window.selectedPlanet?.name || "[unknown]"}`
-  },
+    {
+      text: ["Great, you have chosen one!"],
+      prompt: () => `You chose the planet: ${window.selectedPlanet?.name || "[unknown]"}`
+    },
 
-  {
-    text: ["This many users chose it before you:"],
-    prompt: () =>
-      `${window.selectedPlanet?.y || 0} users of ${window.selectedPlanet?.z || 0} total players, last date: ${window.selectedPlanet?.date || ""}`
-  },
+    {
+      text: ["This many users chose it before you:"],
+      prompt: () =>
+        `${window.selectedPlanet?.y || 0} users of ${window.selectedPlanet?.z || 0} total players, last date: ${window.selectedPlanet?.date || ""}`
+    },
 
-  { text: ["Let's dive in and see how the world is in there shall we?"] },
+    { text: ["Let's dive in and see how the world is in there shall we?"] },
 
-  { text: ["This is your planet right now. A blank canvas!"] },
+    { text: ["This is your planet right now. A blank canvas!"] },
 
-  { text: ["Will you fill it with your touch of creativity? You are scientist and artist."] },
+    { text: ["Will you fill it with your touch of creativity? You are scientist and artist."] },
 
-  { text: ["You can make the terrain, the climate, and a place for a new civilization. Manipulate it with the notion of your hand!"] },
+    { text: ["You can make the terrain, the climate, and a place for a new civilization. Manipulate it with the notion of your hand!"] },
 
-  { text: ["Thus you are the god here. You have limitl—well, not limitless—but still many options to make the planet as you wish!"] },
+    { text: ["Thus you are the god here. You have limitl—well, not limitless—but still many options to make the planet as you wish!"] },
 
-  {
-    text: ["Let's sculpt this planet—give it lands, oceans, and some pretty clouds, shall we?"],
-    prompt: "Move the bars with mouse. Adjust your terrain, atmosphere and water level",
-    onEnd: "openMiniGame1" // triggers the canvas popup
-  }
+    {
+      text: ["Let's sculpt this planet—give it lands, oceans, and some pretty clouds, shall we?"],
+      prompt: "Move the bars with mouse. Adjust your terrain, atmosphere and water level",
+      onEnd: "openMiniGame1" // triggers the canvas popup
+    }
 
 
-];
+  ];
 
 
   // === Globals ===
@@ -90,18 +90,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const storyActions = {
     choosePlanet: () => {
       enablePlanetSelectionGlow();
-       //showChooseWindow(); // <== 👈 this shows the popup
+      //showChooseWindow(); // <== 👈 this shows the popup
       if (choice === true) return;
-        
+
       const chooseWindow = document.createElement("div");
-        chooseWindow.className = "choose-window";
-        chooseWindow.innerHTML = `
+      chooseWindow.className = "choose-window";
+      chooseWindow.innerHTML = `
           <div class="choose-content">
             <p>Click on the planet you want to choose</p>
           </div>
         `;
-        document.body.appendChild(chooseWindow);
-        
+      document.body.appendChild(chooseWindow);
+
     },
     openMiniGame1: () => {
       // Create popup container
@@ -111,8 +111,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       popup.innerHTML = `
          <div class="minigame-content">
-          <iframe src="minigames/myplanets/index.html?planet=${encodeURIComponent(name)}" frameborder="0"></iframe>
-          <button class="close-minigame">Close</button>
+          <iframe src="minigames/myplanets/index.html?planet=${encodeURIComponent(name)}" frameborder="0"
+          style="width:100%; height:100%; border:none;"
+          ></iframe>
+          <div class="minigame-buttons">
+            <button class="submit-minigame">Submit</button>
+            <button class="close-minigame">Close</button>
+          </div>
         </div>
       `;
 
@@ -122,6 +127,47 @@ document.addEventListener("DOMContentLoaded", () => {
       popup.querySelector(".close-minigame").addEventListener("click", () => {
         popup.remove();
       });
+
+      //submit logic
+      let submitted = false;
+
+      popup.querySelector(".submit-minigame").addEventListener("click", () => {
+        if (submitted) return; // only once
+
+        // Create confirmation box
+        const confirmBox = document.createElement("div");
+        confirmBox.className = "confirm-submit";
+        confirmBox.innerHTML = `
+      <p>Are you sure you want to submit?</p>
+      <button class="yes-submit">Yes dah</button>
+      <button class="no-submit">No</button>
+    `;
+
+        document.body.appendChild(confirmBox);
+
+        // YES
+        confirmBox.querySelector(".yes-submit").addEventListener("click", () => {
+          submitted = true;
+
+          // Remove confirmation window
+          confirmBox.remove();
+
+          // Do something for submit (no backend needed)
+          console.log("Submission confirmed for:", name);
+
+          // Optional: disable button
+          popup.querySelector(".submit-minigame").style.opacity = "0.5";
+          popup.querySelector(".submit-minigame").style.pointerEvents = "none";
+        });
+
+        // NO
+        confirmBox.querySelector(".no-submit").addEventListener("click", () => {
+          confirmBox.remove();
+        });
+      });
+
+
+
     }
 
   };
@@ -133,7 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // update text and fade it in
     if (Array.isArray(entry.text)) {
-    textEl.innerHTML = entry.text.map(line => `<p>${line}</p>`).join("");
+      textEl.innerHTML = entry.text.map(line => `<p>${line}</p>`).join("");
     } else {
       textEl.innerHTML = `<p>${entry.text}</p>`;
     }
@@ -165,8 +211,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // buttons
     btnPrev.disabled = i === 0;
     btnNext.disabled = i === story.length - 1;
-
-    if (choice === true) btnNext.disabled = i === story.length - 2; // If the player has made their choice they can no longer access the planet choice menu
   }
 
   // === Start button ===
@@ -185,14 +229,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // === Navigation ===
   btnNext.addEventListener("click", () => {
-      if (!choice && index >= 2) {
-        console.log("User must choose a planet before continuing.");
-        return;
-      }
+    if (!choice && index >= 2) {
+      console.log("User must choose a planet before continuing.");
+      return;
+    }
     if (index < story.length - 1) {
-        const win = document.querySelector(".choose-window");
-        if (win) win.remove();
-     
+      const win = document.querySelector(".choose-window");
+      if (win) win.remove();
+
       index++;
       showStory(index);
     }
@@ -207,7 +251,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (index > 0) {
       const win = document.querySelector(".choose-window");
       if (win) win.remove();
-      
+
       index--;
       showStory(index);
     }
@@ -231,26 +275,26 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // === Example helper ===
-function enablePlanetSelectionGlow() {
-  // allow info panels to still open (they use click handlers from script.js)
-  document.querySelectorAll(".planet").forEach(p => {
-    p.addEventListener("click", (e) => {
-      e.stopPropagation(); // don't bubble into other listeners
+  function enablePlanetSelectionGlow() {
+    // allow info panels to still open (they use click handlers from script.js)
+    document.querySelectorAll(".planet").forEach(p => {
+      p.addEventListener("click", (e) => {
+        e.stopPropagation(); // don't bubble into other listeners
 
-      // Show the confirmation window when a planet is clicked
-      showChooseWindow(p);
+        // Show the confirmation window when a planet is clicked
+        showChooseWindow(p);
+      });
     });
-  });
-}
+  }
 
-    function showChooseWindow(planetEl) {
-      // Prevent multiple windows
-      document.querySelector(".choose-window") ? document.querySelector(".choose-window").remove() : '';
-      if (choice === true || index !== 2) return;
+  function showChooseWindow(planetEl) {
+    // Prevent multiple windows
+    document.querySelector(".choose-window") ? document.querySelector(".choose-window").remove() : '';
+    if (choice === true || index !== 2) return;
 
-      const chooseWindow = document.createElement("div");
-      chooseWindow.className = "choose-window";
-      chooseWindow.innerHTML = `
+    const chooseWindow = document.createElement("div");
+    chooseWindow.className = "choose-window";
+    chooseWindow.innerHTML = `
       <div class="choose-content">
         <p>Choose this planet?</p>
         <div style="display:flex; gap:10px; justify-content:center;">
@@ -259,73 +303,73 @@ function enablePlanetSelectionGlow() {
         </div>
       </div>
       `;
-      document.body.appendChild(chooseWindow);
+    document.body.appendChild(chooseWindow);
 
-      const yes = chooseWindow.querySelector("#confirm-yes");
-      const no = chooseWindow.querySelector("#confirm-no");
+    const yes = chooseWindow.querySelector("#confirm-yes");
+    const no = chooseWindow.querySelector("#confirm-no");
 
-     yes.addEventListener("click", () => {
+    yes.addEventListener("click", () => {
 
-          // visually mark chosen planet
-        document.querySelectorAll(".planet").forEach(el => el.classList.remove("chosen-permanent"));
-        planetEl.classList.add("chosen-permanent");
+      // visually mark chosen planet
+      document.querySelectorAll(".planet").forEach(el => el.classList.remove("chosen-permanent"));
+      planetEl.classList.add("chosen-permanent");
 
-        // mark that a choice has been made
-        choice = true;
+      // mark that a choice has been made
+      choice = true;
 
-        //try aria-label ----
-        let name = planetEl.getAttribute("aria-label")?.trim();
+      //try aria-label ----
+      let name = planetEl.getAttribute("aria-label")?.trim();
 
-        //if not found, try using data-planet to find matching .planet-info #info-{n} ----
-        if (!name) {
-          const dataId = planetEl.dataset.planet; // e.g. "7"
-          if (dataId) {
-            const infoPanel = document.getElementById(`info-${dataId}`);
-            name = infoPanel?.querySelector("h2")?.textContent?.trim();
-          }
+      //if not found, try using data-planet to find matching .planet-info #info-{n} ----
+      if (!name) {
+        const dataId = planetEl.dataset.planet; // e.g. "7"
+        if (dataId) {
+          const infoPanel = document.getElementById(`info-${dataId}`);
+          name = infoPanel?.querySelector("h2")?.textContent?.trim();
         }
+      }
 
-        // try to find any .planet-info that contains the same name text (defensive) ----
-        if (!name) {
-          const ariaGuess = planetEl.getAttribute("aria-label");
-          if (ariaGuess) {
-            const match = Array.from(document.querySelectorAll(".planet-info")).find(pi => {
-              const h = pi.querySelector("h2");
-              return h && h.textContent.trim().toLowerCase() === ariaGuess.trim().toLowerCase();
-            });
-            name = match?.querySelector("h2")?.textContent?.trim();
-          }
+      // try to find any .planet-info that contains the same name text (defensive) ----
+      if (!name) {
+        const ariaGuess = planetEl.getAttribute("aria-label");
+        if (ariaGuess) {
+          const match = Array.from(document.querySelectorAll(".planet-info")).find(pi => {
+            const h = pi.querySelector("h2");
+            return h && h.textContent.trim().toLowerCase() === ariaGuess.trim().toLowerCase();
+          });
+          name = match?.querySelector("h2")?.textContent?.trim();
         }
-        name = name || "Unknown Planet";
-               // placeholder values for now
-        const usersBefore = Math.floor(Math.random() * 50) + 1; // akala random 
-        const totalUsers = 200; // akl random Replace the placeholder usersBefore / totalUsers with real values from your backend when you have one.
-        const lastDate = new Date().toLocaleDateString("en-GB"); // dd/mm/yy
+      }
+      name = name || "Unknown Planet";
+      // placeholder values for now
+      const usersBefore = Math.floor(Math.random() * 50) + 1; // akala random 
+      const totalUsers = 200; // akl random Replace the placeholder usersBefore / totalUsers with real values from your backend when you have one.
+      const lastDate = new Date().toLocaleDateString("en-GB"); // dd/mm/yy
 
-        window.selectedPlanet = {
-          id: planetEl.dataset.planet || null,
-           name,
-          y: usersBefore,
-          z: totalUsers,
-          date: lastDate
-        };
- 
-        chooseWindow.remove();
+      window.selectedPlanet = {
+        id: planetEl.dataset.planet || null,
+        name,
+        y: usersBefore,
+        z: totalUsers,
+        date: lastDate
+      };
 
-        // move to next story entry (the first new one)
-        index++;
-        showStory(index);
-      });
+      chooseWindow.remove();
+
+      // move to next story entry (the first new one)
+      index++;
+      showStory(index);
+    });
 
 
-      no.addEventListener("click", () => {
-          chooseWindow.innerHTML = `
+    no.addEventListener("click", () => {
+      chooseWindow.innerHTML = `
           <div class="choose-content">
             <p>Choose a different planet.</p>
             <div style="display:flex; gap:10px; justify-content:center;">
             </div>
           </div>
         `;
-      });
+    });
   }
 });
