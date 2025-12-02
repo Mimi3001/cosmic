@@ -1,4 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
+  //to lock the minigames
+  let storyPaused = false;
+  const minigameState = {
+    1: { url: "minigames/myplanets/index.html", submitted: false },
+    2: { url: "minigames/temperature/index.html", submitted: false },
+    3: { url: "minigames/life/index.html", submitted: false } // prepare for minigame 3
+  };
+
+  let currentMinigame = null;  // id of the currently opened minigame
+
   // === Grab elements ===
   const textEl = document.getElementById("story-text");
   const btnNext = document.getElementById("story-next");
@@ -15,30 +25,49 @@ document.addEventListener("DOMContentLoaded", () => {
   let choice = false;
 
   if (!textEl) {
-    console.warn("❌ story-text element not found in DOM");
+    console.warn(" story-text element not found in DOM");
     return;
   }
 
   // === Story data ===
   const story = [
     {
-      text: [
-        "Hello cosmic explorer! Earth seemed boring and trashy, so you've been invited to travel to the new world.",
-        "Can you make it interesting and clean?",
-        "Before you stands this new solar system, far away from Earth. Explorers come all the time to attempt what you do right now — build a new home.",
-        "Make a new multiplanet community. Expand, compete, collaborate."
-      ],
-      audio: "audio/intro1.mp3",
-      prompt: "Available planets at this moment [Q]"
+      text: ["Hello cosmic explorer! Earth seemed boring and trashy, so you've been invited to travel to the new world."],
+      // audio: "audio/intro1_1.mp3",
+    },
+    {
+      text: ["Can you make it interesting and clean?"],
+      // audio: "audio/intro1_2.mp3"
     },
     {
       text: [
-        "Here stand 7 planets; and you can choose your own.",
-        "NOTE: if a planet appears colorful, it means there's another explorer on that. choose a white one.",
+        "Before you stands this new solar system, far away from Earth. Explorers come all the time to attempt what you do right now — build a new home."
+      ],
+      // audio: "audio/intro1_3.mp3"
+    },
+    {
+      text: ["Make a new multiplanet community. Expand, compete, collaborate."],
+      // audio: "audio/intro1_4.mp3"
+    },
+
+    {
+      text: ["Here stand 7 planets; and you can choose your own."],
+      //audio: "audio/intro2_1.mp3"
+      prompt: "Available planets at this moment: 7"
+    },
+    {
+      text: [
+        "NOTE: if a planet appears colorful, it means there's another explorer on that. Choose a white one."
+      ],
+      //audio: "audio/intro2_2.mp3"
+    },
+    {
+      text: [
         "Oh! and any similarities with your home solar system are purely coincidental!"
       ],
-      // audio: "audio/intro2.mp3"
+      // audio: "audio/intro2_3.mp3"
     },
+
     {
       text: ["Pick any planet to conquer!"],
       // audio: "audio/choose_planet.mp3",
@@ -77,8 +106,40 @@ document.addEventListener("DOMContentLoaded", () => {
       onEnd: "openMiniGame1" // triggers the canvas popup
     }
 
-
   ];
+  //---------------------//
+  //  STORY AFTER MINIGAME 1 //
+  //---------------------//
+
+  story.push(
+    { text: ["Let's move to more details."] },
+    { text: ["What's the temperature range / atmosphere?"] },
+    {
+      text: ["Move your hand(slider) for tempersture adjustments in front of the camera."],
+      prompt:
+        "Move (slider) your hands up/down following the number markers.",
+      onEnd: "openMiniGame2"
+    },
+
+    // AFTER MINIGAME 2
+    { text: ["Great, you almost completed the first step."] },
+    { text: ["Le petit paradise!"] },
+    { text: ["Here’s your world now."] },
+    {
+      text: ["It is not ready yet though.."],
+      onEnd: "lockAfterMiniGame2"
+    },
+    { text: ["Something is still missing..."] },
+    { text: ["LIFE! Fauna and flora should thrive here."] },
+    {
+      text: ["Design your animals, build your landscape!"],
+      prompt:
+        "Draw plants and trees. Tap <Generate Population> to create colors & creatures. You can generate multiple times.",
+      onEnd: "openMiniGame3"
+    }
+  );
+
+  const neoindex = story.findIndex(item => item.onEnd === "choosePlanet");
 
 
   // === Globals ===
@@ -86,11 +147,185 @@ document.addEventListener("DOMContentLoaded", () => {
   let audio = null;
   let soundEnabled = true;
 
+
+  //===prin to storyActions gia na to xrisomopoioun ta actions===//
+  const minigameConfirmText = {
+    1: "Submit your terrain & atmosphere settings?",
+    2: "Submit your temperature & climate settings?",
+    3: "Submit your flora generation?"
+  };
+  // === UNIVERSAL CONFIRM WINDOW (Same style as choose planet) ===
+  function createConfirmWindow(message, yesCallback, noCallback) {
+    // Remove existing windows
+    const old = document.querySelector(".choose-window");
+    if (old) old.remove();
+
+    const win = document.createElement("div");
+    win.className = "choose-window";
+
+    win.innerHTML = `
+    <div class="choose-content">
+      <p>${message}</p>
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button class="confirm-yes">Yes</button>
+        <button class="confirm-no">No</button>
+      </div>
+    </div>
+  `;
+
+    document.body.appendChild(win);
+
+    win.querySelector(".confirm-yes").onclick = () => {
+      win.remove();
+      yesCallback();
+    };
+
+    win.querySelector(".confirm-no").onclick = () => {
+      win.remove();
+      if (noCallback) noCallback();
+    };
+
+    return win;
+  }
+
+  //===universal open minigame system===//
+
+  // === UNIVERSAL MINIGAME POPUP FUNCTION ===
+  /*
+  function openMinigame(url) {
+
+    minigameActive = true;
+    minigameSubmitted = false;
+    storyPaused = true;
+
+    const popup = document.createElement("div");
+    popup.className = "minigame-popup";
+
+    popup.innerHTML = `
+        <div class="minigame-content">
+            <iframe src="${url}" frameborder="0"
+                class="mg-iframe"
+                style="width:100%; height:100%; border:none;"></iframe>
+
+            <div class="minigame-buttons">
+                
+                
+                <button class="submit-minigame">Submit</button>
+                <button class="close-minigame">Close</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(popup);
+
+    const iframe = popup.querySelector(".mg-iframe");
+
+    // CLOSE
+    popup.querySelector(".close-minigame").onclick = () => {
+      canReopenMinigame = true;//alla mporei na ksananoiksei
+      popup.remove(); // but story remains locked
+    };
+    // SUBMIT
+    popup.querySelector(".submit-minigame").onclick = () => {
+      if (minigameSubmitted) return;
+
+      const box = document.createElement("div");
+      box.className = "confirm-submit";
+
+      box.innerHTML = `
+          <p>Submit?</p>
+          <button class="yes-submit">Yes</button>
+          <button class="no-submit">No</button>
+        `;
+
+      document.body.appendChild(box);
+
+      box.querySelector(".no-submit").onclick = () => box.remove();
+
+      box.querySelector(".yes-submit").onclick = () => {
+        box.remove();
+        popup.remove();
+
+        minigameSubmitted = true;
+        minigameActive = false;
+        storyPaused = false;
+
+        console.log("Minigame submitted → story unlocked");
+      };
+    };
+  }
+*/
+  function openMinigame(id) {
+    const mg = minigameState[id];
+    if (!mg) return console.error("Unknown minigame ID:", id);
+
+    currentMinigame = id;
+    storyPaused = true;
+
+    const popup = document.createElement("div");
+    popup.className = "minigame-popup";
+
+    popup.innerHTML = `
+    <div class="minigame-content">
+      <iframe src="${mg.url}" class="mg-iframe" allow="camera"></iframe>
+      <div class="minigame-buttons">
+        <button class="submit-minigame">Submit</button>
+        <button class="close-minigame">Close</button>
+      </div>
+    </div>
+  `;
+
+    document.body.appendChild(popup);
+
+    // Close = user tries to leave without submitting
+    popup.querySelector(".close-minigame").onclick = () => {
+      popup.remove();
+      // storyPaused stays true ,  user must still submit
+      
+      //promt to mpoulo
+      promptText.textContent = "";
+      promptText.classList.remove("visible");
+    };
+
+    popup.querySelector(".submit-minigame").onclick = () => {
+      // USER ALREADY SUBMITTED BEFORE → ask if they want to resubmit
+      if (mg.submitted) {
+        createConfirmWindow(
+          "You already submitted this minigame. Submit a new one?",
+          () => {       // YES
+            mg.submitted = true;
+            popup.remove();
+            storyPaused = false;
+          },
+          () => { }      // NO → do nothing
+        );
+        return;
+      }
+
+      // FIRST SUBMISSION → normal confirm
+      createConfirmWindow(
+        minigameConfirmText[id] || "Submit your results?",
+        () => {        // YES
+          mg.submitted = true;
+          popup.remove();
+
+          promptText.textContent = "";
+          promptText.classList.remove("visible");//mpoulo prompt
+
+          storyPaused = false;
+        },
+        () => { }       // NO
+      );
+    };
+  }
+
+
+
   // === Actions triggered by story lines ===
   const storyActions = {
     choosePlanet: () => {
       enablePlanetSelectionGlow();
-      //showChooseWindow(); // <== 👈 this shows the popup
+      //showChooseWindow(); // <== this shows the popup
       if (choice === true) return;
 
       const chooseWindow = document.createElement("div");
@@ -101,74 +336,16 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         `;
       document.body.appendChild(chooseWindow);
-
     },
-    openMiniGame1: () => {
-      // Create popup container
-      const name = window.selectedPlanet?.name || "Unknown";
-      const popup = document.createElement("div");
-      popup.className = "minigame-popup";
-
-      popup.innerHTML = `
-         <div class="minigame-content">
-          <iframe src="minigames/myplanets/index.html?planet=${encodeURIComponent(name)}" frameborder="0"
-          style="width:100%; height:100%; border:none;"
-          ></iframe>
-          <div class="minigame-buttons">
-            <button class="submit-minigame">Submit</button>
-            <button class="close-minigame">Close</button>
-          </div>
-        </div>
-      `;
-
-      document.body.appendChild(popup);
-
-      // Close logic
-      popup.querySelector(".close-minigame").addEventListener("click", () => {
-        popup.remove();
-      });
-
-      //submit logic
-      let submitted = false;
-
-      popup.querySelector(".submit-minigame").addEventListener("click", () => {
-        if (submitted) return; // only once
-
-        // Create confirmation box
-        const confirmBox = document.createElement("div");
-        confirmBox.className = "confirm-submit";
-        confirmBox.innerHTML = `
-      <p>Are you sure you want to submit?</p>
-      <button class="yes-submit">Yes dah</button>
-      <button class="no-submit">No</button>
-    `;
-
-        document.body.appendChild(confirmBox);
-
-        // YES
-        confirmBox.querySelector(".yes-submit").addEventListener("click", () => {
-          submitted = true;
-
-          // Remove confirmation window
-          confirmBox.remove();
-
-          // Do something for submit (no backend needed)
-          console.log("Submission confirmed for:", name);
-
-          // Optional: disable button
-          popup.querySelector(".submit-minigame").style.opacity = "0.5";
-          popup.querySelector(".submit-minigame").style.pointerEvents = "none";
-        });
-
-        // NO
-        confirmBox.querySelector(".no-submit").addEventListener("click", () => {
-          confirmBox.remove();
-        });
-      });
 
 
+    openMiniGame1: () => openMinigame(1),
+    openMiniGame2: () => openMinigame(2),
+    openMiniGame3: () => openMinigame(2),
 
-    }
+    lockAfterMiniGame2: () => {
+      window.lockPoint = index; // store the index where back is disabled
+    },
 
   };
 
@@ -221,7 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btnNext.style.display = "block"; // show arrows when story starts
         btnPrev.style.display = "block"; // show arrows when story starts
         showStory(0); // start narration after 3 seconds
-      }, 3000);
+      }, 1000);//GIATI ARGEISSSSSSS
     });
   } else {
     showStory(0);
@@ -229,7 +406,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // === Navigation ===
   btnNext.addEventListener("click", () => {
-    if (!choice && index >= 2) {
+    if (storyPaused) {
+      console.log("Reopening minigame… submit to continue.");
+      openMinigame(currentMinigame);
+      return;
+    }
+    /*
+        if (minigameActive && !minigameSubmitted) {
+          console.log("You must submit the minigame before continuing.");
+          return;
+        }
+    */
+    if (!choice && index >= neoindex) {
       console.log("User must choose a planet before continuing.");
       return;
     }
@@ -242,11 +430,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
   btnPrev.addEventListener("click", () => {
-    if (choice && index <= 3) {
+    if (choice && index <= neoindex + 1) {
       console.log("Cannot go back after confirming a planet.");
       return;
     }
-
+    if (window.lockPoint !== undefined && index <= window.lockPoint) {
+      console.log("You cannot go back from this point.");
+      return;
+    }
 
     if (index > 0) {
       const win = document.querySelector(".choose-window");
@@ -290,7 +481,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function showChooseWindow(planetEl) {
     // Prevent multiple windows
     document.querySelector(".choose-window") ? document.querySelector(".choose-window").remove() : '';
-    if (choice === true || index !== 2) return;
+    if (choice === true || index !== neoindex) return;
 
     const chooseWindow = document.createElement("div");
     chooseWindow.className = "choose-window";
