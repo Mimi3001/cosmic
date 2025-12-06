@@ -7,7 +7,7 @@ let mbgMin;
 let mbgMax;
 let sunSize;
 let sky1, sky2, lake1, lake2;// gradient colors (HSB p5 color objects)
-let hueSlider;
+
 let treeCol, mmgCol, mbgCol;// generated colors for elements
 let hueRanges = [// RANGES FOR EACH SLIDER STEP 0–4
   { min: 140, max: 290 },                   // step 0 cold
@@ -20,36 +20,31 @@ let cloudLayer;
 let lastGenTime = 0;
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
- // cloudLayer = createGraphics(windowWidth, windowHeight / 2, { willReadFrequently: true });
+  createCanvas(800, 500);
   colorMode(HSB, 360, 100, 100, 255);
-  cloudLayer = createGraphics(width, height, WEBGL);
-  frameRate(0.5);
-  // step slider
-  hueSlider = createSlider(0, 4, 2, 1);
-  hueSlider.position(10, 10);
-  hueSlider.style('width', '200px');
+cloudLayer = createGraphics(width, height);
+ frameRate(0.5);
+  
 
   determineValues();// generate initial geometry values
-
+  
 }
 
 function draw() {
   background(100);
 
-  let step = hueSlider.value();
+
   generateColorsForStep(step);
 
-  // draw scene using generated colors
   sky(0, 0, width, horizonLine, sky1, sky2);//diavathimisi
-  lake(0, horizonLine, width, height - horizonLine, lake1, lake2);//diavathimisi
+  
 
   noStroke();
   sun();
-  clouds();
-  makeClouds(cloudLayer);   // NEW clouds each time
+  clouds(); 
+makeClouds(cloudLayer);   // NEW clouds each time
 
-  image(cloudLayer, 0, 0);
+   image(cloudLayer, 0, 0);
   mountainsBG();
   mountainsMG();
   trees();
@@ -58,17 +53,14 @@ function draw() {
 
   translate(0, horizonLine * 2);
   scale(1, -1);
-
-  mountainsMgReflection();
-  treesReflection();
-
+  
   pop();//xreiazontia?
 
-
+ 
 }
 
 function determineValues() {
-  horizonLine = random(windowHeight/2 - 50, windowHeight/2 + 70);
+  horizonLine =  350;
 
   treeMin = random(horizonLine, horizonLine - 20);
   treeMax = random(treeMin - 20, treeMin - 50);
@@ -101,7 +93,7 @@ function generateColorsForStep(step) {
   }
 
   // Helper to build p5 HSB color with hue wrapped 0..360
-  function hsbColor(h, s, b, a=255) {
+  function hsbColor(h, s, b, a) {
     h = wrapHue(h);
     return color(h, s, b, a);
   }
@@ -148,13 +140,7 @@ function generateColorsForStep(step) {
   sky2 = hsbColor(h_sky2, random(10, 50), random(80, 100));
 
   // Lake gradient: two hues that may be near sky or different; darker 
-  let h_lake1 = pickHueWithinRange(range);//same with sky
-  let h_lake2 = pickHueWithinRange(range);//same with sky
-  if (abs(h_lake1 - h_lake2) < 6) {// if they are too close
-    h_lake2 = wrapHue(h_lake1 + 25);// push one a bit
-  }
-  lake1 = hsbColor(h_lake1, random(40, 60), random(70, 80));
-  lake2 = hsbColor(h_lake2, random(30, 70), random(60, 70));
+ 
 }
 
 
@@ -190,35 +176,7 @@ function trees() {
 
 }
 
-function treesReflection() {
-  let c = color(treeCol);
-  let ctre = color(treCol);
 
-  c.setAlpha(160);
-  ctre.setAlpha(145);
-  fill(ctre);
-  beginShape(); //perlin noise method
-  let xoff = random(0, 10);
-  vertex(-100, horizonLine); //start point
-  for (let x = 0; x < width; x += random(2, 5)) {
-    let y = map(noise(xoff) * height, 0, height, treeMin, treeMax + 10);
-    vertex(x, y);
-    xoff += 0.1;
-  }
-  vertex(width + 100, horizonLine); //end point
-  endShape(CLOSE);
-
-  fill(c);
-
-  beginShape();
-  vertex(-100, horizonLine); //trees start point
-  for (let x = 0; x < width; x += random(5, 20)) {
-    vertex(x, random(treeMax, treeMin));
-    vertex(x + 10, random(treeMin, horizonLine - 10));
-  }
-  vertex(width + 100, horizonLine); //trees end point
-  endShape(CLOSE);
-}
 
 function mountainsMG() {
   fill(mmgCol);
@@ -236,24 +194,7 @@ function mountainsMG() {
 }
 
 
-function mountainsMgReflection() {
-  let m = color(mmgCol);
-  // setAlpha expects 0..255 alpha, keep some transparency for reflection
-  m.setAlpha(140);
-  fill(m);
-  beginShape(); //perlin noise method
-  let xoff = random(0, 10);
-  vertex(-100, horizonLine); //start point
-  for (let x = 0; x < width; x += random(1, 10)) {
-    let y = map(noise(xoff) * height, 0, height, mmgMax, mmgMin + 50);
-    vertex(x, y);
-    xoff += 0.1;
-  }
-  vertex(width + 100, horizonLine); //end point
-  endShape(CLOSE);
 
-
-}
 
 function mountainsBG() {
   fill(mbgCol);
@@ -298,29 +239,12 @@ function sky(x, y, w, h, c1, c2) {
   }
 }
 
-function lake(x, y, w, h, c1, c2) {
-  noFill();
-  for (let i = y; i <= y + h; i++) {
-    let inter = map(i, y, y + h, 0, 1);
-    let c = lerpColor(c1, c2, inter);
-    stroke(c);
-    line(x, i, x + w, i);
-  }
-}
 
-function clouds() {
-  noStroke();
-  // clouds random every draw as in your code
-  fill(0, 0, 100, 40);
-  ellipse(random(0, width), random(0, mbgMin), random(100, 200), random(20, 25));
-  ellipse(random(0, width), random(0, mbgMin), random(50, 80), random(20, 25));
-  fill(0, 0, 100, 60);
-  ellipse(random(0, width), random(0, mbgMin), random(60, 140), 22);
-}
+
 
 function makeClouds(pg) {
   pg.pixelDensity(1);
-  noiseSeed(frameCount);
+ noiseSeed(frameCount);
   pg.loadPixels();
 
   for (let x = 0; x < pg.width; x++) {
@@ -329,11 +253,11 @@ function makeClouds(pg) {
       let index = (x + y * pg.width) * 4;
       let cvalue = noise(x / 300, y / 55);
 
-      if (cvalue < random(0.2, 0.4)) {//diafores piknotites
+      if (cvalue < random(0.2,0.4)) {//diafores piknotites
         let setC = map(cvalue, 0.33, 0, 245, 255);
 
         // Proper RGB placement
-        pg.pixels[index] = setC;
+        pg.pixels[index]     = setC;
         pg.pixels[index + 1] = setC;
         pg.pixels[index + 2] = setC;
         pg.pixels[index + 3] = 110;
@@ -343,16 +267,3 @@ function makeClouds(pg) {
 
   pg.updatePixels();
 }
-
-// This listens for the parent asking for the slider value
-window.addEventListener("message", (event) => {
-  if (event.data?.type === "request_slider_value") {
-    const sliderValue = document.getElementById("mySlider").value;
-
-    // Send value back to parent
-    window.parent.postMessage(
-      { type: "minigame2_result", value: sliderValue },
-      "*"
-    );
-  }
-});

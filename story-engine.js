@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const minigameState = {
     1: { url: "minigames/myplanets/index.html", submitted: false },
     2: { url: "minigames/temperature/index.html", submitted: false },
-    3: { url: "minigames/life/index.html", submitted: false } // prepare for minigame 3
+    3: { url: "minigames/flora/index.html", submitted: false } 
   };
 
   let currentMinigame = null;  // id of the currently opened minigame
@@ -187,74 +187,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     return win;
   }
-
   //===universal open minigame system===//
 
-  // === UNIVERSAL MINIGAME POPUP FUNCTION ===
-  /*
-  function openMinigame(url) {
-
-    minigameActive = true;
-    minigameSubmitted = false;
-    storyPaused = true;
-
-    const popup = document.createElement("div");
-    popup.className = "minigame-popup";
-
-    popup.innerHTML = `
-        <div class="minigame-content">
-            <iframe src="${url}" frameborder="0"
-                class="mg-iframe"
-                style="width:100%; height:100%; border:none;"></iframe>
-
-            <div class="minigame-buttons">
-                
-                
-                <button class="submit-minigame">Submit</button>
-                <button class="close-minigame">Close</button>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(popup);
-
-    const iframe = popup.querySelector(".mg-iframe");
-
-    // CLOSE
-    popup.querySelector(".close-minigame").onclick = () => {
-      canReopenMinigame = true;//alla mporei na ksananoiksei
-      popup.remove(); // but story remains locked
-    };
-    // SUBMIT
-    popup.querySelector(".submit-minigame").onclick = () => {
-      if (minigameSubmitted) return;
-
-      const box = document.createElement("div");
-      box.className = "confirm-submit";
-
-      box.innerHTML = `
-          <p>Submit?</p>
-          <button class="yes-submit">Yes</button>
-          <button class="no-submit">No</button>
-        `;
-
-      document.body.appendChild(box);
-
-      box.querySelector(".no-submit").onclick = () => box.remove();
-
-      box.querySelector(".yes-submit").onclick = () => {
-        box.remove();
-        popup.remove();
-
-        minigameSubmitted = true;
-        minigameActive = false;
-        storyPaused = false;
-
-        console.log("Minigame submitted → story unlocked");
-      };
-    };
-  }
-*/
   function openMinigame(id) {
     const mg = minigameState[id];
     if (!mg) return console.error("Unknown minigame ID:", id);
@@ -341,7 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     openMiniGame1: () => openMinigame(1),
     openMiniGame2: () => openMinigame(2),
-    openMiniGame3: () => openMinigame(2),
+    openMiniGame3: () => openMinigame(3),
 
     lockAfterMiniGame2: () => {
       window.lockPoint = index; // store the index where back is disabled
@@ -552,7 +486,7 @@ document.addEventListener("DOMContentLoaded", () => {
       showStory(index);
     });
 
-
+//receive data from minigame2
     no.addEventListener("click", () => {
       chooseWindow.innerHTML = `
           <div class="choose-content">
