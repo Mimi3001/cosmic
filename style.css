@@ -34,7 +34,7 @@ img {
 
 .union-2 {
   flex-grow: 0;
-  flex-shrink: 1;
+  flex-shrink: 10;
   flex-basis: auto;
   fill: rgba(255, 255, 255, 1);
   border: none;
@@ -150,6 +150,7 @@ body {
 }
 
 /*Layer 1: Large bright stars */
+/*
 .stars-layer:nth-child(1)::before {
   content: "";
   position: absolute;
@@ -175,9 +176,10 @@ body {
     radial-gradient(circle at 98% 75%, rgba(255, 255, 255, 0.9) 1px, transparent 0.5px);
   animation: twinkle1 7s ease-in-out infinite alternate;
   animation-delay: 1s;
-}
+}*/
 
 /* Layer 2: Medium blue stars */
+/*
 .stars-layer:nth-child(2)::before {
   content: "";
   position: absolute;
@@ -199,9 +201,10 @@ body {
 
   animation: twinkle2 5s ease-in-out infinite alternate;
   animation-delay: 3s;
-}
+}*/
 
 /* Layer 3: Small yellow stars */
+/*
 .stars-layer:nth-child(3)::before {
   content: "";
   position: absolute;
@@ -223,9 +226,10 @@ body {
 
   animation: twinkle3 4s ease-in-out infinite alternate;
   animation-delay: 2s;
-}
+}*/
 
 /* Twinkle animations */
+/*
 @keyframes twinkle1 {
 
   0%,
@@ -260,7 +264,7 @@ body {
   50% {
     opacity: 0.5;
   }
-}
+}*/
 
 
 /* ----------------------------asterakia svg layer----------------*/
@@ -284,6 +288,118 @@ body {
 }
 
 /*----------------------------------------------------------------*/
+/*===========kommmmmitisssssssssssssssss===========*/
+.comet-layer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2000px;
+  height: 2000px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 2;
+  /* behind planets & orbits */
+}
+
+.comet {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  transform-origin: center center;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.comet img {
+  width: 100%;
+  height: 100%;
+  transform: rotate(120deg);/* tail direction */
+  /*filter: drop-shadow(0 0 10px rgba(0, 200, 255, 0.75));*/ /*skia feggei*/
+}
+.orbit-c1, .orbit-c2, .orbit-c3 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  animation: spin linear infinite;
+}
+
+/* Different orbit sizes and durations */
+.orbit-c1 { width: 1200px; height: 300px; animation-duration: 100s; }
+.orbit-c2 { width: 1000px; height: 250px; animation-duration: 315s; }
+.orbit-c3 { width: 1400px; height: 350px; animation-duration: 160s; }
+
+/* Each comet initial position along the orbit */
+.c1a { transform: rotate(0deg) translateX(400px); }
+.c1b { transform: rotate(140deg) translateX(400px); }
+.c2a { transform: rotate(20deg) translateX(500px); }
+.c2b { transform: rotate(100deg) translateX(350px); }
+.c2c { transform: rotate(200deg) translateX(570px); }
+.c2d { transform: rotate(300deg) translateX(500px); }
+.c3a { transform: rotate(50deg) translateX(550px); }
+.c3b { transform: rotate(210deg) translateX(550px); }
+
+@keyframes spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* A new independent layer just for straight comets */
+/* MAIN WRAPPER — centered inside the solar system */
+.ellipse-orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);  /* TRUE CENTER */
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Only rotation is animated */
+.ellipse-rotator {
+  width: 0;
+  height: 0;
+  animation: ellipseSpin 120s linear infinite;
+  transform-origin: center center;
+}
+
+/* The elliptical shape — 2500 × 400 */
+.ellipse-path {
+  position: absolute;
+  width: 2500px;
+  height: 400px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(10deg); /* tilt ellipse */
+  pointer-events: none;
+}
+
+/* Comets placed on ellipse radius */
+.fly1 { transform: rotate(0deg) translateX(1250px); }
+.fly2 { transform: rotate(100deg) translateX(1250px); }
+
+@keyframes ellipseSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/*
+.orbit-new {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  border-radius: 50%;
+  transform: translate(-580%, -80%);
+  animation: spin 10s linear infinite; 
+}
+
+.new1 { transform: rotate(0deg) translateX(200px)  }
+.new2 { transform: rotate(190deg) translateX(100px); }*/
 
 /* ==================================================== SUN ===== */
 /* Position the Figma SVG behind the Sun Z=0*/
@@ -309,7 +425,7 @@ body {
   }
 
   to {
-    transform: translate(-50%, -50%) rotate(-360deg);
+    transform: translate(-50%, -50%) rotate(-180deg);
   }
 
 }
@@ -327,12 +443,10 @@ body {
 }
 
 /* keep the sun above the svg */
-.sun {
-  z-index: 1;
-}
 
 .sun {
   position: absolute;
+  z-index: 1;
   top: 50%;
   left: 50%;
   width: 43px;
@@ -362,33 +476,27 @@ body {
 .orbit1 {
   width: 220px;
   height: 220px;
-  /**/
   top: calc(50% + 15px);
-  /* slight vertical offset */
   left: calc(50% - 10px);
-  /* slight horizontal offset */
-  /**/
   animation-duration: 32s;
 }
 
 .orbit2 {
   width: 300px;
   height: 300px;
-  /**/
   top: calc(50% + 35px);
   left: calc(50% - 18px);
-  /**/
   animation-duration: 50s;
+
 }
 
 .orbit3 {
   width: 420px;
   height: 420px;
-  /**/
   top: calc(50% + 80px);
   left: calc(50% - 34px);
-  /**/
   animation-duration: 30s;
+
 }
 
 .orbit4 {
@@ -404,10 +512,8 @@ body {
 .orbit5 {
   width: 580px;
   height: 580px;
-  /**/
   top: calc(50% + 35px);
   left: calc(50% - 30px);
-  /**/
   animation-duration: 58s;
 }
 
@@ -531,21 +637,23 @@ body {
 .planet1 {
   width: 16px;
   height: 16px;
-  transform: translateX(102px);
+  transform: rotate(0deg) translateX(102px);
   background: url("images/1.svg") center/cover no-repeat;
 }
 
 .planet2 {
   width: 30px;
   height: 30px;
-  transform: translateX(135px);
+  transform: rotate(40deg) translateX(126px);
+  /*kanonika 135*/
   background: url("images/2.svg") center/cover no-repeat;
 }
 
 .planet3 {
   width: 36px;
   height: 36px;
-  transform: translateX(188px);
+  transform: rotate(120deg) translateX(198px);
+  /*kanonika188 alla i peristrofi to xala*/
   background: url("images/3.svg") center/cover no-repeat;
 }
 
@@ -559,14 +667,16 @@ body {
 .planet5 {
   width: 44px;
   height: 44px;
-  transform: translateX(268px);
+  transform: rotate(-20deg) translateX(268px);
+  /*kanonika 268*/
   background: url("images/5.svg") center/cover no-repeat;
 }
 
 .planet6 {
   width: 52px;
   height: 52px;
-  transform: translateX(310px);
+  transform: rotate(120deg) translateX(320px);
+  /*kanonika310*/
   background: url("images/6.svg") center/cover no-repeat;
 }
 
@@ -775,6 +885,40 @@ body {
   transform: translateY(0);
   pointer-events: auto;
 }
+
+/* ========================================================= START BUTTON === */
+.start-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(10, 10, 30, 0.7);
+  border: 2px solid #00ccff;
+  color: #00eaff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 26px;
+  padding: 16px 40px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(0, 200, 255, 0.6);
+  transition: all 0.3s ease;
+  z-index: 9999;
+}
+
+.start-btn:hover {
+  background: rgba(10, 10, 30, 0.85);
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.9);
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+.start-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
 
 /* ========================================================= START BUTTON === */
 .start-btn {

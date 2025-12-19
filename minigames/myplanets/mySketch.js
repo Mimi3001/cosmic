@@ -19,6 +19,55 @@ let elevMult; // parameter that controls height of terrain
 let exploding = false;
 let cloudMesh;
 
+//---------------------------------------------
+const planetTextures = {
+  Hamarik: {
+    color: "./textures/Hamarikcolor.jpg",
+    elevation: "./textures/Hamarikelev.jpg",
+    water: "./textures/Hamarikelev.jpg",
+    clouds: "./textures/Hamarikclouds.png"
+  },
+  Tahay: {
+    color: "./textures/Tahaycolor.jpg",
+    elevation: "./textures/Tahayelev.jpg",
+    water: "./textures/Tahayelev.jpg",
+    clouds: "./textures/Tahayclouds.png"  
+  },
+    Chura: {
+    color: "./textures/Churacolor.jpg",
+    elevation: "./textures/Churaelev.jpg",
+    water: "./textures/Churaelev.jpg",
+    clouds: "./textures/Churaclouds.png"  
+  },
+  Santamasa: {
+    color: "./textures/Santamasacolor.jpg",
+    elevation: "./textures/Santamasaelev.jpg",
+    water: "./textures/Santamasaelev.jpg",
+    clouds: "./textures/Santamasaclouds.png"
+  },
+   Ahra: {
+    color: "./textures/Ahracolor.jpg",
+    elevation: "./textures/Ahraelev.jpg",
+    water: "./textures/Ahraelev.jpg",
+    clouds: "./textures/Ahraclouds.png"
+  },
+  Lete: {
+    color: "./textures/Letecolor.jpg",
+    elevation: "./textures/Leteelev.jpg",
+    water: "./textures/Leteelev.jpg",
+      clouds: "./textures/Leteclouds.png"
+  },
+  Veles: {
+    color: "./textures/Velescolor.jpg",
+    elevation: "./textures/Veleselev.jpg",
+    water: "./textures/Veleselev.jpg",
+    clouds: "./textures/Velesclouds.png"
+  }
+};
+//--------------------------------------------------
+
+
+
 function setup() {
   canvas = document.getElementById("threeCanvas");
   //threeCanvas = createCanvas(windowWidth, windowHeight, WEBGL); // don't want to do this!
@@ -58,6 +107,7 @@ function setup() {
   orbitControls.enableDamping = true;
   orbitControls.dampingFactor = 0.1;
 
+const textures = planetTextures[chosenPlanet] || planetTextures["Hamarik"];
   const textureLoader = new THREE.TextureLoader()
 
   // if (useLights) {
@@ -68,8 +118,12 @@ function setup() {
   // const elevMap = textureLoader.load(
   //   "srtm_ramp2.worldx294x196.jpg"
   // );
+colorMap = textureLoader.load(textures.color);
+elevMap = textureLoader.load(textures.elevation);
+const waterElevMap = textureLoader.load(textures.water);
+const cloudTexture = textureLoader.load(textures.clouds);
 
-  colorMap = textureLoader.load(
+/*  colorMap = textureLoader.load(
     "./world.200412.3x5400x2700.jpg");
   //lightsMap = textureLoader.load(
   //  "./earth_lights_lrg.jpg"); // 4 afairo
@@ -78,7 +132,7 @@ function setup() {
   );
 
   const waterElevMap = textureLoader.load("./inverted-elevation-world-map.jpg");
-
+*/
   // Add Earth geometry
   const earthGroup = new THREE.Group();
   // earthGroup.rotation.z = -23.4 * Math.PI / 180;
@@ -100,7 +154,7 @@ function setup() {
 
   // Add clouds layer - feugei
 
-  const cloudTexture = new THREE.TextureLoader().load("cloud_combined_2048-2.png");
+/* const cloudTexture = new THREE.TextureLoader().load("cloud_combined_2048-2.png");*/
   const cloudGeo = new THREE.SphereGeometry(1.04, 64, 64);//auta einai ta sunnefa poso apexoun kai ti diametro exoun
   const cloudMat = new THREE.MeshPhongMaterial({
     map: cloudTexture,

@@ -29,7 +29,7 @@ function setup() {
   hueSlider = createSlider(0, 4, 2, 1);
   hueSlider.position(10, 10);
   hueSlider.style('width', '200px');
-
+  hueSlider.id("hueSlider");   // id
   determineValues();// generate initial geometry values
 
 }
@@ -308,7 +308,7 @@ function lake(x, y, w, h, c1, c2) {
   }
 }
 
-function clouds() {
+function clouds() {//ta apla
   noStroke();
   // clouds random every draw as in your code
   fill(0, 0, 100, 40);
@@ -319,7 +319,14 @@ function clouds() {
 }
 
 function makeClouds(pg) {
-  pg.pixelDensity(1);
+  pg.clear();
+  /*Then every draw:
+makeClouds(cloudLayer);
+image(cloudLayer, 0, 0);
+But you NEVER do: pg.clear();
+In WEBGL mode, pg.loadPixels() reads uninitialized memory → becomes garbage → clouds accumulate → screen turns progressively black. */
+
+// pg.pixelDensity(1);
   noiseSeed(frameCount);
   pg.loadPixels();
 
@@ -347,8 +354,8 @@ function makeClouds(pg) {
 // This listens for the parent asking for the slider value
 window.addEventListener("message", (event) => {
   if (event.data?.type === "request_slider_value") {
-    const sliderValue = document.getElementById("mySlider").value;
-
+    //const sliderValue = document.getElementById("hueSlider").value;
+const sliderValue = hueSlider.value();
     // Send value back to parent
     window.parent.postMessage(
       { type: "minigame2_result", value: sliderValue },
@@ -356,3 +363,11 @@ window.addEventListener("message", (event) => {
     );
   }
 });
+function sendTemperatureValueToParent() {
+    const value = hueSlider.value();     // <-- your slider
+    window.parent.postMessage(
+        { type: "minigame2_result", value },
+        "*"
+    );
+    console.log("MG2 sent:", value);
+}

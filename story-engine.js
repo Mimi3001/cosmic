@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const minigameState = {
     1: { url: "minigames/myplanets/index.html", submitted: false },
     2: { url: "minigames/temperature/index.html", submitted: false },
-    3: { url: "minigames/flora/index.html", submitted: false } 
+    3: { url: "minigames/flora/index.html", submitted: false }
   };
 
   let currentMinigame = null;  // id of the currently opened minigame
@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let index = 0;
   let audio = null;
   let soundEnabled = true;
-
+  let pendingMG3Value = null;
 
   //===prin to storyActions gia na to xrisomopoioun ta actions===//
   const minigameConfirmText = {
@@ -196,12 +196,14 @@ document.addEventListener("DOMContentLoaded", () => {
     currentMinigame = id;
     storyPaused = true;
 
+    const planetName = window.selectedPlanet?.name || "";
+
     const popup = document.createElement("div");
     popup.className = "minigame-popup";
 
     popup.innerHTML = `
     <div class="minigame-content">
-      <iframe src="${mg.url}" class="mg-iframe" allow="camera"></iframe>
+      <iframe src="${mg.url}?planet=${encodeURIComponent(planetName)}"class="mg-iframe" allow="camera"></iframe>
       <div class="minigame-buttons">
         <button class="submit-minigame">Submit</button>
         <button class="close-minigame">Close</button>
@@ -209,13 +211,29 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
   `;
 
+    if (id === 3) {
+      const iframe = popup.querySelector("iframe");
+
+      iframe.onload = () => {
+        if (pendingMG3Value !== null) {
+          iframe.contentWindow.postMessage(
+            { type: "pref_from_parent", value: pendingMG3Value },
+            "*"
+          );
+          console.log("Sent stored MG2 value to MG3.");
+        } else {
+          console.log("MG3 opened but no stored value found.");
+        }
+      };
+    }
+
     document.body.appendChild(popup);
 
     // Close = user tries to leave without submitting
     popup.querySelector(".close-minigame").onclick = () => {
       popup.remove();
       // storyPaused stays true ,  user must still submit
-      
+
       //promt to mpoulo
       promptText.textContent = "";
       promptText.classList.remove("visible");
@@ -224,6 +242,10 @@ document.addEventListener("DOMContentLoaded", () => {
     popup.querySelector(".submit-minigame").onclick = () => {
       // USER ALREADY SUBMITTED BEFORE → ask if they want to resubmit
       if (mg.submitted) {
+        if (currentMinigame === 2) {
+          const iframe = popup.querySelector("iframe");
+          iframe.contentWindow.postMessage({ type: "request_slider_value" }, "*");
+        }
         createConfirmWindow(
           "You already submitted this minigame. Submit a new one?",
           () => {       // YES
@@ -486,7 +508,7 @@ document.addEventListener("DOMContentLoaded", () => {
       showStory(index);
     });
 
-//receive data from minigame2
+    //receive data from minigame2
     no.addEventListener("click", () => {
       chooseWindow.innerHTML = `
           <div class="choose-content">
@@ -497,4 +519,32 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     });
   }
+  window.addEventListener("message", (event) => {
+    console.log("PARENT RECEIVED MESSAGE:", event.data);
+
+    if (event.data?.type === "minigame2_result") {
+      pendingMG3Value = event.data.value;
+      console.log("Parent received from minigame 2:", event.data.value);
+      /*
+            // Find MG3 iframe
+            const mg3 = document.querySelector('iframe[src="minigames/flora/index.html"]');
+            if (!mg3) {
+              console.warn("Minigame 3 iframe not found.");
+              return;
+            }
+      
+            mg3.contentWindow.postMessage(
+              {
+                type: "pref_from_parent",
+                value: event.data.value
+              },
+              "*"
+            );
+      
+            console.log("Parent forwarded value to minigame 3.");
+            */
+      pendingMG3Value = event.data.value;   // <-- store it
+    }
+  });
+
 });

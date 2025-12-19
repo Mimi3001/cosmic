@@ -27,9 +27,9 @@ let hueRanges = [// RANGES FOR EACH SLIDER STEP 0–4
 //plirofories apo to game 2
 window.addEventListener("message", (event) => {
     if (event.data?.type === "pref_from_parent") {
-        console.log("Received preference from parent:", preference);
+       console.log("Received preference from parent:", event.data.value);
         // NOW call your background generator
-        step = event.data.value;   // 0–4
+        step = Number(event.data.value);   // 0–4
         // paletteLocked = false;  
         regenerate = true;
     }
@@ -39,18 +39,12 @@ function setup() {
     createCanvas(1100, 800);
     colorMode(HSB, 360, 100, 100, 255);
     frameRate(5);
-    
-   // pixelDensity(1);
+
+    // pixelDensity(1);
 
     sizeSlider = document.getElementById("sizeSlider");
     detailSlider = document.getElementById("detailSlider");
     heightSlider = document.getElementById("heightSlider");
-
-    // TREE HEIGHT SLIDER
-    /*const heightControl = document.createElement("label");
-    heightControl.innerHTML = ` Tree Height: <input type="range" id="heightSlider" min="50" max="300" value="150" />`;
-    document.body.insertBefore(heightControl, document.body.children[2]);
-    heightSlider = document.getElementById("heightSlider");*/
 
     // RESET button
     const resetBtn = document.createElement("button");
@@ -62,12 +56,30 @@ function setup() {
     document.getElementById("flowerBtn").onclick = () => (currentPlant = "flower");
     document.getElementById("randomizeColorsBtn").onclick = randomizeColors;
 }
+function depthScale(y) {
+    let t = map(y, mmgMin, horizonLine, 0.4, 1.2);
+    return constrain(t, 0.4, 1.2);
+}
+
 function mousePressed() {
-    if (mouseY < 0 || mouseY > height) return;
+    if (mouseY < mbgMin) return;
+    let baseHeight = parseInt(heightSlider.value);// Smaller near mountains, larger near bottom.
+    
+    let depth = map(mouseY, mmgMin, height, 0.2, 1.6); // scale 0.4 ↔ 1.2 from mmgMin to canvas height
+    depth = constrain(depth, 0.2, 2.2);
+    let scaledHeight = baseHeight * depth;
+    
     let branches = generateTree(
         { x: mouseX, y: mouseY },
-        parseInt(heightSlider.value),
-        { r: random(0, 20), g: 200, b: 60 },
+        scaledHeight,
+        {///xrwma dentroy
+            r: random(0, 20),
+            g: 200,
+            b: 60
+        },
+
+        /* parseInt(heightSlider.value),
+         { r: random(0, 20), g: 200, b: 60 },*/
         parseInt(sizeSlider.value) * 0.1,
         0,
         parseInt(detailSlider.value)
@@ -75,8 +87,6 @@ function mousePressed() {
 
     plants.push({
         type: currentPlant,
-        x: mouseX,
-        y: mouseY,
         branches: branches
     });
 }
@@ -86,7 +96,7 @@ function draw() {
         generateLandscape(landscape, step);
         regenerate = false;
     }
-    background(180, 20, 100,255);  
+    background(180, 20, 100, 255);
     noStroke();
     image(landscape, 0, 0);// draw static image
 
@@ -96,14 +106,14 @@ function draw() {
                 stroke(b.color.r, b.color.g, b.color.b);
                 strokeWeight(b.width);
                 line(b.x1, b.y1, b.x2, b.y2);
-                
+
             }
-            
+
         }
         if (p.type === "flower") {
             drawFlower(p.x, p.y);
         }
-        
+
     }
 }
 function determineValues() {
@@ -119,14 +129,6 @@ function determineValues() {
     mbgMax = mbgMin - random(10, 80);
 
     sunSize = random(30, 50);
-
-
-
-
-
-
-
-
 }
 function generateColorsForStep(step) {
     let range = hueRanges[step];
@@ -178,9 +180,9 @@ function generateLandscape(pg, step) {
 
     // FIX random seed so noise, shapes, clouds, sun are always
     //randomSeed(step * 99999);
-   // noiseSeed(step * 77777);
-   randomSeed(step * 10000 + millis());
-noiseSeed(step * 20000 + millis());
+    // noiseSeed(step * 77777);
+    randomSeed(step * 10000 + millis());
+    noiseSeed(step * 20000 + millis());
 
     pg.colorMode(HSB, 360, 100, 100, 255);
 
@@ -218,7 +220,7 @@ function sun(pg) {
     pg.ellipse(sunX, sunY, sunSize * 3);
 }
 function makeClouds(pg) {
-   // pg.pixelDensity(1);
+    // pg.pixelDensity(1);
     pg.loadPixels();
 
     for (let x = 0; x < pg.width; x++) {
@@ -255,7 +257,7 @@ function mountainsBG(pg) {
     pg.endShape(pg.CLOSE);
 }
 function mountainsMG(pg) {
- 
+
     pg.fill(mmgCol);
     pg.beginShape();
     let xoff = random(0, 10);
@@ -271,7 +273,7 @@ function mountainsMG(pg) {
 }
 function etrees(pg) {
     // Back tree layer
-    
+
     pg.fill(treCol);
     pg.beginShape();
     let xoff1 = random(0, 10);
@@ -355,8 +357,9 @@ function drawFlower(x, y) {
     fill(55, 100, 100);
     ellipse(x, y, 8, 8);
     pop();
-    
+
 }
+
 function randomizeColors() {
     for (let p of plants) {
         p.color = { r: random(0, 20), g: random(200, 255), b: random(40, 100) };
