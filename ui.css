@@ -1,0 +1,31 @@
+:root {
+  --ui-bg: rgba(10, 10, 30, 0.85);
+  --ui-text: #cdeeff;
+  --ui-accent: #00ccff;
+  --ui-border: rgba(0, 204, 255, 0.5);
+}
+
+/* Universal UI elements */
+.ui-button {
+  background: var(--ui-bg);
+  color: var(--ui-text);
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.ui-button:hover {
+  box-shadow: 0 0 10px var(--ui-accent);
+}
+
+/* Sliders + labels */
+.ui-label {
+  color: var(--ui-text);
+}
+
+.ui-range {
+  accent-color: var(--ui-accent);
+}

@@ -1,8 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   //to lock the minigames
   let storyPaused = false;
-  let waitingForMG2Value = false;
-
   const minigameState = {
     1: { url: "minigames/myplanets/index.html", submitted: false },
     2: { url: "minigames/temperature/index.html", submitted: false },
@@ -10,7 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   let currentMinigame = null;  // id of the currently opened minigame
-  let currentMinigamePrompt = ""; // remembers the correct prompt for reopen (LEFT/RIGHT bug fix)
 
   // === Grab elements ===
   const textEl = document.getElementById("story-text");
@@ -115,10 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
   //---------------------//
 
   story.push(
-    {
-      text: ["Let's move to more details."],
-      onEnd: "lockAfterMiniGame1"
-    },
+    { text: ["Let's move to more details."] },
     { text: ["What's the temperature range / atmosphere?"] },
     {
       text: ["Move your hand(slider) for tempersture adjustments in front of the camera."],
@@ -128,13 +122,13 @@ document.addEventListener("DOMContentLoaded", () => {
     },
 
     // AFTER MINIGAME 2
-    {
-      text: ["Great, you almost completed the first step."],
-      onEnd: "lockAfterMiniGame2"
-    },
+    { text: ["Great, you almost completed the first step."] },
     { text: ["Le petit paradise!"] },
     { text: ["Here’s your world now."] },
-    { text: ["It is not ready yet though.."] },
+    {
+      text: ["It is not ready yet though.."],
+      onEnd: "lockAfterMiniGame2"
+    },
     { text: ["Something is still missing..."] },
     { text: ["LIFE! Fauna and flora should thrive here."] },
     {
@@ -269,26 +263,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   //===universal open minigame system===//
 
-  function openMinigame(id, { reopen = false } = {}) {
+  function openMinigame(id) {
+    let lastGamePrompt = "";
 
-
-    /*const mg = minigameState[id];
-    const entry = story[index];
-    const gamePrompt = entry?.gamePrompt ? (typeof entry.gamePrompt === "function" ? entry.gamePrompt() : entry.gamePrompt) : "";*/
     const mg = minigameState[id];
+    const entry = story[index];
+    //const gamePrompt = entry?.gamePrompt ? (typeof entry.gamePrompt === "function" ? entry.gamePrompt() : entry.gamePrompt) : "";
+    lastGamePrompt = entry?.gamePrompt
+      ? (typeof entry.gamePrompt === "function"
+        ? entry.gamePrompt()
+        : entry.gamePrompt)
+      : "";
 
-    // IMPORTANT: when reopening after LEFT/RIGHT, story[index] is no longer the minigame entry.
-    // So we reuse the remembered prompt instead of recomputing it from the wrong story index.
-    let gamePrompt = "";
-    if (reopen) {
-      gamePrompt = currentMinigamePrompt || "";
-    } else {
-      const entry = story[index];
-      gamePrompt = entry?.gamePrompt
-        ? (typeof entry.gamePrompt === "function" ? entry.gamePrompt() : entry.gamePrompt)
-        : "";
-      currentMinigamePrompt = gamePrompt; // remember correct prompt for reopening
-    }
+
 
     if (!mg) return console.error("Unknown minigame ID:", id);
 
@@ -313,8 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (id === 3) {
       const iframe = popup.querySelector("iframe");
       //TO UI TOY
-      //iframe.onload = () => {
-      iframe.addEventListener("load", () => {
+      iframe.onload = () => {
         iframe.contentWindow.postMessage({
           type: "ui_theme",
           vars: {
@@ -323,17 +309,6 @@ document.addEventListener("DOMContentLoaded", () => {
             "--ui-accent": "#00ccff"
           }
         }, "*");
-
-        if (pendingMG3Value !== null) {//MG3 only receives the value if:
-          iframe.contentWindow.postMessage(
-            { type: "pref_from_parent", value: pendingMG3Value },
-            "*"
-          );
-          console.log("Sent stored MG2 value to MG3.");
-        } else {
-          console.log("MG3 opened but no stored value found.");
-        }
-
 
         //na mpei reset mono gt to 3o game
         const resetBtn = document.createElement("button");
@@ -345,28 +320,58 @@ document.addEventListener("DOMContentLoaded", () => {
           const iframe = popup.querySelector("iframe");
           iframe.contentWindow.postMessage({ type: "reset_game" }, "*");
         };
-      });
+
+        iframe.onload = () => {
+          if (pendingMG3Value !== null) {
+            iframe.contentWindow.postMessage(
+              { type: "pref_from_parent", value: pendingMG3Value },
+              "*"
+            );
+            console.log("Sent stored MG2 value to MG3.");
+          } else {
+            console.log("MG3 opened but no stored value found.");
+          }
+        }
+      };
     }
+    function promptGiaGames(iframe, text) {
+      if (!iframe || !text) return;
+      iframe.contentWindow.postMessage(
+        { type: "set_prompt", text },
+        "*"
+      );
+    }
+    ///-----------------
+    document.body.appendChild(popup);
+    ///-----------------
+    // 2) Safety resend in case iframe listener wasn't ready
+    setTimeout(() => {
+      promptGiaGames(iframe, lastGamePrompt);
+    }, 50);
+
+
     const iframe = popup.querySelector("iframe");
-    //to promt
+    //to promt gia games
+    iframe.addEventListener("load", () => {
+      promptGiaGames(iframe, lastGamePrompt);
+    });
+
+    /*
     iframe.addEventListener("load", () => {
       iframe.contentWindow.postMessage(
         { type: "set_prompt", text: gamePrompt }, "*"
       );
-    })
-    document.body.appendChild(popup);
-
-
-
-
+    })*/
+    
     // Close = user tries to leave without submitting
     popup.querySelector(".close-minigame").onclick = () => {
       popup.remove();
       // storyPaused stays true ,  user must still submit
 
       //promt to mpoulo
-      promptText.textContent = "";
-      promptText.classList.remove("visible");
+      //svisimo
+      /*promptText.textContent = "";
+      promptText.classList.remove("visible");*/
     };
 
     popup.querySelector(".submit-minigame").onclick = () => {
@@ -379,12 +384,6 @@ document.addEventListener("DOMContentLoaded", () => {
         createConfirmWindow(
           "You already submitted this minigame. Submit a new one?",
           () => {       // YES
-            const iframe = popup.querySelector("iframe");
-            iframe.contentWindow.postMessage(
-              { type: "request_slider_value" },
-              "*"
-            );
-
             mg.submitted = true;
             popup.remove();
             storyPaused = false;
@@ -398,19 +397,6 @@ document.addEventListener("DOMContentLoaded", () => {
       createConfirmWindow(
         minigameConfirmText[id] || "Submit your results?",
         () => {        // YES
-          if (currentMinigame === 2) {
-            const iframe = popup.querySelector("iframe");
-
-            waitingForMG2Value = true;
-
-            iframe.contentWindow.postMessage(
-              { type: "request_slider_value" },
-              "*"
-            );
-
-           
-            return; // DO NOT close yet
-          }
           mg.submitted = true;
           popup.remove();
 
@@ -450,9 +436,7 @@ document.addEventListener("DOMContentLoaded", () => {
     openMiniGame4: () => openMinigame(3), //until new 
     openMiniGame5: () => openMinigame(3), //until new 
     openMiniGame6: () => openMinigame(3), //until new 
-    lockAfterMiniGame1: () => {
-      window.lockPoint = index; // store the index where back is disabled
-    },
+
     lockAfterMiniGame2: () => {
       window.lockPoint = index; // store the index where back is disabled
     },
@@ -527,7 +511,7 @@ document.addEventListener("DOMContentLoaded", () => {
   btnNext.addEventListener("click", () => {
     if (storyPaused) {
       console.log("Reopening minigame… submit to continue.");
-      openMinigame(currentMinigame, { reopen: true });
+      openMinigame(currentMinigame);
       return;
     }
     /*
@@ -688,15 +672,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (event.data?.type === "minigame2_result") {
       pendingMG3Value = event.data.value;
       console.log("Parent received from minigame 2:", event.data.value);
-      if (waitingForMG2Value) {
-      waitingForMG2Value = false;
-
-      const popup = document.querySelector(".minigame-popup");
-      if (popup) popup.remove();
-
-      storyPaused = false;
-      minigameState[2].submitted = true;
-    }
       /*
             // Find MG3 iframe
             const mg3 = document.querySelector('iframe[src="minigames/flora/index.html"]');
@@ -715,7 +690,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
             console.log("Parent forwarded value to minigame 3.");
             */
-      //pendingMG3Value = event.data.value;   // <-- store it
+      pendingMG3Value = event.data.value;   // <-- store it
     }
   });
 

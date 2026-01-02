@@ -61,12 +61,6 @@ function setup() {
     colorMode(HSB, 360, 100, 100, 255);
     frameRate(5);
 
-    const tools = document.querySelector(".flora-tools");
-    const toggle = document.querySelector(".flora-tools-toggle");
-
-    toggle.onclick = () => {
-        tools.classList.toggle("open");
-    };
     // pixelDensity(1);
 
     sizeSlider = document.getElementById("sizeSlider");
@@ -149,7 +143,7 @@ function draw() {
     }
 }
 function determineValues() {
-    horizonLine = height*0.42;
+    horizonLine = 350;
 
     treeMin = horizonLine - random(0, 20);
     treeMax = treeMin - random(20, 55);

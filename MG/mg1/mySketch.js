@@ -246,13 +246,6 @@ function setup() {
     orbitControls.update();
   }
   animate();
-  const tools = document.querySelector(".terrain-tools");
-const toggle = document.querySelector(".terrain-tools-toggle");
-
-toggle.onclick = () => {
-  tools.classList.toggle("open");
-};
-
 }
 
 function getPointsMat(elevMap, waterElevMap) {

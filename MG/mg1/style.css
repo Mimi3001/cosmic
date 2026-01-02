@@ -59,20 +59,19 @@ h5 {
 }
 
 /* optional: keep content from hiding under prompt if you use fixed/absolute later */
-.mg-root{  box-shadow: 0 2px 6px rgba(0,0,0,0.35); }
+.mg-root{ padding-top: 8px; }
 
-/*
+
 #controls {
   position: absolute;
-  top: 60px; 
+  top: 60px; /*xwro gia prompt*/
   left: 20px;
   z-index: 2;
   color: white;
-}*/
-#controls br {
-  display: none;
+  /*font-family: Inter, sans-serif;*/
+  
+  
 }
-
 .ui-range {
   width: 200px;
   margin-left: 10px;
@@ -92,53 +91,3 @@ h5 {
   margin-left: 10px;
 }
 */
-
-/* === sliders (flora style) === */
-
-.terrain-sliders {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 180px;
-}
-
-.terrain-sliders label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--ui-text);
-}
-
-.terrain-sliders input[type="range"] {
-  width: 160px;
-}
-/* === Terrain Tools Panel (same pattern as Flora) === */
-
-.terrain-tools {
-  position: absolute;
-  top: 60px;
-  left: 20px;
-  z-index: 5;
-}
-
-.terrain-tools-toggle {
-  padding: 6px 12px;
-}
-
-/* hidden by default */
-.terrain-tools-panel {
-  display: none;
-  margin-top: 8px;
-  background: rgba(10,10,30,0.9);
-  border: 1px solid var(--ui-border);
-  border-radius: 10px;
-  padding: 10px;
-  box-shadow: 0 0 18px rgba(0,0,0,0.5);
-}
-
-/* visible when open */
-.terrain-tools.open .terrain-tools-panel {
-  display: flex;
-}
-

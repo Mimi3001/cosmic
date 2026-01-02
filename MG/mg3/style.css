@@ -1,12 +1,17 @@
-html,
-body {
-	margin: 0;
-	padding: 0;
-	 overflow: hidden; /* Prevent scrollbars */
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent scrollbars */
 }
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
 .mg-prompt{
-  
-    /*height: auto;*/
   position: sticky;
   top: 0;
   left: 0;/**/
@@ -16,8 +21,8 @@ body {
 
   display: flex;
   justify-content: center;
-  align-items: center;
-
+  align-items: center;    /* space inside the bar (explained below) */
+  
   text-align: center;
   font-family: 'Inter', sans-serif;
   font-weight: 700;
@@ -31,14 +36,9 @@ body {
 }
 
 /* optional: keep content from hiding under prompt if you use fixed/absolute later */
-.mg-root{ 
-  box-shadow: 0 2px 6px rgba(0,0,0,0.35);
-  /*position: relative;
-  width: 100%;
-  height: 100%;*/
+.mg-root{ padding-top: 8px; }
 
-}
-.mg-root #controls {
+#controls {
   position: absolute;
   top: 60px; /*xwro gia prompt*/
   left: 20px;
