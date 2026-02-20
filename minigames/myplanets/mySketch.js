@@ -20,6 +20,30 @@ let exploding = false;
 let cloudMesh;
 
 window.addEventListener("message", (event) => {
+
+  if (event.data?.type === "request_mg1_height") {
+    const heightValue = Number(
+      document.getElementById("heightSlider")?.value ?? 0
+    );
+
+    window.parent.postMessage(
+      { type: "minigame1_height", value: heightValue }, "*"
+    );
+    console.log("[MG1] sent heightSlider:", heightValue);
+  }
+  
+  if (event.data?.type === "request_mg1_water") {
+    const waterValue = Number(
+      document.getElementById("waterSlider")?.value ?? 0
+    );
+
+    window.parent.postMessage(
+      { type: "minigame1_water", value: waterValue }, "*"
+    );
+
+    console.log("[MG1] sent waterSlider:", waterValue);
+  }
+
   if (event.data?.type === "set_prompt") {
     const el = document.getElementById("mg-prompt");
     if (el) el.textContent = event.data.text || "";
@@ -247,11 +271,11 @@ function setup() {
   }
   animate();
   const tools = document.querySelector(".terrain-tools");
-const toggle = document.querySelector(".terrain-tools-toggle");
+  const toggle = document.querySelector(".terrain-tools-toggle");
 
-toggle.onclick = () => {
-  tools.classList.toggle("open");
-};
+  toggle.onclick = () => {
+    tools.classList.toggle("open");
+  };
 
 }
 

@@ -18,25 +18,43 @@ let hueRanges = [// RANGES FOR EACH SLIDER STEP 0–4
 ];
 let cloudLayer;
 let lastGenTime = 0;
+const params = new URLSearchParams(window.location.search);
+const planetIndex = Number(params.get("planetIndex")) || 4;//to 4 einai default
+const mg1Height = Number(params.get("mg1Height")) || 0;
+const mg1Water = Number(params.get("mg1Water")) || 0;
 
+console.log("[MG2] mg1Height mg1Water received:", mg1Water, mg1Height);
+
+function sunSizeFromPlanet(index) {
+  return map(index, 1, 7, 80, 20);
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
- // cloudLayer = createGraphics(windowWidth, windowHeight / 2, { willReadFrequently: true });
+  // cloudLayer = createGraphics(windowWidth, windowHeight / 2, { willReadFrequently: true });
   colorMode(HSB, 360, 100, 100, 255);
   cloudLayer = createGraphics(width, height, WEBGL);
   frameRate(0.5);
   // step slider
   const promptHeight = 60;
   hueSlider = createSlider(0, 4, 2, 1);
-  hueSlider.position(20,promptHeight);
+  hueSlider.position(20, promptHeight);
   hueSlider.style('width', '200px');
   hueSlider.id("hueSlider");   // id
   hueSlider.addClass("ui-range");//ui class
   determineValues();// generate initial geometry values
 
 }
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 
+  // resize offscreen graphics too
+  if (cloudLayer) {
+    cloudLayer.resizeCanvas(windowWidth, windowHeight);
+  }
+
+  //regenerateScene();
+}
 function draw() {
   background(100);
 
@@ -45,8 +63,9 @@ function draw() {
 
   // draw scene using generated colors
   sky(0, 0, width, horizonLine, sky1, sky2);//diavathimisi
+  if (mg1Water > 0) {
   lake(0, horizonLine, width, height - horizonLine, lake1, lake2);//diavathimisi
-
+  }
   noStroke();
   sun();
   clouds();
@@ -62,8 +81,10 @@ function draw() {
   translate(0, horizonLine * 2);
   scale(1, -1);
 
+  if (mg1Water > 0) {
   mountainsMgReflection();
   treesReflection();
+  }
 
   pop();//xreiazontia?
 
@@ -71,18 +92,25 @@ function draw() {
 }
 
 function determineValues() {
-  horizonLine = random(windowHeight/2 - 50, windowHeight/2 + 70);
+  const heightNorm = constrain(mg1Height/ 0.1 , 0 , 1); // to 0.1 tou slider ginetai 1 
+ // const mountainMult = 0.2 + heightNorm; // to 0 se 0.5 to 0.1 se 1.5 
+console.log("[MG2] mg1Height:", mg1Height, "multiplier:", heightNorm);
+
+  horizonLine = random(windowHeight / 2 - 50, windowHeight / 2 + 70);
 
   treeMin = random(horizonLine, horizonLine - 20);
   treeMax = random(treeMin - 20, treeMin - 50);
 
   mmgMin = random(treeMax - 5, treeMax - 50);
-  mmgMax = random(mmgMin, mmgMin - 50);
+  //mmgMax = random(mmgMin, mmgMin - 50);
+  mmgMax = mmgMin - random(0,  20 + heightNorm * 120);
 
   mbgMin = random(mmgMin, mmgMax - 50);
-  mbgMax = random(mbgMin, mbgMin - 50);
-
-  sunSize = random(30, 50);
+  //mbgMax = random(mbgMin, mbgMin - 50);
+  mbgMax = mbgMin - random(10,   30 + heightNorm * 160);
+ // console.log("mountains biased by height:", mountainMult);
+  sunSize = sunSizeFromPlanet(planetIndex);;
+  console.log("sunSize set from planetIndex", planetIndex, "sunSize:", sunSize);
 }
 
 function generateColorsForStep(step) {
@@ -104,7 +132,7 @@ function generateColorsForStep(step) {
   }
 
   // Helper to build p5 HSB color with hue wrapped 0..360
-  function hsbColor(h, s, b, a=255) {
+  function hsbColor(h, s, b, a = 255) {
     h = wrapHue(h);
     return color(h, s, b, a);
   }
@@ -159,7 +187,6 @@ function generateColorsForStep(step) {
   lake1 = hsbColor(h_lake1, random(40, 60), random(70, 80));
   lake2 = hsbColor(h_lake2, random(30, 70), random(60, 70));
 }
-
 
 // Helpers for hue wrapping / distance (kept small/simple)
 function wrapHue(h) {
@@ -238,7 +265,6 @@ function mountainsMG() {
   endShape(CLOSE);
 }
 
-
 function mountainsMgReflection() {
   let m = color(mmgCol);
   // setAlpha expects 0..255 alpha, keep some transparency for reflection
@@ -277,7 +303,7 @@ function sun() {
   // keep random position every draw, as in your code (you said sun and clouds random as they do now)
   let sunX = random(width * 0.1, width * 0.9);
   let sunY = random(mbgMin, height * 0.1);
-
+  //console.log("[MG2] drawing sun with size:", sunSize);
   // draw sun
   fill(0, 0, 100);
   ellipse(sunX, sunY, sunSize);
@@ -329,7 +355,7 @@ image(cloudLayer, 0, 0);
 But you NEVER do: pg.clear();
 In WEBGL mode, pg.loadPixels() reads uninitialized memory → becomes garbage → clouds accumulate → screen turns progressively black. */
 
-// pg.pixelDensity(1);
+  // pg.pixelDensity(1);
   noiseSeed(frameCount);
   pg.loadPixels();
 
@@ -356,9 +382,10 @@ In WEBGL mode, pg.loadPixels() reads uninitialized memory → becomes garbage �
 
 // This listens for the parent asking for the slider value
 window.addEventListener("message", (event) => {
+
   if (event.data?.type === "request_slider_value") {
     //const sliderValue = document.getElementById("hueSlider").value;
-const sliderValue = hueSlider.value();
+    const sliderValue = hueSlider.value();
     // Send value back to parent
     window.parent.postMessage(
       { type: "minigame2_result", value: sliderValue },
@@ -366,19 +393,18 @@ const sliderValue = hueSlider.value();
     );
   }
 
-   if (event.data?.type === "set_prompt") {
+  if (event.data?.type === "set_prompt") {
     const el = document.getElementById("mg-prompt");
     if (el) el.textContent = event.data.text || "";
   }
-
-  
-
 });
+
+//auto pou leei :P 
 function sendTemperatureValueToParent() {
-    const value = hueSlider.value();     // <-- your slider
-    window.parent.postMessage(
-        { type: "minigame2_result", value },
-        "*"
-    );
-    console.log("MG2 sent:", value);
+  const value = hueSlider.value();     // <-- your slider
+  window.parent.postMessage(
+    { type: "minigame2_result", value },
+    "*"
+  );
+  console.log("MG2 sent:", value);
 }

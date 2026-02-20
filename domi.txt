@@ -1,0 +1,21 @@
+index.html
+story-engine.js
+script.je
+style.css
+minigames
+|_myplanets
+	|_index.html
+	  mySketch.js
+	  style.css
+|_temperature
+	|_index.html
+	  mySketch.js
+	  style.css
+|_life
+	|_index.html
+	  world.js
+	  style.css
+
+i have a site with minigames .games appear lineraly with a narration going on and each game's actions will affect the following ones.
+right now temperature game would send a value that would affect the hues of life games.(life has 3+ games in unified landscape: flora/animals/civil)
+logs seem that this value is send but sth got broken and the colors dont change anymore.

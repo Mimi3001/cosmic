@@ -2,11 +2,15 @@ let currentPlant = "tree";
 let plants = [];
 let sizeSlider, detailSlider, heightSlider;
 let step = 2; // default until message arrives
-//let paletteLocked = false;
+
 let regenerate = true;   // generate once on load
 let landscape;
 
+let cloudLayer;
+let horizonRatio = 0.42;  // 42% 
 let horizonLine;
+let prevW, prevH;//
+
 let treeMin;
 let treeMax;
 let mmgMin;
@@ -23,12 +27,27 @@ let hueRanges = [// RANGES FOR EACH SLIDER STEP 0–4
     { min: 10, max: 110 },                   // step 3 warm
     { min1: 0, max1: 70, min2: 330, max2: 360 } // step 4 hot
 ];
+const params = new URLSearchParams(window.location.search);
+const planetIndex = Number(params.get("planetIndex")) || 4;
+const mg1Height = Number(params.get("mg1Height")) || 0;
+const waterValue = Number(params.get("mg1Water")) || 0;
 
+//let waterValue = 0;
+let mg1Water = 0;
+let hasWater = false;
+let waterShape = null; // stores polygon + bounds
+let seed = 0;
+let landscapeSeed = Math.floor(Math.random() * 1e9);
+
+function sunSizeFromPlanet(index) {
+    return map(index, 1, 7, 80, 20);
+}
 //plirofories apo to game 2 kai prompt kai ui - ola se ena mplok ----------ENA ANA ARXEIO 
 window.addEventListener("message", (event) => {
     if (event.data?.type === "pref_from_parent") {
         console.log("Received preference from parent:", event.data.value);
         step = Number(event.data.value);   // NOW call your background generator // 0–4
+        seed = step;
         regenerate = true; // paletteLocked = false; 
     }
 
@@ -44,6 +63,7 @@ window.addEventListener("message", (event) => {
     if (event.data?.type === "reset_game") {
         plants = [];
         regenerate = true;
+        //regenerateScene();
     }
 
     //gia to prompt
@@ -52,9 +72,16 @@ window.addEventListener("message", (event) => {
         if (el) el.textContent = event.data.text || "";
     }
 
-});
+    if (event.data?.type === "minigame1_water") {
+        waterValue = Number(event.data.value) || 0;
+        console.log("[WATER] Received waterValue from parent:", waterValue);
+        regenerate = true; // force landscape rebuild
+    }
 
+});
 function setup() {
+    prevW = width;
+    prevH = height;
     const w = window.innerWidth;
     const h = window.innerHeight;
     createCanvas(w, h);
@@ -67,7 +94,6 @@ function setup() {
     toggle.onclick = () => {
         tools.classList.toggle("open");
     };
-    // pixelDensity(1);
 
     sizeSlider = document.getElementById("sizeSlider");
     detailSlider = document.getElementById("detailSlider");
@@ -82,47 +108,176 @@ function setup() {
 
     document.getElementById("treeBtn").onclick = () => (currentPlant = "tree");
     document.getElementById("flowerBtn").onclick = () => (currentPlant = "flower");
+    //document.getElementById("buchBtn").onclick = () => (currentPlant = "bush");
     document.getElementById("randomizeColorsBtn").onclick = randomizeColors;
 }
 function windowResized() {//resize support
-    resizeCanvas(window.innerWidth, window.innerHeight);
+    // horizonRatio = horizonLine / height; // keep ratio
+     const newW = window.innerWidth;
+  const newH = window.innerHeight;
+
+  const sx = newW / prevW;
+  const sy = newH / prevH;
+   resizeCanvas(newW, newH);
+
+  // 🔁 remap plant positions
+  for (let p of plants) {
+    if (p.x !== undefined) {
+      p.x *= sx;
+      p.y *= sy;
+    }
+
+    if (p.type === "tree") {
+      for (let b of p.branches) {
+        b.x1 *= sx;
+        b.y1 *= sy;
+        b.x2 *= sx;
+        b.y2 *= sy;
+      }
+    }
+  }
+
+  prevW = newW;
+  prevH = newH;
+   // resizeCanvas(window.innerWidth, window.innerHeight);
+    // horizonLine = height * horizonRatio; // recompute horizon using same ratio
+
+    // regenerateScene();
+    /*   if (cloudLayer) {
+      cloudLayer.resizeCanvas(windowWidth, windowHeight);
+    }*/
     regenerate = true;
+    // regenerateScene();
+}
+function regenerateScene() {
+    //randomSeed(millis());   // optional but helps randomness
+    noiseSeed(millis());
+
+    determineValues();      // horizon, mountains, trees, sun size, etc.
+
+    cloudLayer.clear();     // VERY important to avoid black garbage
 }
 function depthScale(y) {
     let t = map(y, mmgMin, horizonLine, 0.4, 1.2);
     return constrain(t, 0.4, 1.2);
 }
+function generateBamboo(x, y, height, thickness) {
 
+    let internodeCount = int(map(height, 30, 160, 3, 7));
+    internodeCount = constrain(internodeCount, 3, 7);
+
+    let internodeH = height / internodeCount;
+    let lean = random(-0.12, 0.12);
+
+    let col = color(
+        random(80, 120),
+        random(40, 70),
+        random(40, 80)
+    );
+
+    // texture lines .de douleuei . einai san skia katw
+    let textureLines = [];
+    let texCount = int(thickness * 1.2);
+    for (let i = 0; i < texCount; i++) {
+        textureLines.push({
+            x: random(-thickness / 2, thickness / 2),
+            alpha: random(20, 40)
+        });
+    }
+
+    // leaves only near top
+    let leaves = [];
+    let leafCount = int(random(2, 8));//posa fulla
+    for (let i = 0; i < leafCount; i++) {
+        leaves.push({
+            angle: (i % 2 === 0 ? -1 : 1) * random(0.1, 2.9),//kateuthinsi!!! 
+            len: height * random(0.25, 0.4),
+            w: height * 0.055   //paxos fullwn
+        });
+    }
+
+    return {
+        type: "bamboo",
+        x, y,
+        h: height,
+        w: thickness,
+        internodes: internodeCount,
+        internodeH,
+        lean,
+        color: col,
+        textureLines,
+        leaves
+    };
+}
 function mousePressed() {
     if (mouseY < mbgMin) return;
     let baseHeight = parseInt(heightSlider.value);// Smaller near mountains, larger near bottom.
-
     let depth = map(mouseY, mmgMin, height, 0.2, 1.6); // scale 0.4 ↔ 1.2 from mmgMin to canvas height
     depth = constrain(depth, 0.2, 2.2);
     let scaledHeight = baseHeight * depth;
 
-    let branches = generateTree(
-        { x: mouseX, y: mouseY },
-        scaledHeight,
-        {///xrwma dentroy
-            r: random(0, 20),
-            g: 200,
-            b: 60
-        },
+    let thickness = parseInt(sizeSlider.value) * 0.08;
+    let detail = parseInt(detailSlider.value);
+    let detailRaw = parseInt(detailSlider.value);
+    let detailNorm = map(detailRaw, 3, 12, 0, 1);// 3 to 12 apo to html na ta antistoixisei
+    detailNorm = constrain(detailNorm, 0, 1); //min to max
+    let sizeNorm = map(sizeSlider.value, 20, 80, 0.5, 1.0);//apo times tou html
+    sizeNorm = constrain(sizeNorm, 0.5, 1.0);//na ta tautisei se auto to euros klimakas
+    let flowerScale = sizeNorm * depth;
+    if (isPointInWater(mouseX, mouseY)) {
+        if (currentPlant === "tree") {
+            plants.push( //TREE button + WATER = BAMBOO
+                generateBamboo(
+                    mouseX,
+                    mouseY,
+                    scaledHeight,
+                    thickness,
+                    detail,
+                )
+            );
+            // return;
+        }
+        else if (currentPlant === "flower") {
+            // FLOWER button + WATER = LOTUS
+            plants.push(
+                generateLotus(
+                    mouseX,
+                    mouseY,
+                    detailNorm,
+                    flowerScale
+                )
+            );
+        }
+        return;
+    }
+    if (currentPlant === "tree") {//sto edafos = kanonika
+        let branches = generateTree(
+            { x: mouseX, y: mouseY },
+            scaledHeight,
+            { r: random(0, 20), g: 200, b: 60 },
+            thickness,
+            0,
+            detail
+        );
 
-        /* parseInt(heightSlider.value),
-         { r: random(0, 20), g: 200, b: 60 },*/
-        parseInt(sizeSlider.value) * 0.1,
-        0,
-        parseInt(detailSlider.value)
-    );
+        plants.push({
+            type: "tree",
+            branches
+        });
+    }
 
-    plants.push({
-        type: currentPlant,
-        branches: branches
-    });
+    else if (currentPlant === "flower") {
+        plants.push(
+            generateFlower(
+                mouseX,
+                mouseY,
+                detailNorm,
+                flowerScale
+            )
+        );
+    }
 }
-function draw() {
+function draw() { // draw dinei sxima generate dinei dedomena
     if (regenerate) {
         landscape = createGraphics(width, height);
         generateLandscape(landscape, step);
@@ -130,37 +285,179 @@ function draw() {
     }
     background(180, 20, 100, 255);
     noStroke();
-    image(landscape, 0, 0);// draw static image
+    image(landscape, 0, 0, width, height);// draw static image
 
+
+    push();
+    scale(width / landscape.width, height / landscape.height);
     for (let p of plants) {
         if (p.type === "tree") {
             for (let b of p.branches) {
                 stroke(b.color.r, b.color.g, b.color.b);
                 strokeWeight(b.width);
                 line(b.x1, b.y1, b.x2, b.y2);
+            }
+        }
+        if (p.type === "bamboo") {
+            push();
+            translate(p.x, p.y);
+            rotate(p.lean);
 
+            rectMode(CENTER);
+            noStroke();
+            fill(p.color);
+
+            let yCursor = 0;
+
+            for (let i = 0; i < p.internodes; i++) {
+                rect(0, -yCursor - p.internodeH / 2, p.w, p.internodeH);// internode body
+                rect(0, -yCursor, p.w + 2, 2); // node ring
+
+                /*
+                rect(0, -p.h, p.w, p.h); // stalk
+                rect(p.w / 2, -p.h, p.w + 2, 2);// nodes
+                rect(p.w / 2, 0, p.w + 2, 2);*/
+
+                // texture lines
+                for (let t of p.textureLines) {
+                    stroke(hue(p.color), saturation(p.color), brightness(p.color), t.alpha);
+                    line(t.x, yCursor, t.x, -yCursor - p.internodeH);
+                }
+                yCursor += p.internodeH;
+                //stroke(hue(p.color), saturation(p.color), brightness(p.color), t.a);
+                //line(t.x, 0, t.x, -t.h);
             }
 
+            // leaves
+            noStroke();
+            for (let l of p.leaves) {
+                push();
+                translate(p.w / 2, -p.h + 10);
+                rotate(l.angle);
+                fill(p.color);
+                beginShape();
+                vertex(0, 0);
+                quadraticVertex(
+                    l.len * 0.6,
+                    l.w,
+                    l.len,
+                    0
+                );
+                quadraticVertex(
+                    l.len * 0.6,
+                    -l.w,
+                    0,
+                    0
+                );
+                /*
+                curveVertex(l.len * 0.5, 6);
+                vertex(l.len, 0);
+                curveVertex(l.len * 0.5, -6);*/
+                endShape(CLOSE);
+                pop();
+            }
+            pop();
         }
-        if (p.type === "flower") {
-            drawFlower(p.x, p.y);
+        else if (p.type === "lotus") {
+            push();
+            translate(p.x, p.y);
+            // scale(1);   // 🔹 1/4 size
+            scale(p.scale);//apply once
+            // leaves
+            noStroke();
+
+            fill(p.leafCol);
+            for (let l of p.leaves) {
+                arc(
+                    cos(l.a) * l.r,
+                    sin(l.a) * l.r,
+                    l.r * 2,
+                    l.r * 2,
+                    l.a - PI * 0.9,
+                    l.a + PI * 0.9
+                );
+            }
+
+            // flowers
+            for (let f of p.flowers) {
+                push();
+                translate(f.x, f.y);
+                scale(f.s);
+                fill(p.col);
+                if (p.hasFlower) {
+                    push();
+
+                    // outer petals (lighter)
+                    fill(hue(p.col), saturation(p.col) * 0.7, brightness(p.col));
+                    for (let i = 0; i < 8; i++) {
+                        rotate(TWO_PI / 8);
+                        ellipse(0, -8, 5, 14);
+                    }
+
+                    // inner petals (more saturated)
+                    fill(hue(p.col), saturation(p.col), brightness(p.col) * 0.95);
+                    for (let i = 0; i < 6; i++) {
+                        rotate(TWO_PI / 6);
+                        ellipse(0, -5, 4, 10);
+                    }
+                    // center
+                    fill(45, 60, 90);
+                    ellipse(0, 0, 4);
+                    pop();
+                }
+                pop();
+            }
+
+            pop();
+        }
+
+        else if (p.type === "flower") {
+            push();
+            translate(p.x, p.y);
+            // scale(0.5);   // 🔹 1/4 size
+
+            for (let f of p.flowers) {
+                push();
+                translate(f.x, f.y);
+                scale(f.s);
+                fill(p.col);
+                noStroke();
+
+                for (let j = 0; j < 5; j++) {
+                    rotate(TWO_PI / 5);
+                    ellipse(0, -6, 4, 8);
+                }
+
+                fill(50, 50, 90);
+                ellipse(0, 0, 3);
+                pop();
+            }
+            pop();
         }
 
     }
+
 }
 function determineValues() {
-    horizonLine = height*0.42;
+    horizonLine = height * horizonRatio;//*.42
+    const heightNorm = constrain(mg1Height / 0.1, 0, 1); // to 0.1 tou slider ginetai 1 
+    console.log("[MG2] mg1Height:", mg1Height, "multiplier:", heightNorm);
+    //horizonLine = height * 0.42;
 
     treeMin = horizonLine - random(0, 20);
     treeMax = treeMin - random(20, 55);
 
     mmgMin = treeMax - random(5, 60);
-    mmgMax = mmgMin - random(0, 20);
+    //mmgMax = mmgMin - random(0, 20);
+    mmgMax = mmgMin - random(0, 20 + heightNorm * 120);
 
     mbgMin = mmgMin - random(0, 70);
-    mbgMax = mbgMin - random(10, 80);
+    //mbgMax = mbgMin - random(10, 80);
+    mbgMax = mbgMin - random(10, 30 + heightNorm * 160);
 
-    sunSize = random(30, 50);
+    sunSize = sunSizeFromPlanet(planetIndex);
+    console.log("sunSize set from planetIndex", planetIndex, "sunSize:", sunSize);
+
 }
 function generateColorsForStep(step) {
     let range = hueRanges[step];
@@ -209,10 +506,9 @@ function generateColorsForStep(step) {
     sky2 = hsbColor(h2, random(10, 50), random(80, 100));
 }
 function generateLandscape(pg, step) {
+    randomSeed(landscapeSeed);
+    noiseSeed(landscapeSeed);//auto pagwni to fonto gia panta
 
-    // FIX random seed so noise, shapes, clouds, sun are always
-    //randomSeed(step * 99999);
-    // noiseSeed(step * 77777);
     randomSeed(step * 10000 + millis());
     noiseSeed(step * 20000 + millis());
 
@@ -225,9 +521,24 @@ function generateLandscape(pg, step) {
     sky(pg, 0, 0, width, horizonLine, sky1, sky2);
     sun(pg);
     makeClouds(pg);  // now because noiseSeed is fixed
+
+    pg.noStroke();
+    pg.fill(mmgCol);
+    pg.rect(0, horizonLine, width, height - horizonLine);
+    //KLENO PROSORINA
+    if (waterValue > 0) {
+        console.log("[WATER] waterValue > 0 → generating water");
+        generateWater(pg);
+        cutLakeHole(pg, waterShape);
+        drawWaterGradient(pg);
+        //KLEINO PROSOTINA
+    } else {
+        console.log("[WATER] waterValue = 0 → skipping water");
+    }
     mountainsBG(pg);
     mountainsMG(pg);
     etrees(pg);
+
 }
 function sky(pg, x, y, w, h, c1, c2) {
     pg.noStroke();
@@ -329,6 +640,140 @@ function etrees(pg) {
     pg.vertex(width + 100, horizonLine);
     pg.endShape(pg.CLOSE);
 }
+
+function generateWater(pg) {
+    hasWater = true;
+
+    // --- placement ---
+    let centerY = random(horizonLine + 80, height * 0.75);
+    let centerX = random(width * 0.3, width * 0.7);
+    let baseRadius = random(width * 0.6, width * 0.32);//diastasti
+
+    // safety clamp so it never crosses horizon----------------------------------
+    centerY = max(centerY, horizonLine + baseRadius - 60);
+
+    let points = [];
+    let noiseOffset = random(1000);
+    let steps = 40; // low-poly but organic
+
+    for (let i = 0; i < steps; i++) {
+        let angle = map(i, 0, steps, 0, TWO_PI);
+
+        let nx = cos(angle) + 1.5;
+        let ny = sin(angle) + 1.5;
+
+        let n = noise(
+            nx * 0.8 + noiseOffset,
+            ny * 0.8 + noiseOffset
+        );
+
+        let radius = baseRadius * map(n, 0, 1, 0.6, 1.3);
+
+        let x = centerX + cos(angle) * radius;
+        let y = centerY + sin(angle) * radius;
+
+
+        y = max(y, horizonLine - 10);
+
+        points.push({ x, y });
+    }
+
+    waterShape = {
+        points,
+        centerX,
+        centerY,
+        radius: baseRadius
+    };
+
+    drawWater(pg, waterShape);
+    let minY = height;
+    let maxY = 0;
+
+    for (let p of points) {
+        minY = min(minY, p.y);
+        maxY = max(maxY, p.y);
+    }
+
+    waterShape = {
+        points,
+        minY,
+        maxY
+    };
+
+}
+function drawWater(pg, shape) {
+    pg.push();
+    pg.noStroke();
+
+    let gradTop = horizonLine - 10;
+    let gradBottom = height;
+
+    for (let y = shape.minY; y <= shape.maxY; y++) {
+
+        let inter = map(y, gradTop, gradBottom, 0, 1);
+        let col = lerpColor(sky2, sky1, inter);
+
+        pg.stroke(col);
+
+        for (let x = 0; x <= width; x += 2) {
+            if (pointInPolygon(x, y, shape.points)) {
+                pg.point(x, y);
+            }
+        }
+    }
+
+    pg.pop();
+}
+
+function pointInPolygon(x, y, poly) {
+    let inside = false;
+
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        let xi = poly[i].x, yi = poly[i].y;
+        let xj = poly[j].x, yj = poly[j].y;
+
+        let intersect =
+            ((yi > y) !== (yj > y)) &&
+            (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+
+        if (intersect) inside = !inside;
+    }
+    return inside;
+}
+//geometry helper 
+function isPointInWater(x, y) {
+    if (!waterShape || !waterShape.points) return false;
+    return pointInPolygon(x, y, waterShape.points);
+}
+
+function cutLakeHole(pg, shape) {
+    pg.push();
+    pg.erase();
+    pg.noStroke();
+    pg.beginShape();
+    for (let p of shape.points) {
+        pg.vertex(p.x, p.y);
+    }
+    pg.endShape(pg.CLOSE);
+    pg.noErase();
+    pg.pop();
+}
+
+function drawWaterGradient(pg) {
+    pg.push();
+    pg.noStroke();
+
+    let top = horizonLine - 10;
+    let bottom = height;
+
+    for (let y = top; y <= bottom; y++) {
+        let inter = map(y, top, bottom, 0, 1);
+        pg.stroke(lerpColor(sky2, sky1, inter));
+        pg.line(0, y, width, y);
+    }
+
+    pg.pop();
+}
 function wrapHue(h) {
     let r = h % 360;
     return r < 0 ? r + 360 : r;
@@ -337,6 +782,73 @@ function generateTree(start, length, color, width, angle, depth) {
     let segments = [];
     buildTree(start, length, color, width, angle, depth, segments);
     return segments;
+}
+
+function generateLotus(x, y, detailNorm, sizeNorm) {
+
+
+    let hasFlower = random() < 0.6; // 60% flower, 40% leaf-only
+
+    let flowers = [];
+    if (hasFlower) {
+        let count = floor(lerp(1, 4, detailNorm));
+        for (let i = 0; i < count; i++) {
+            flowers.push({
+                x: random(-16, 15),
+                y: random(-15, 14),
+                //  s: random(0.45, 0.6)//megethos
+                s: sizeNorm * random(0.8, 1.0)
+            });
+        }
+    }
+    let leaves = [];
+    let leafCount = floor(lerp(1, 3, detailNorm));
+    for (let i = 0; i < leafCount; i++) {
+        leaves.push({
+            a: random(TWO_PI),
+            r: sizeNorm * random(12, 18)
+        });
+    }
+
+    return {
+        type: "lotus",
+        x, y,
+        flowers,
+        leaves,
+        hasFlower,
+        col: random([
+            color(random(0, 60), 15, 97),
+            color(random(190, 360), random(5, 25), 97),
+        ]),
+        leafCol: color(random(100, 120), random(35, 50), random(25, 45))
+    };
+}
+
+function generateFlower(x, y, detailNorm, sizeNorm) {
+
+    let count = floor(lerp(1, 6, detailNorm));
+
+    let flowers = [];
+    // flowers.push({ x: 0, y: 0, s: 1 });//dinei panta 1 
+
+    for (let i = 0; i < count; i++) {//pio polla
+        flowers.push({
+            x: random(-14, 10),
+            y: random(-10, 15),
+            // s: random(0.45, 0.6)//megethos
+            s: sizeNorm * random(0.8, 1.0)
+        });
+    }
+    return {
+        type: "flower",
+        x, y,
+        flowers,
+
+        col: random([
+            color(random(0, 60), 45, 90),
+            color(random(260, 360), 30, 90),
+        ])
+    };
 }
 function buildTree(start, branch_length, branch_color, branch_width, angle, max_branch, segments) {
     if (max_branch === 0) return;
@@ -375,13 +887,13 @@ function buildTree(start, branch_length, branch_color, branch_width, angle, max_
         segments
     );
 }
-function drawFlower(x, y) {
+function drawFlower(x, y, col) {
     push();
     stroke(40, 100, 50);
     line(x, y, x, y + 10);
 
     noStroke();
-    fill(330, 80, 100);
+    fill(col.r, col.g, col.b);
     for (let a = 0; a < TWO_PI; a += PI / 3) {
         ellipse(x + 8 * cos(a), y + 8 * sin(a), 10, 10);
     }
@@ -394,6 +906,131 @@ function drawFlower(x, y) {
 
 function randomizeColors() {
     for (let p of plants) {
-        p.color = { r: random(0, 20), g: random(200, 255), b: random(40, 100) };
+        //  p.color = { r: random(0, 20), g: random(200, 255), b: random(40, 100) };
+        if (p.type === "tree") {
+            // new random base color
+            let newCol = {
+                r: random(0, 30),
+                g: random(170, 255),
+                b: random(40, 140)
+            };
+
+            p.color = newCol;
+
+            // recolor tree branches
+            //if (p.type === "tree") {
+            for (let b of p.branches) {
+                b.color = {
+                    r: newCol.r + random(-5, 5),
+                    g: newCol.g + random(-10, 10),
+                    b: newCol.b + random(-10, 10)
+                };
+            }
+        }
+        else if (p.type === "bamboo") {
+            p.color = color(
+                random(80, 120),   // hue
+                random(40, 70),    // saturation
+                random(40, 80)     // brightness
+            );
+        }
+        else if (p.type === "lotus") {
+            p.col = random([//ta anthi
+                color(random(0, 60), 15, 97),
+                color(random(190, 360), random(5, 25), 97)
+            ]);
+            p.leafCol = color(random(100, 120), random(35, 50), random(25, 45));//ta fulla
+        }
+        else if (p.type === "flower") {
+            p.col = random([
+                color(random(0, 60), 45, 90),
+                color(random(260, 360), 30, 90)
+            ]);
+        }
     }
+
+
 }
+
+function serializePlants(plants) {
+    return plants.map(p => {
+        if (p.type === "tree") {
+            return {
+                type: "tree",
+                branches: p.branches.map(b => ({
+                    x1: b.x1,
+                    y1: b.y1,
+                    x2: b.x2,
+                    y2: b.y2,
+                    color: b.color,   // already plain {r,g,b}
+                    width: b.width
+                }))
+            };
+        }
+
+        if (p.type === "bamboo") {
+            return {
+                type: "bamboo",
+                x: p.x,
+                y: p.y,
+                h: p.h,
+                w: p.w,
+                internodes: p.internodes,
+                internodeH: p.internodeH,
+                lean: p.lean,
+                leaves: p.leaves,
+                textureLines: p.textureLines,
+                color: {
+                    h: hue(p.color),
+                    s: saturation(p.color),
+                    b: brightness(p.color)
+                }
+            };
+        }
+
+        if (p.type === "lotus" || p.type === "flower") {
+            return {
+                ...p,
+                col: [hue(p.col), saturation(p.col), brightness(p.col)],
+                leafCol: p.leafCol
+                    ? [hue(p.leafCol), saturation(p.leafCol), brightness(p.leafCol)]
+                    : null
+            };
+        }
+    });
+}
+
+// This listens for the parent asking for the slider value
+window.addEventListener("message", (event) => {
+
+    if (event.data?.type === "request_slider_value") {
+        //const sliderValue = document.getElementById("hueSlider").value;
+        const sliderValue = hueSlider.value();
+        // Send value back to parent
+        window.parent.postMessage(
+            { type: "minigame2_result", value: sliderValue },
+            "*"
+        );
+    }
+
+    if (event.data?.type === "set_prompt") {
+        const el = document.getElementById("mg-prompt");
+        if (el) el.textContent = event.data.text || "";
+    }
+
+    if (event.data?.type === "request_mg3_snapshot") {
+        window.parent.postMessage({
+            type: "minigame3_result",
+            payload: {
+                landscape: {
+                    step,
+                    planetIndex,
+                    mg1Height,
+                    mg1Water: waterValue,
+                    seed
+                },
+                plants: serializePlants(plants)
+            }
+        }, "*");
+    }
+});

@@ -12,14 +12,29 @@ console.log("Planet script loaded!");
 document.addEventListener('DOMContentLoaded', () => {
   const planets = document.querySelectorAll('.planet');
   const panels = document.querySelectorAll('.planet-info');
+  const planetHues = {
+    1: 95,   // Hamarik
+    2: 35,   // Tahay
+    3: 10,   // Chura
+    4: 20,   // Santamasa
+    5: 335,  // Ahra
+    6: 45,   // Lete
+    7: 215   // Veles
+  };
 
-  function closeAllPanels() {
+  
+  function clearPlanetStates() {
+  planets.forEach(p => {
+    p.classList.remove('temp-blue');
+  });
+}
+function closeAllPanels() {
     panels.forEach(p => {
       p.classList.remove('active');
       // p.setAttribute('aria-hidden', 'true');
+      clearPlanetStates();
     });
   }
-
   // open panel for given id (string or number)
   function openPanel(id) {
     closeAllPanels();
@@ -53,8 +68,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     planet.addEventListener('click', handleActivate);
-    planet.addEventListener('touchstart', handleActivate, {passive:true});
+    planet.addEventListener('touchstart', handleActivate, { passive: true });
+    planet.addEventListener("click", () => {
 
+      planets.forEach(el => {
+        el.classList.remove("temp-blue");
+      });
+
+      const id = planet.dataset.planet;
+      const hue = planetHues[id];
+
+      planet.style.setProperty("--planet-hue", hue);
+      planet.classList.add("temp-blue");
+    });
     // This does nothing also (?)
 
     // planet.addEventListener('keydown', (e) => {
@@ -133,14 +159,14 @@ document.addEventListener('DOMContentLoaded', showUserId);
   let isDragging = false;
   let startX, startY;
 
- function updateTransform() {
-  // Apply the transform (keeps your translate/scale formatting consistent)
-  space.style.transform = `translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${scale})`;
-  // Also store the numeric values on the element so other scripts can read them reliably
-  space.dataset.posX = String(posX);
-  space.dataset.posY = String(posY);
-  space.dataset.scale = String(scale);
-}
+  function updateTransform() {
+    // Apply the transform (keeps your translate/scale formatting consistent)
+    space.style.transform = `translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${scale})`;
+    // Also store the numeric values on the element so other scripts can read them reliably
+    space.dataset.posX = String(posX);
+    space.dataset.posY = String(posY);
+    space.dataset.scale = String(scale);
+  }
 
 
   // Mouse drag

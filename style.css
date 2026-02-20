@@ -1,6 +1,13 @@
 /* ===== Figma Variables ===== */
 :root {
   --font-family-inter: 'Inter', sans-serif;
+  --ahra: 335;
+  --chura: 10;
+  --hamarik: 95;
+  --lete: 45;
+  --santamasa: 20;
+  --tahay: 35;
+  --veles: 215;
 }
 
 /* ===== CSS Reset ===== */
@@ -46,7 +53,7 @@ img {
 body {
   margin: 0;
   overflow: hidden;
-  background-color: #888;
+  background-color: hsl(218, 12%, 45%);
   background-image: url('images/fonto.png');
   background-size: cover;  /* Ensure the image covers the entire viewport */
   background-position: center center;  /* Center the image in the viewport */
@@ -1109,18 +1116,35 @@ body {
 }
 
 .planet.temp-blue::before {
-  transform: translate(-50%, -50%) scale(1.5);
+  transform: translate(-50%, -50%) scale(1);
   opacity: 1;
   border: 3px solid rgba(0, 180, 255, 0.9);
   box-shadow: 0 0 20px 8px rgba(0, 180, 255, 0.6);
 }
+.planet::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: transparent;
+  transition: background 0.3s ease;
+    border-radius: 50%;
+}
+.planet.temp-blue::after {/*40%*/
+  background: hsla(var(--planet-hue), 70%, 50%, 0.3);
+}
 
 .planet.chosen-permanent::before {
-  transform: translate(-50%, -50%) scale(1.6);
+  transform: translate(-50%, -50%) scale(1.3);
   opacity: 1;
   border: 3px solid rgba(0, 200, 255, 1);
   box-shadow: 0 0 30px 10px rgba(0, 200, 255, 0.8);
 }
+
+.planet.chosen-permanent::after {/*60%*/
+  background: hsla(var(--planet-hue), 70%, 50%, 0.7);
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 1440px) {

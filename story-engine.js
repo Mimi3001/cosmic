@@ -2,11 +2,15 @@ document.addEventListener("DOMContentLoaded", () => {
   //to lock the minigames
   let storyPaused = false;
   let waitingForMG2Value = false;
+  let waitingForMG1Height = false;
+
 
   const minigameState = {
     1: { url: "minigames/myplanets/index.html", submitted: false },
     2: { url: "minigames/temperature/index.html", submitted: false },
-    3: { url: "minigames/flora/index.html", submitted: false }
+    3: { url: "minigames/life/index.html", submitted: false },
+    4: { url: "minigames/life/index.html", submitted: false },
+    5: { url: "minigames/life/index.html", submitted: false },
   };
 
   let currentMinigame = null;  // id of the currently opened minigame
@@ -26,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   promptText.id = "prompt-text";
   document.body.appendChild(promptText);
   let choice = false;
-
+  let storedMG3World = null;
   if (!textEl) {
     console.warn(" story-text element not found in DOM");
     return;
@@ -271,7 +275,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function openMinigame(id, { reopen = false } = {}) {
 
+    let existingPopup = document.getElementById("minigame-popup");
 
+    if (existingPopup) {
+      existingPopup.style.display = "flex";
+
+
+
+      const iframe = existingPopup.querySelector("iframe");
+
+      //SWITCH MODE INSTEAD OF RELOADING
+      if (id === 3) {
+        iframe.contentWindow.postMessage({
+          type: "set_mode",
+          mode: "flora"
+        }, "*");
+      }
+      if (id === 4) {
+        iframe.contentWindow.postMessage({
+          type: "set_mode",
+          mode: "animals"
+        }, "*");
+      }
+      if (id === 5) {
+        iframe.contentWindow.postMessage({
+          type: "set_mode",
+          mode: "humans"
+        }, "*");
+      }
+
+      return;
+    }
     /*const mg = minigameState[id];
     const entry = story[index];
     const gamePrompt = entry?.gamePrompt ? (typeof entry.gamePrompt === "function" ? entry.gamePrompt() : entry.gamePrompt) : "";*/
@@ -296,13 +330,23 @@ document.addEventListener("DOMContentLoaded", () => {
     storyPaused = true;
 
     const planetName = window.selectedPlanet?.name || "";
+    const planetIndex = window.selectedPlanet?.index ?? 4; //h estw 4o planiti
+    const mg1Height = window.mg1Height ?? 0;//h estw 0 upsos
+    const mg1Water = window.mg1Water ?? 0;
+
+    console.log("[PARENT] opening MG", id, "with planetIndex:", planetIndex);
 
     const popup = document.createElement("div");
+    popup.id = "minigame-popup";
     popup.className = "minigame-popup";
 
+    //one source to rull them all, name, index, height, WATEeeR
     popup.innerHTML = `
     <div class="minigame-content">
-      <iframe src="${mg.url}?planet=${encodeURIComponent(planetName)}"class="mg-iframe" allow="camera"></iframe>
+      <iframe 
+        src="${mg.url}?planet=${encodeURIComponent(planetName)}&planetIndex=${planetIndex}&mg1Height=${mg1Height}&mg1Water=${mg1Water}" 
+        class="mg-iframe" allow="camera">
+      </iframe>
       <div class="minigame-buttons">
         <button class="submit-minigame">Submit</button>
         <button class="close-minigame">Close</button>
@@ -343,10 +387,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
         resetBtn.onclick = () => {
           const iframe = popup.querySelector("iframe");
-          iframe.contentWindow.postMessage({ type: "reset_game" }, "*");
+          iframe.contentWindow.postMessage({ type: "reset_game", source: id }, "*");
         };
       });
     }
+    if (id === 4 || id === 5) {
+      const iframe = popup.querySelector("iframe");
+
+      iframe.addEventListener("load", () => {
+        if (storedMG3World) {
+          iframe.contentWindow.postMessage({
+            type: "init_world",
+            payload: storedMG3World
+          }, "*");
+           console.log("[PARENT] Sent stored world to Life minigames", id);
+        } else {
+          console.warn("MG4 opened with no MG3 world");
+        }
+      });
+    }
+
     const iframe = popup.querySelector("iframe");
     //to promt
     iframe.addEventListener("load", () => {
@@ -354,14 +414,42 @@ document.addEventListener("DOMContentLoaded", () => {
         { type: "set_prompt", text: gamePrompt }, "*"
       );
     })
+    //neo
+    iframe.addEventListener("load", () => {
+
+      // ⭐ MODE SWITCHING
+      if (id === 3) {
+        iframe.contentWindow.postMessage({
+          type: "set_mode",
+          mode: "flora"
+        }, "*");
+      }
+
+      if (id === 4) {
+        iframe.contentWindow.postMessage({
+          type: "set_mode",
+          mode: "animals"
+        }, "*");
+      }
+
+      if (id === 5) {
+        iframe.contentWindow.postMessage({
+          type: "set_mode",
+          mode: "civil"
+        }, "*");
+      }
+
+    });
+
     document.body.appendChild(popup);
 
 
 
-
+    //===============================================================
     // Close = user tries to leave without submitting
     popup.querySelector(".close-minigame").onclick = () => {
-      popup.remove();
+      //popup.remove();
+      popup.style.display = "none";
       // storyPaused stays true ,  user must still submit
 
       //promt to mpoulo
@@ -370,6 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     popup.querySelector(".submit-minigame").onclick = () => {
+      //=======================================================================
       // USER ALREADY SUBMITTED BEFORE  ask if they want to resubmit
       if (mg.submitted) {
         if (currentMinigame === 2) {
@@ -384,7 +473,14 @@ document.addEventListener("DOMContentLoaded", () => {
               { type: "request_slider_value" },
               "*"
             );
-
+            if (currentMinigame === 1) {
+              const iframe = popup.querySelector("iframe");
+              iframe.contentWindow.postMessage(
+                { type: "request_mg1_height" },//zitame to ipsos on submit MG1
+                "*"
+              );
+              //console.log("height", id, "with planetIndex:", planetIndex);
+            }
             mg.submitted = true;
             popup.remove();
             storyPaused = false;
@@ -393,11 +489,26 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         return;
       }
-
-      // FIRST SUBMISSION → normal confirm
+      //=========================================================================Ω
+      // FIRST SUBMISSION========================================================
       createConfirmWindow(
         minigameConfirmText[id] || "Submit your results?",
         () => {        // YES
+
+          if (currentMinigame === 1) {
+            waitingForMG1Height = true;//na perimenei
+            const iframe = popup.querySelector("iframe");
+            iframe.contentWindow.postMessage(
+              { type: "request_mg1_height" },
+              "*"
+            );
+            iframe.contentWindow.postMessage(
+              { type: "request_mg1_water" },
+              "*"
+            );
+            return; //idia logiki epilusis sto mg2 pros mg3
+          }
+
           if (currentMinigame === 2) {
             const iframe = popup.querySelector("iframe");
 
@@ -408,11 +519,27 @@ document.addEventListener("DOMContentLoaded", () => {
               "*"
             );
 
-           
+
             return; // DO NOT close yet
           }
+
+          if (currentMinigame === 3 || currentMinigame === 4 || currentMinigame === 5) {//OLOI STELNOUN
+            const iframe = popup.querySelector("iframe");
+
+            waitingForMG3Value = true;
+
+            iframe.contentWindow.postMessage(
+              { type: "request_mg3_snapshot" },
+              "*"
+            );
+
+
+            return; // DO NOT close yet
+          }
+
           mg.submitted = true;
-          popup.remove();
+          // popup.remove();
+          popup.style.display = "none";
 
           promptText.textContent = "";
           promptText.classList.remove("visible");//mpoulo prompt
@@ -444,11 +571,11 @@ document.addEventListener("DOMContentLoaded", () => {
     },
 
 
-    openMiniGame1: () => openMinigame(1),
-    openMiniGame2: () => openMinigame(2),
-    openMiniGame3: () => openMinigame(3),
-    openMiniGame4: () => openMinigame(3), //until new 
-    openMiniGame5: () => openMinigame(3), //until new 
+    openMiniGame1: () => openMinigame(1),//planetsterain
+    openMiniGame2: () => openMinigame(2),//temp
+    openMiniGame3: () => openMinigame(3),//flora
+    openMiniGame4: () => openMinigame(4), //animals
+    openMiniGame5: () => openMinigame(5), //humans
     openMiniGame6: () => openMinigame(3), //until new 
     lockAfterMiniGame1: () => {
       window.lockPoint = index; // store the index where back is disabled
@@ -658,6 +785,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       window.selectedPlanet = {
         id: planetEl.dataset.planet || null,
+        index: Number(planetEl.dataset.planet),
         name,
         y: usersBefore,
         z: totalUsers,
@@ -685,18 +813,56 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("message", (event) => { //-------ENA ANA ARXEIO 
     console.log("PARENT RECEIVED MESSAGE:", event.data);
 
+    if (event.data?.type === "minigame1_height") {
+      window.mg1Height = Number(event.data.value);
+
+      console.log("Parent stored MG1 height:", window.mg1Height);
+
+      if (waitingForMG1Height) {
+        waitingForMG1Height = false;
+
+        const popup = document.querySelector(".minigame-popup");
+        if (popup) popup.remove();//MG1 closes after sending height
+
+        minigameState[1].submitted = true;// Parent has the value before MG2 opens
+        storyPaused = false;
+      }
+    }
+
+    if (event.data?.type === "minigame1_water") {
+      window.mg1Water = Number(event.data.value);
+
+      console.log("Parent stored MG1 water:", window.mg1Water);
+    }
+
+
     if (event.data?.type === "minigame2_result") {
       pendingMG3Value = event.data.value;
       console.log("Parent received from minigame 2:", event.data.value);
       if (waitingForMG2Value) {
-      waitingForMG2Value = false;
+        waitingForMG2Value = false;
 
-      const popup = document.querySelector(".minigame-popup");
-      if (popup) popup.remove();
+        const popup = document.querySelector(".minigame-popup");
+        if (popup) popup.remove();
 
-      storyPaused = false;
-      minigameState[2].submitted = true;
+        storyPaused = false;
+        minigameState[2].submitted = true;
+      }
+
     }
+    if (event.data?.type === "minigame3_result") {
+      storedMG3World = event.data.payload;
+      console.log("[MAIN] Stored MG3 world", storedMG3World);
+
+      if (waitingForMG3Value) {
+        waitingForMG3Value = false;
+
+        const popup = document.querySelector(".minigame-popup");
+        if (popup) popup.style.display = "none";// popup.remove();
+
+        minigameState[3].submitted = true;
+        storyPaused = false;
+      }
       /*
             // Find MG3 iframe
             const mg3 = document.querySelector('iframe[src="minigames/flora/index.html"]');
@@ -718,5 +884,47 @@ document.addEventListener("DOMContentLoaded", () => {
       //pendingMG3Value = event.data.value;   // <-- store it
     }
   });
+// ===== DEV SKIP SYSTEM =====
+window.devSkipTo = function (mgNumber) {
+  console.log("DEV SKIP to minigame", mgNumber);
+
+  // Fake required previous states
+  choice = true;
+
+  window.selectedPlanet = {
+    id: 4,
+    index: 7,
+    name: "Test Planet",
+    y: 10,
+    z: 200,
+    date: new Date().toLocaleDateString("en-GB")
+  };
+
+  // Fake MG1 values
+  window.mg1Height = 50;
+  window.mg1Water = 40;
+  minigameState[1].submitted = true;
+
+  // Fake MG2 result
+  pendingMG3Value = 22;
+  minigameState[2].submitted = true;
+
+  // Fake MG3 world (minimal structure)
+  storedMG3World = {
+    plants: [],
+    colors: ["#00ff00"],
+    landscape: []
+  };
+  minigameState[3].submitted = true;
+
+  storyPaused = false;
+
+  // Jump to correct story index
+  const target = story.findIndex(s => s.onEnd === `openMiniGame${mgNumber}`);
+  if (target !== -1) {
+    index = target;
+    showStory(index);
+  }
+};
 
 });
