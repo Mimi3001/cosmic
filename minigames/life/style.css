@@ -211,3 +211,44 @@ body.civil .civil-tools { display: block; }
   color: var(--ui-text);
 }
 
+/* MG6: both tools visible, stacked vertically not overlapping */
+/*body.mg6 .flora-tools { display: block; }
+body.mg6 .animal-tools { 
+  display: block;
+  top: auto;      
+  left: 16px;
+  position: absolute;
+}*/
+
+/* Position animal below flora dynamically isn't easy in pure CSS,
+   so we use a fixed offset that clears the flora panel when open */
+/*body.mg6 .animal-tools { top: 280px; }*/
+
+/* MG6: hide all tools  drawing is automatic via clicks */
+body.mg6 .flora-tools,
+body.mg6 .animal-tools,
+body.mg6 .civil-tools { display: none !important; }/* rule ensures the JS and CSS don't fight each other anymore.*/
+/*body.mg6 .civil-tools { display: none; }*/
+.life-tools-container {
+  position: absolute;
+  top: 70px;
+  left: 16px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Remove position:absolute from the individual tools since container handles it */
+.flora-tools, .animal-tools, .civil-tools {
+  position: relative;  /* override the absolute */
+  top: auto;
+  left: auto;
+}
+
+/* civil stays separate and absolute since it's never shown with others */
+.civil-tools {
+  position: absolute;
+  top: 70px;
+  left: 16px;
+}

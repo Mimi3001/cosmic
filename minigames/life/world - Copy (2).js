@@ -101,8 +101,8 @@ function setMode(mode) { //Mode Tools Switch-deleitourgounakoma
         //currentMode = "mg6"; // default click behaviour starts as flora
         // open BOTH panels
         document.body.classList.add("mg6"); // both CSS states active
-        document.querySelectorAll(".flora-tools-toggle, .animal-tools-toggle, .civil-tools-toggle")
-            .forEach(el => el.style.display = "none");
+         document.querySelectorAll(".flora-tools-toggle, .animal-tools-toggle, .civil-tools-toggle")
+    .forEach(el => el.style.display = "none");
         /*setTimeout(() => {
             document.querySelector(".flora-tools")?.classList.add("open");
             document.querySelector(".animal-tools")?.classList.add("open");
@@ -469,60 +469,60 @@ function mousePressed() {//If a value depends on a click → mousePressed handle
     if (currentMode === "view") return;
 
     if (currentMode === "mg6") {
-        const zone = getZone(mouseX, mouseY);
-        const roll = Math.random();
+  const zone = getZone(mouseX, mouseY);
+  const roll = Math.random();
 
-        if (zone === "land") { // randomly place tree OR flower OR land animal
-
-            if (roll < 0.4) {
-                currentPlant = "tree";
-                handleFloraClick();
-            } else if (roll < 0.6) {
-                currentPlant = "flower";
-                handleFloraClick();
-            } else {    // random land animal
-                const landTypes = [4, 6, 7, 8, 9, 10, 12, 13, 17]; // frog sheep,cow,fox,chicken,ladybug,tortoise,lizard  duck
-                animals.push({
-                    x: mouseX, y: mouseY,
-                    size: animalSize, hue: random(360),
-                    type: landTypes[Math.floor(Math.random() * landTypes.length)]
-                });
-                removeSmudges(1);
-            }
-        } else if (zone === "sky") {
-            const skyTypes = [14, 17, 18]; // bat, bird, bee
-            animals.push({
-                x: mouseX, y: mouseY,
-                size: animalSize, hue: random(360),
-                type: skyTypes[Math.floor(Math.random() * skyTypes.length)]
-            });
-            removeSmudges(1);
-
-        } else if (zone === "water") {
-            const roll2 = Math.random();
-            if (roll2 < 0.4) {   //  bamboo or lotus
-                currentPlant = roll2 < 0.2 ? "tree" : "flower"; // tree bamboo, flower lotus in water
-                handleFloraClick();
-            } else { // water animals
-                const waterTypes = [4, 5, 11, 15, 16]; // frog, fish, turtle, shrimp, hippo
-                animals.push({
-                    x: mouseX, y: mouseY,
-                    size: animalSize, hue: random(360),
-                    type: waterTypes[Math.floor(Math.random() * waterTypes.length)]
-                });
-                removeSmudges(1);
-            }
-        }
-        return;
+  if (zone === "land") { // randomly place tree OR flower OR land animal
+   
+    if (roll < 0.6) {
+      currentPlant = "tree";
+      handleFloraClick();
+    } else if (roll < 0.5) {
+      currentPlant = "flower";
+      handleFloraClick();
+    } else {    // random land animal
+      const landTypes = [4, 6, 7, 8, 9, 10, 12, 13, 17]; // frog sheep,cow,fox,chicken,ladybug,tortoise,lizard  duck
+      animals.push({
+        x: mouseX, y: mouseY,
+        size: animalSize, hue: random(360),
+        type: landTypes[Math.floor(Math.random() * landTypes.length)]
+      });
+      removeSmudges(1);
     }
-    /*
-        if (currentMode === "mg6") {
-            const zone = getZone(mouseX, mouseY);
-            if (zone === "land") handleFloraClick();
-            else if (zone === "water" || zone === "sky") handleAnimalClick(mouseX, mouseY);
-            // or just always do both — your call
-            return;
-        }*/
+ } else if (zone === "sky") {
+  const skyTypes = [14, 17, 18]; // bat, bird, bee
+  animals.push({
+    x: mouseX, y: mouseY,
+    size: animalSize, hue: random(360),
+    type: skyTypes[Math.floor(Math.random() * skyTypes.length)]
+  });
+  removeSmudges(1);
+
+} else if (zone === "water") {
+  const roll2 = Math.random();
+  if (roll2 < 0.6) {   //  bamboo or lotus
+    currentPlant = roll2 < 0.2 ? "tree" : "flower"; // tree bamboo, flower lotus in water
+    handleFloraClick();
+  } else { // water animals
+    const waterTypes = [4, 5, 11, 15, 16]; // frog, fish, turtle, shrimp, hippo
+    animals.push({
+      x: mouseX, y: mouseY,
+      size: animalSize, hue: random(360),
+      type: waterTypes[Math.floor(Math.random() * waterTypes.length)]
+    });
+    removeSmudges(1);
+  }
+}
+  return;
+}
+/*
+    if (currentMode === "mg6") {
+        const zone = getZone(mouseX, mouseY);
+        if (zone === "land") handleFloraClick();
+        else if (zone === "water" || zone === "sky") handleAnimalClick(mouseX, mouseY);
+        // or just always do both — your call
+        return;
+    }*/
     //  console.log("MODE:", currentMode);
 
 }
@@ -1516,14 +1516,11 @@ function removeSmudges(count = 2) {
     }
     // if (smudges.length === 0 &&  currentMode !== "civil") {//only during mg6
     if (smudges.length === 0 && currentMode === "mg6") {
-        // 1. Freeze-no more interaction
-        currentMode = "view";
-        window.parent.postMessage({ type: "smudges_cleared" }, "*");  // 3. Tell parent we're done
-        /*  setTimeout(() => {//wait 2sec
-                 
-                 saveCanvas("my-planet", "png"); // p5.js triggers download // 2. Save canvas as image to user's PC
-               
-            }, 2000); // wait 2s for smudges to visually clear first*/
+        currentMode = "view";  // 1. Freeze-no more interaction
+        setTimeout(() => {//wait 2sec
+            saveCanvas("my-planet", "png"); // p5.js triggers download // 2. Save canvas as image to user's PC
+            window.parent.postMessage({ type: "smudges_cleared" }, "*");  // 3. Tell parent we're done
+        }, 2000); // wait 2s for smudges to visually clear first
     }
 }
 
@@ -2019,10 +2016,6 @@ window.addEventListener("message", (event) => {
         }, "*");
 
         console.log("[WORLD] Snapshot sent to parent");
-    }
-
-    if (event.data.type === "save_canvas") {
-        saveCanvas("my-planet", "png");
     }
 });
 function deserializePlants(data) {

@@ -17,5 +17,4 @@ minigames
 	  style.css
 
 i have a site with minigames .games appear lineraly with a narration going on and each game's actions will affect the following ones.
-right now temperature game would send a value that would affect the hues of life games.(life has 3+ games in unified landscape: flora/animals/civil)
-logs seem that this value is send but sth got broken and the colors dont change anymore.
+(life has 4 games in unified landscape: flora/animals/civil)

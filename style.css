@@ -613,11 +613,11 @@ body {
 .planet-info h2 {
   margin-bottom: 8px;
   color: rgb(95, 216, 253);
-  font-size: 18px;
+  font-size: 22px;
 }
 
 .planet-info p {
-  font-size: 14px;
+  font-size: 18px;
   line-height: 1.4;
 }
 
@@ -628,7 +628,7 @@ body {
   background: transparent;
   border: none;
   color: #cdeeff;
-  font-size: 16px;
+  /*font-size: 16px;*/
   cursor: pointer;
   padding: 4px;
   line-height: 1;
@@ -707,7 +707,7 @@ body {
   background: rgba(10, 10, 30, 0.7);
   color: #cdeeff;
   font-family: 'Courier New', monospace;
-  font-size: 14px;
+  font-size: 18px;
   padding: 6px 10px;
   border-radius: 8px;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
@@ -868,7 +868,7 @@ body {
   /* border: 1px solid rgba(100,150,255,0.3);*/
   border-radius: 8px;
   padding: 6px 10px;
-  font-size: 14px;
+  font-size: 18px;
   font-family: 'Helvetica';
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
   cursor: pointer;
@@ -932,7 +932,7 @@ body {
   border: 2px solid #00ccff;
   color: #00eaff;
   font-family: 'Orbitron', sans-serif;
-  font-size: 26px;
+  font-size: 28px;
   padding: 16px 40px;
   border-radius: 12px;
   text-transform: uppercase;
@@ -961,12 +961,12 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 8000;
+  z-index: 199001;
 }
 
 .story-text {
   position: absolute;
-  bottom: 80px;
+  bottom: 70px;
   /* slightly above nav arrows */
   /*width: calc(100% - 200px);*/
   /* 150px each side */
@@ -976,17 +976,17 @@ body {
   font-family: 'Inter', sans-serif;
   font-weight: 300;
   /* thin font */
-  font-size: 16px;
+  font-size: 26px;
   color: #fff;
   text-shadow:
-    2px 2px 4px rgba(0, 0, 0, 0.8),
+    4px 4px 6px rgba(0, 0, 0, 0.8),
     -1px -1px 0 #000,
     1px -1px 0 #000,
-    -1px 1px 0 #000,
-    1px 1px 0 #000;
+    -1px 2px 0 #000,
+    2px 2px 0 #000;
   opacity: 0;
   transition: opacity 0.6s ease;
-  z-index: 9000;
+  z-index: 199001;
 }
 
 .story-text.show {
@@ -1006,9 +1006,15 @@ body {
   text-align: center;
   font-family: 'Inter', sans-serif;
   font-weight: 700;
-  font-size: 16px;
-  color: #00ccff;
-  text-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+  font-size: 30px;
+  color: #6ddefa;
+  /*text-shadow: 0 0 8px rgba(0, 0, 0, 0.6);*/
+   text-shadow:
+    2px 2px 6px rgba(0, 0, 0, 0.6),
+    -1px -1px 0 #005885,
+    1px -1px 0 #005885,
+    -1px 1px 0 #005885,
+    1px 1px 0 #005885;
   opacity: 0;
   transition: opacity 0.5s ease;
   z-index: 10000;
@@ -1028,7 +1034,7 @@ body {
   display: flex;
   gap: 2px;
   /* space between arrows */
-  z-index: 9001;
+  z-index: 199001;
 }
 
 .story-btn {
@@ -1040,6 +1046,7 @@ body {
   padding: 0;
   opacity: 0.8;
   transition: opacity 0.2s ease, transform 0.2s ease;
+   z-index: 199001;
 }
 
 .story-btn:hover {
@@ -1085,7 +1092,7 @@ body {
   transform: translate(-50%, -50%);
   background: rgba(10, 10, 30, 0.9);
   color: white;
-  padding: 30px 50px;
+  padding: 30px 40px;
   border: 2px solid #00ccff;
   border-radius: 12px;
   text-align: center;
@@ -1094,7 +1101,8 @@ body {
 }
 
 .choose-window p {
-  font-size: 20px;
+  font-size: 24px;
+  font-family: Arial;
   margin-bottom: 10px;
 }
 
@@ -1171,7 +1179,7 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.5);
   /*fonto piso*/
   display: flex;
   justify-content: center;
@@ -1190,9 +1198,9 @@ body {
 
 .minigame-content {
   background: #111;
-  width: 85%;
+  width: 70%;
   /*tis othonis*/
-  height: 85%;
+  height: 70%;
   border-radius: 12px;
   overflow: hidden;
   display: flex;
@@ -1252,6 +1260,7 @@ body {
   color: black;
   cursor: pointer;
   font-weight: bold;
+  font-size: 28px;
 }
 
 .confirm-submit button:hover {

@@ -3,7 +3,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let storyPaused = false;
   let waitingForMG2Value = false;
   let waitingForMG1Height = false;
-
+  let waitingForMG3Value = false;
+  let smudgesPending = false;
 
   const minigameState = {
     1: { url: "minigames/myplanets/index.html", submitted: false },
@@ -11,6 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
     3: { url: "minigames/life/index.html", submitted: false },
     4: { url: "minigames/life/index.html", submitted: false },
     5: { url: "minigames/life/index.html", submitted: false },
+    6: { url: "minigames/life/index.html", submitted: false },
+
   };
 
   let currentMinigame = null;  // id of the currently opened minigame
@@ -142,77 +145,114 @@ document.addEventListener("DOMContentLoaded", () => {
     { text: ["Something is still missing..."] },
     { text: ["LIFE! Fauna and flora should thrive here."] },
     {
-      text: ["Design your animals, build your landscape!"],
+      text: ["Build your landscape! Design your animals"],
+      //
       gamePrompt:
-        "Click on the landscape to draw plants flowers and trees. Tap randomise to change colors and submit your design.",
+        "Click on the landscape to draw flowers and trees. Adjust size and detail and randomise colors. Submit your design.",
       onEnd: "openMiniGame3"
     },
 
-    // AFTER MINIGAME 3
-    { text: ["beautyfull. like a true urban architect"] },
+    // during MINIGAME 3
     {
-      text: ["but it's still too silent!"],
-      onEnd: "lockAfterMiniGame3"
+      text: ["Lets start with plants, then!"],
+      onEnd: "waitForMiniGame3"  //mg3 closes and story continues
+    },
+    { text: ["beautyfull. like a true urban architect"] },
+
+    {
+      text: ["but it's still too silent."],
+      onEnd: "lockAfterMiniGame3",
+
     },
     { text: ["lets make some noisy animals to live in this pretty planet "] },
     { text: ["birds, fish, mammals, incects, you name it! "] },
     {
-      text: ["Design your animals, on your landscape!"],
+      text: ["Place animals, on your planet!"],
+      //
       gamePrompt:
-        "Click on the landscape, sky and water to make random animals. ",
+        "Click on the land, sky and water to make random animals. ",
       onEnd: "openMiniGame4"
     },
-
-    // AFTER MINIGAME 4
+    //during mg4
     {
-      text: ["what a nature"],
+      text: ["how do they sound? give them a voice "]
+    },
+    {
+      text: ["what a nature!"],
+      onEnd: "waitForMiniGame4"
+    },
+    // AFTER MINIGAME 4
+    { text: ["it is lonely for the explorer"] },
+    {
+      text: ["where's the civilization?"],
       onEnd: "lockAfterMiniGame4"
     },
-    { text: ["it is lonely for the explorer"] },
-    { text: ["where's the civilization?"] },
     {
       text: ["humans must enjoy your paradise"],
       gamePrompt:
-        "Click on the planet, to build cities ",
+        "Click on the planet, to add human population, build cities and factories.",
       onEnd: "openMiniGame5"
     },
-
-    // AFTER MINIGAME 5
+    // DURING MINIGAME 5
     {
-      text: ["you made a new home for humans"],
-      onEnd: "lockAfterMiniGame5"
+      text: ["Bravo! you made a new home for humans"]
     },
-    { text: ["but wait what are these noises"] },
+    { text: ["but wait what are these clouds?"] },
     {
       text: ["phew phew! push them away!"],
       gamePrompt:
-        "Click on the smudges to clean them ",
+        "Click on the smudges to clean them from the solar system",//3 leave 1 appear
     },
     { text: ["oh is it the humans doing it?"] },
     {
-      text: ["your paradise will become a dumbster if you dont clean it"],
+      text: ["your paradise will become a dumbster if you don't clean it"],
       gamePrompt:
-        "Clean the trash"
+        "Wipe (wave hand to clean the trash"
     },
-    { text: ["wait the plants and the animals go away too"] },
-    { text: ["humans are too many. the must eat and built"] },
-    { text: ["you should generate more nature."] },
+    { text: ["wait the plants and the animals go away too"] },//kathe click na afairei ena animal/futo
     {
-      text: ["fix the balance beetween humans and nature ratio"],
-      gamePrompt:
-        "generate MOORE plants MOOOOOOOOOOORE animals MOOOOOOOORE flowers",
-      onEnd: "openMiniGame6"
+      text: ["you should stop generating that much civilization"],
+      onEnd: "waitForMiniGame5"// story stops , wait mg5  to close
     },
-    // AFTER MINIGAME 6 - the end
+
+    //AFTER MINIGAME 5
+    { text: ["humans are too many. they must eat and build and build"] },//afou kleisti to game
+    { text: ["their actions keep polluting"] },
     {
-      text: ["you made it!"],
+      text: ["you should generate more nature."],
       onEnd: "lockAfterMiniGame5"
     },
-    { text: ["this planet is balanced and thriving!"] },
     {
-      text: ["you may rest now and enjoy the view"],
-      prompt: "click on the images"
+      text: ["fix the balance between humans and nature"],
+      //
+      gamePrompt:
+        "generate MOooORE plants, mOOoooOre green, moOore ANiMAls",
+      onEnd: "openMiniGame6"
     },
+    // DURING AND AFTER MINIGAME 6 - the end
+    { text: ["that's it. pollution goes away"] },
+    {
+      text: ["keep adding"],
+      //  onEnd: "lockAfterMiniGame6",
+      onEnd: "waitForSmudgesCleared"
+    },
+    {
+      text: ["you made it!"],
+      onEnd: "lockAfterMiniGame6",
+    },//IMAGE of the landscape gets saved locally
+    {
+      text: ["this planet is balanced and thriving!"],
+      // onEnd: "waitForMG6Close" //GAME CLOSES HERE
+    },
+    { text: "you see humans should give more.. space to nature" },
+    { text: "but you did a great job explorer!" },
+    {
+      text: ["you may rest now and enjoy the view"],//edw kleinei to paixnidi
+      onEnd: "openview"
+
+
+    },
+    // after the save - mg6 close
     { text: ["you are a caring god that made a clean and safe space for all the creatures"] },
     {
       text: ["thank you for your input explorer"],
@@ -236,7 +276,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const minigameConfirmText = {
     1: "Submit your terrain & atmosphere settings?",
     2: "Submit your temperature & climate settings?",
-    3: "Submit your flora generation?"
+    3: "Submit your flora generation?",
+    4: "Submit your fauna population?",
+    5: "Submit your civilization?",
+    6: "Submit your final nature balance?"
   };
   // === UNIVERSAL CONFIRM WINDOW (Same style as choose planet) ===
   function createConfirmWindow(message, yesCallback, noCallback) {
@@ -279,31 +322,98 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (existingPopup) {
       existingPopup.style.display = "flex";
+      currentMinigame = id;
 
-
+      const entry = story[index];
+      const gamePrompt = entry?.gamePrompt
+        ? (typeof entry.gamePrompt === "function" ? entry.gamePrompt() : entry.gamePrompt)
+        : "";
+      currentMinigamePrompt = gamePrompt; // overwrite MG3's old prompt
+      /* oxi auta
+            if (gamePrompt) {
+              promptText.textContent = gamePrompt;
+              promptText.classList.add("visible");
+            } else {
+              promptText.classList.remove("visible");
+            }*/
 
       const iframe = existingPopup.querySelector("iframe");
+      iframe.contentWindow.postMessage({ type: "set_prompt", text: gamePrompt }, "*");//send updated prompt
 
       //SWITCH MODE INSTEAD OF RELOADING
       if (id === 3) {
         iframe.contentWindow.postMessage({
           type: "set_mode",
-          mode: "flora"
+          mode: "flora",
+
         }, "*");
       }
       if (id === 4) {
+        // FIXED: Send saved world state BEFORE switching mode
+        if (storedMG3World) {
+          iframe.contentWindow.postMessage({
+            type: "init_world",
+            payload: storedMG3World
+          }, "*");
+          console.log("[PARENT] Restored world state for animals stage");
+        }
         iframe.contentWindow.postMessage({
           type: "set_mode",
-          mode: "animals"
+          mode: "animals",
+
         }, "*");
       }
       if (id === 5) {
+        // FIXED: Send saved world state BEFORE switching mode
+        if (storedMG3World) {
+          iframe.contentWindow.postMessage({
+            type: "init_world",
+            payload: storedMG3World
+          }, "*");
+          console.log("[PARENT] Restored world state for civil stage");
+        }
         iframe.contentWindow.postMessage({
           type: "set_mode",
-          mode: "humans"
+          mode: "civil",
+
         }, "*");
       }
+      if (id === 6) {
+        existingPopup.querySelector(".submit-minigame").style.display = "none";
+        iframe.contentWindow.postMessage({
+          type: "set_mode", mode: "mg6",
+          // gamePrompt: "generate MOooORE plants, mOOoooOre green"
+        }, "*");
+      }/*
+      existingPopup.querySelector(".close-minigame").onclick = () => {
+        if (currentMinigame === 6) {
+          popup.remove();
+          storyPaused = false;  // unfreeze
+          index++;
+          showStory(index);     // advance to "you are a caring god..."
+        } else {
+          existingPopup.style.display = "none";
+          promptText.textContent = "";
+          promptText.classList.remove("visible");
+        }
+      };*/
+      const closeBtn = existingPopup.querySelector(".close-minigame");
+      const newClose = closeBtn.cloneNode(true); // cloning removes all old listeners
+      closeBtn.replaceWith(newClose);
 
+      newClose.onclick = () => {
+        if (currentMinigame === 6|| currentMinigame === "view") {
+         // existingPopup.remove();//auto to katastrefei
+          existingPopup.style.display = "none";  // HIDE not remove
+          storyPaused = false;
+          index++;
+          showStory(index);
+        } else {
+          existingPopup.style.display = "none";
+          promptText.textContent = "";
+          promptText.classList.remove("visible");
+        }
+      };
       return;
     }
     /*const mg = minigameState[id];
@@ -325,6 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (!mg) return console.error("Unknown minigame ID:", id);
+
 
     currentMinigame = id;
     storyPaused = true;
@@ -380,7 +491,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         //na mpei reset mono gt to 3o game
-        const resetBtn = document.createElement("button");
+        /*const resetBtn = document.createElement("button");
         resetBtn.textContent = "Reset";
         resetBtn.className = "ui-button reset-minigame";
         popup.querySelector(".minigame-buttons").prepend(resetBtn);
@@ -388,7 +499,7 @@ document.addEventListener("DOMContentLoaded", () => {
         resetBtn.onclick = () => {
           const iframe = popup.querySelector("iframe");
           iframe.contentWindow.postMessage({ type: "reset_game", source: id }, "*");
-        };
+        };*/
       });
     }
     if (id === 4 || id === 5) {
@@ -400,7 +511,7 @@ document.addEventListener("DOMContentLoaded", () => {
             type: "init_world",
             payload: storedMG3World
           }, "*");
-           console.log("[PARENT] Sent stored world to Life minigames", id);
+          console.log("[PARENT] Sent stored world to Life minigames", id);
         } else {
           console.warn("MG4 opened with no MG3 world");
         }
@@ -417,7 +528,7 @@ document.addEventListener("DOMContentLoaded", () => {
     //neo
     iframe.addEventListener("load", () => {
 
-      // ⭐ MODE SWITCHING
+      //  MODE SWITCHING
       if (id === 3) {
         iframe.contentWindow.postMessage({
           type: "set_mode",
@@ -457,11 +568,108 @@ document.addEventListener("DOMContentLoaded", () => {
       promptText.classList.remove("visible");
     };
 
+    // popup.querySelector(".submit-minigame").onclick = () => {
+    //   //=======================================================================
+    //   // USER ALREADY SUBMITTED BEFORE  ask if they want to resubmit
+    //   if (mg.submitted) {
+    //     if (currentMinigame === 2) {
+    //       const iframe = popup.querySelector("iframe");
+    //       iframe.contentWindow.postMessage({ type: "request_slider_value" }, "*");
+    //     }
+    //     createConfirmWindow(
+    //       "You already submitted this minigame. Submit a new one?",
+    //       () => {       // YES
+    //         const iframe = popup.querySelector("iframe");
+    //         iframe.contentWindow.postMessage(
+    //           { type: "request_slider_value" },
+    //           "*"
+    //         );
+    //         if (currentMinigame === 1) {
+    //           const iframe = popup.querySelector("iframe");
+    //           iframe.contentWindow.postMessage(
+    //             { type: "request_mg1_height" },//zitame to ipsos on submit MG1
+    //             "*"
+    //           );
+    //           //console.log("height", id, "with planetIndex:", planetIndex);
+    //         }
+    //         mg.submitted = true;
+    //         popup.remove();
+    //         storyPaused = false;
+    //       },
+    //       () => { }      // NO do nothing
+    //     );
+    //     return;
+    //   }
+    //   //=========================================================================Ω
+    //   // FIRST SUBMISSION========================================================
+    //   createConfirmWindow(
+    //     minigameConfirmText[id] || "Submit your results?",
+    //     () => {        // YES
+
+    //       if (currentMinigame === 1) {
+    //         waitingForMG1Height = true;//na perimenei
+    //         const iframe = popup.querySelector("iframe");
+    //         iframe.contentWindow.postMessage(
+    //           { type: "request_mg1_height" },
+    //           "*"
+    //         );
+    //         iframe.contentWindow.postMessage(
+    //           { type: "request_mg1_water" },
+    //           "*"
+    //         );
+    //         return; //idia logiki epilusis sto mg2 pros mg3
+    //       }
+
+    //       if (currentMinigame === 2) {
+    //         const iframe = popup.querySelector("iframe");
+
+    //         waitingForMG2Value = true;
+
+    //         iframe.contentWindow.postMessage(
+    //           { type: "request_slider_value" },
+    //           "*"
+    //         );
+
+
+    //         return; // DO NOT close yet
+    //       }
+
+    //       if (currentMinigame === 3 || currentMinigame === 4 || currentMinigame === 5) {//OLOI STELNOUN
+    //         const iframe = popup.querySelector("iframe");
+
+    //         waitingForMG3Value = true;
+
+    //         iframe.contentWindow.postMessage(
+    //           { type: "request_mg3_snapshot" },
+    //           "*"
+    //         );
+
+
+    //         return; // DO NOT close yet
+    //       }
+
+    //       mg.submitted = true;
+    //       // popup.remove();
+    //       popup.style.display = "none";
+
+    //       promptText.textContent = "";
+    //       promptText.classList.remove("visible");//mpoulo prompt
+
+    //       storyPaused = false;
+    //     },
+    //     () => { }       // NO
+    //   );
+    // };
+
     popup.querySelector(".submit-minigame").onclick = () => {
+      // Use currentMinigame (live value) instead of closure-captured id
+      const activeId = currentMinigame;
+      const activeMg = minigameState[activeId];
+
       //=======================================================================
       // USER ALREADY SUBMITTED BEFORE  ask if they want to resubmit
-      if (mg.submitted) {
-        if (currentMinigame === 2) {
+      if (activeMg.submitted) {
+        if (activeId === 2) {
           const iframe = popup.querySelector("iframe");
           iframe.contentWindow.postMessage({ type: "request_slider_value" }, "*");
         }
@@ -469,34 +677,41 @@ document.addEventListener("DOMContentLoaded", () => {
           "You already submitted this minigame. Submit a new one?",
           () => {       // YES
             const iframe = popup.querySelector("iframe");
-            iframe.contentWindow.postMessage(
-              { type: "request_slider_value" },
-              "*"
-            );
-            if (currentMinigame === 1) {
-              const iframe = popup.querySelector("iframe");
+
+            if (activeId === 1) {
               iframe.contentWindow.postMessage(
-                { type: "request_mg1_height" },//zitame to ipsos on submit MG1
+                { type: "request_mg1_height" },
                 "*"
               );
-              //console.log("height", id, "with planetIndex:", planetIndex);
+            } else if (activeId === 2) {
+              iframe.contentWindow.postMessage(
+                { type: "request_slider_value" },
+                "*"
+              );
+            } else if (activeId === 3 || activeId === 4 || activeId === 5) {
+              waitingForMG3Value = true;
+              iframe.contentWindow.postMessage(
+                { type: "request_mg3_snapshot" },
+                "*"
+              );
             }
-            mg.submitted = true;
-            popup.remove();
+
+            activeMg.submitted = true;
+            popup.style.display = "none";
             storyPaused = false;
           },
           () => { }      // NO do nothing
         );
         return;
       }
-      //=========================================================================Ω
+      //=========================================================================
       // FIRST SUBMISSION========================================================
       createConfirmWindow(
-        minigameConfirmText[id] || "Submit your results?",
+        minigameConfirmText[activeId] || "Submit your results?",
         () => {        // YES
 
-          if (currentMinigame === 1) {
-            waitingForMG1Height = true;//na perimenei
+          if (activeId === 1) {
+            waitingForMG1Height = true;
             const iframe = popup.querySelector("iframe");
             iframe.contentWindow.postMessage(
               { type: "request_mg1_height" },
@@ -506,10 +721,10 @@ document.addEventListener("DOMContentLoaded", () => {
               { type: "request_mg1_water" },
               "*"
             );
-            return; //idia logiki epilusis sto mg2 pros mg3
+            return;
           }
 
-          if (currentMinigame === 2) {
+          if (activeId === 2) {
             const iframe = popup.querySelector("iframe");
 
             waitingForMG2Value = true;
@@ -519,11 +734,10 @@ document.addEventListener("DOMContentLoaded", () => {
               "*"
             );
 
-
             return; // DO NOT close yet
           }
 
-          if (currentMinigame === 3 || currentMinigame === 4 || currentMinigame === 5) {//OLOI STELNOUN
+          if (activeId === 3 || activeId === 4 || activeId === 5) {
             const iframe = popup.querySelector("iframe");
 
             waitingForMG3Value = true;
@@ -533,16 +747,14 @@ document.addEventListener("DOMContentLoaded", () => {
               "*"
             );
 
-
             return; // DO NOT close yet
           }
 
-          mg.submitted = true;
-          // popup.remove();
+          activeMg.submitted = true;
           popup.style.display = "none";
 
           promptText.textContent = "";
-          promptText.classList.remove("visible");//mpoulo prompt
+          promptText.classList.remove("visible");
 
           storyPaused = false;
         },
@@ -556,6 +768,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // === Actions triggered by story lines ===
   const storyActions = {
     choosePlanet: () => {
+
       enablePlanetSelectionGlow();
       //showChooseWindow(); // <== this shows the popup
       if (choice === true) return;
@@ -573,10 +786,69 @@ document.addEventListener("DOMContentLoaded", () => {
 
     openMiniGame1: () => openMinigame(1),//planetsterain
     openMiniGame2: () => openMinigame(2),//temp
-    openMiniGame3: () => openMinigame(3),//flora
-    openMiniGame4: () => openMinigame(4), //animals
-    openMiniGame5: () => openMinigame(5), //humans
-    openMiniGame6: () => openMinigame(3), //until new 
+
+    openMiniGame3: () => {
+      openMinigame(3); setTimeout(() => { storyPaused = false; }, 0);
+    },
+    waitForMiniGame3: () => { if (!minigameState[3].submitted) storyPaused = true; },//flora // freezes here
+
+    openMiniGame4: () => {
+      openMinigame(4); setTimeout(() => { storyPaused = false; }, 0);
+    },
+    waitForMiniGame4: () => { if (!minigameState[4].submitted) storyPaused = true; }, //animals // freezes here
+
+    openMiniGame5: () => {
+      openMinigame(5);
+      setTimeout(() => { storyPaused = false; }, 0); // runs AFTER openMinigame finishes
+    },
+    waitForMiniGame5: () => { if (!minigameState[5].submitted) storyPaused = true; },//civil
+
+
+    openMiniGame6: () => {
+      openMinigame(6); setTimeout(() => { storyPaused = false; }, 0); // same fix
+    },
+    waitForSmudgesCleared: () => {  // lock here — only smudges_cleared message will unlock
+      //waitForMG6Close: () => {
+      storyPaused = true; //telos // freeze narration
+      currentMinigame = 6;
+
+      /*
+            const popup = document.getElementById("minigame-popup");
+            const iframe = popup?.querySelector("iframe");// send save command to iframe
+            if (iframe) {
+              iframe.contentWindow.postMessage({ type: "save_canvas" }, "*");
+            }
+            // if player already closed the popup, reopen it in view mode (no tools, just landscape)
+            if (!popup || popup.style.display === "none") {
+              const existingPopup = document.getElementById("minigame-popup");
+              if (existingPopup) {
+                existingPopup.style.display = "flex";
+                existingPopup.querySelector(".submit-minigame").style.display = "none";
+                const iframe2 = existingPopup.querySelector("iframe");
+                iframe2.contentWindow.postMessage({ type: "hide_ui" }, "*");
+              }
+            }
+      */
+    },
+
+    /* openMiniGame5: () => {
+       openMinigame(5); // humans
+       storyPaused = false; //narration continues
+     },
+     waitForMiniGame5: () => {
+       storyPaused = true;  // only freeze HERE
+     },
+     openMiniGame6: () => {
+       openMinigame(6);
+       storyPaused = false;
+       setTimeout(() => {
+         const btn = document.querySelector(".submit-minigame");
+         if (btn) btn.style.display = "none";//na min exei koumpia
+       }, 50);
+     }, */
+
+
+
     lockAfterMiniGame1: () => {
       window.lockPoint = index; // store the index where back is disabled
     },
@@ -592,7 +864,89 @@ document.addEventListener("DOMContentLoaded", () => {
     lockAfterMiniGame5: () => {
       window.lockPoint = index; // store the index where back is disabled
     },
-    //den kserw an thelei lock kai to teleutaio paixnidi
+    lockAfterMiniGame6: () => {
+      window.lockPoint = index;     //to kratame
+    },
+
+    openview: () => {
+      storyPaused = true; // freeze until player closes view
+      currentMinigame = "view"; // distinguish from active game
+
+      const popup = document.getElementById("minigame-popup");
+ // popup should always exist at this point — just show and configure it
+  if (!popup) {
+    console.error("[BUG] popup missing in openview — was it removed somewhere?");
+    return;
+  }
+
+  popup.style.display = "flex";
+      function setupViewPopup(popup) {
+        // hide submit, keep close
+        const submit = popup.querySelector(".submit-minigame");
+        if (submit) submit.style.display = "none";
+
+        // send hide_ui and save_canvas to iframe
+        const iframe = popup.querySelector("iframe");
+        if (iframe) {
+          iframe.contentWindow.postMessage({ type: "hide_ui" }, "*");
+          setTimeout(() => {// delay save to let the canvas render fully
+          iframe.contentWindow.postMessage({ type: "save_canvas" }, "*");
+           }, 1500);
+        }
+
+        // close button advances story
+        const closeBtn = popup.querySelector(".close-minigame");
+        const newClose = closeBtn.cloneNode(true);
+        closeBtn.replaceWith(newClose);
+        newClose.onclick = () => {
+          popup.style.display = "none";
+          storyPaused = false;
+          index++;
+          showStory(index);
+        };
+      }
+
+      if (existingPopup && existingPopup.style.display !== "none") {
+        // popup is already open — just configure it
+        setupViewPopup(existingPopup);
+      } else if (existingPopup) {
+        // popup exists but hidden — show it
+        existingPopup.style.display = "flex";
+        setupViewPopup(existingPopup);
+      } else {
+        // popup was removed — rebuild it
+        const planetName = window.selectedPlanet?.name || "";
+        const planetIndex = window.selectedPlanet?.index ?? 4;
+        const mg1Height = window.mg1Height ?? 0;
+        const mg1Water = window.mg1Water ?? 0;
+        const popup = document.createElement("div");
+        popup.id = "minigame-popup";
+        popup.className = "minigame-popup";
+        popup.innerHTML = `
+      <div class="minigame-content">
+        <iframe src="minigames/life/index.html?planet=${encodeURIComponent(planetName)}&planetIndex=${planetIndex}&mg1Height=${mg1Height}&mg1Water=${mg1Water}"
+          class="mg-iframe" allow="camera">
+        </iframe>
+        <div class="minigame-buttons">
+          <button class="close-minigame">Close</button>
+        </div>
+      </div>
+    `;
+        document.body.appendChild(popup);
+        const iframe = popup.querySelector("iframe");
+        iframe.addEventListener("load", () => {
+          if (storedMG3World) {
+            iframe.contentWindow.postMessage({ type: "init_world", payload: storedMG3World }, "*");
+          }
+          iframe.contentWindow.postMessage({ type: "set_mode", mode: "view" }, "*");
+          iframe.contentWindow.postMessage({ type: "hide_ui" }, "*");
+          setTimeout(() => {
+          iframe.contentWindow.postMessage({ type: "save_canvas" }, "*");
+            }, 2000); // longer delay for fresh load
+        });
+        setupViewPopup(popup);
+      }
+    }
   };
 
   // === Core function ===
@@ -616,6 +970,7 @@ document.addEventListener("DOMContentLoaded", () => {
       promptText.textContent = value;
       promptText.classList.add("visible");
     } else {
+      promptText.textContent = "";
       promptText.classList.remove("visible");
     }
 
@@ -654,27 +1009,44 @@ document.addEventListener("DOMContentLoaded", () => {
   btnNext.addEventListener("click", () => {
     if (storyPaused) {
       console.log("Reopening minigame… submit to continue.");
-      openMinigame(currentMinigame, { reopen: true });
+      // just show the popup again, don't reinitialise anything
+      const existing = document.getElementById("minigame-popup");//not sure
+      if (existing) existing.style.display = "flex";
+
+      //openMinigame(currentMinigame, { reopen: true });
       return;
     }
-    /*
-        if (minigameActive && !minigameSubmitted) {
-          console.log("You must submit the minigame before continuing.");
-          return;
-        }
-    */
-    if (!choice && index >= neoindex) {
-      console.log("User must choose a planet before continuing.");
-      return;
-    }
+
+    if (!choice && index >= neoindex) return;
     if (index < story.length - 1) {
       const win = document.querySelector(".choose-window");
       if (win) win.remove();
-
       index++;
       showStory(index);
     }
   });
+
+
+
+  /*
+      if (minigameActive && !minigameSubmitted) {
+        console.log("You must submit the minigame before continuing.");
+        return;
+      }
+  */
+  /*sbinw not sure
+   if (!choice && index >= neoindex) {
+     console.log("User must choose a planet before continuing.");
+     return;
+   }
+   if (index < story.length - 1) {
+     const win = document.querySelector(".choose-window");
+     if (win) win.remove();
+
+     index++;
+     showStory(index);
+   }
+ });*/
   btnPrev.addEventListener("click", () => {
     if (choice && index <= neoindex + 1) {
       console.log("Cannot go back after confirming a planet.");
@@ -839,92 +1211,192 @@ document.addEventListener("DOMContentLoaded", () => {
     if (event.data?.type === "minigame2_result") {
       pendingMG3Value = event.data.value;
       console.log("Parent received from minigame 2:", event.data.value);
-      if (waitingForMG2Value) {
-        waitingForMG2Value = false;
+      //if (waitingForMG2Value) {
+      waitingForMG2Value = false;
 
-        const popup = document.querySelector(".minigame-popup");
-        if (popup) popup.remove();
+      const popup = document.querySelector(".minigame-popup");
+      if (popup) popup.remove();
 
-        storyPaused = false;
-        minigameState[2].submitted = true;
-      }
+      storyPaused = false;
+      minigameState[2].submitted = true;
+      // }
 
     }
-    if (event.data?.type === "minigame3_result") {
+    // if (event.data?.type === "minigame3_result") {
+    //   storedMG3World = event.data.payload;
+    //   console.log("[MAIN] Stored MG3 world", storedMG3World);
+
+    //   if (waitingForMG3Value) {
+    //     waitingForMG3Value = false;
+
+    //     const popup = document.querySelector(".minigame-popup");
+    //     if (popup) popup.style.display = "none";// popup.remove();
+
+    //     minigameState[3].submitted = true;
+    //     storyPaused = false;
+    //   }
+    //   /*
+    //         // Find MG3 iframe
+    //         const mg3 = document.querySelector('iframe[src="minigames/flora/index.html"]');
+    //         if (!mg3) {
+    //           console.warn("Minigame 3 iframe not found.");
+    //           return;
+    //         }
+
+    //         mg3.contentWindow.postMessage(
+    //           {
+    //             type: "pref_from_parent",
+    //             value: event.data.value
+    //           },
+    //           "*"
+    //         );
+
+    //         console.log("Parent forwarded value to minigame 3.");
+    //         */
+    //   //pendingMG3Value = event.data.value;   // <-- store it
+    // }
+    if (event.data?.type === "minigame3_result" && waitingForMG3Value) {
       storedMG3World = event.data.payload;
       console.log("[MAIN] Stored MG3 world", storedMG3World);
+      waitingForMG3Value = false;
+      // if this was triggered by smudges_cleared, jump to "you made it!"
+      if (//currentMinigame === 6 &&
+        smudgesPending) {
+        smudgesPending = false;
+        const target = story.findIndex(s => s.onEnd === "lockAfterMiniGame6");
+        if (target !== -1) {
+          index = target;
+          storyPaused = false;
+          showStory(index);
+        }
 
-      if (waitingForMG3Value) {
-        waitingForMG3Value = false;
-
-        const popup = document.querySelector(".minigame-popup");
-        if (popup) popup.style.display = "none";// popup.remove();
-
-        minigameState[3].submitted = true;
-        storyPaused = false;
+        return;// don't hide popup or mark submitted
       }
-      /*
-            // Find MG3 iframe
-            const mg3 = document.querySelector('iframe[src="minigames/flora/index.html"]');
-            if (!mg3) {
-              console.warn("Minigame 3 iframe not found.");
-              return;
-            }
-      
-            mg3.contentWindow.postMessage(
-              {
-                type: "pref_from_parent",
-                value: event.data.value
-              },
-              "*"
-            );
-      
-            console.log("Parent forwarded value to minigame 3.");
-            */
-      //pendingMG3Value = event.data.value;   // <-- store it
+      //if (waitingForMG3Value) {
+      //  waitingForMG3Value = false;
+
+      const popup = document.querySelector(".minigame-popup");
+      if (popup) popup.style.display = "none";
+
+      minigameState[currentMinigame].submitted = true;
+      storyPaused = false;
+      //}
+
+      /* if (currentMinigame === 6) {
+         // Reopen as cinematic view — no buttons
+         const cinematic = document.createElement("div");
+         cinematic.id = "minigame-popup";
+         cinematic.className = "minigame-popup";
+         cinematic.innerHTML = `
+           <div class="minigame-content">
+             <iframe src="minigames/life/index.html?planet=...&planetIndex=..."
+               class="mg-iframe" allow="camera">
+             </iframe>
+             <!-- no buttons -->
+           </div>
+         `;
+         document.body.appendChild(cinematic);
+ 
+         const iframe = cinematic.querySelector("iframe");
+         iframe.addEventListener("load", () => {
+           iframe.contentWindow.postMessage({ type: "init_world", payload: storedMG3World }, "*");
+           iframe.contentWindow.postMessage({ type: "set_mode", mode: "view" }, "*"); // new mode
+           iframe.contentWindow.postMessage({ type: "hide_ui" }, "*"); // tell world.js to hide tools
+         });
+       }*/
     }
+    if (event.data?.type === "smudges_cleared") {
+      // only fires during MG6
+      if (currentMinigame !== 6) return;
+      smudgesPending = true;
+      // capture final world state including MG6 plants/animals
+      const popup = document.getElementById("minigame-popup");
+      const iframe = popup?.querySelector("iframe");
+      if (iframe) {
+        waitingForMG3Value = true; // reuse existing snapshot mechanism
+        iframe.contentWindow.postMessage({ type: "request_mg3_snapshot" }, "*");
+        // minigame3_result handler will fire, update storedMG3World,
+        // then we jump story from there:
+      }
+
+      // jump to "you made it!" beat
+      //auto paei allou
+      /*const target = story.findIndex(s => s.onEnd === "lockAfterMiniGame6");
+      if (target !== -1) {
+        index = target;
+        storyPaused = false;
+        showStory(index);
+      }*/
+    }
+    //   if (event.data?.type === "smudges_cleared" && currentMinigame === 6) {
+    // freeze tools, save image — world.js handles this
+    // then after a short delay, close the popup and continue story
+    /* setTimeout(() => {
+       const popup = document.getElementById("minigame-popup");
+       if (popup) popup.remove();
+       storyPaused = false;
+       index++;
+       showStory(index);
+     }, 2000);
+     */ // 2s to let the save complete
+    /*      const target = story.findIndex(s => s.onEnd === "lockAfterMiniGame6");
+    if (target !== -1) {
+      index = target;
+      storyPaused = false;
+      showStory(index);
+    }
+        const popup = document.getElementById("minigame-popup");
+        const iframe = popup?.querySelector("iframe");
+        if (iframe) {
+          iframe.contentWindow.postMessage({ type: "hide_ui" }, "*");
+        }
+      }
+  */
+
   });
-// ===== DEV SKIP SYSTEM =====
-window.devSkipTo = function (mgNumber) {
-  console.log("DEV SKIP to minigame", mgNumber);
+  // ===== DEV SKIP SYSTEM =====
+  window.devSkipTo = function (mgNumber) {
+    console.log("DEV SKIP to minigame", mgNumber);
 
-  // Fake required previous states
-  choice = true;
+    // Fake required previous states
+    choice = true;
 
-  window.selectedPlanet = {
-    id: 4,
-    index: 7,
-    name: "Test Planet",
-    y: 10,
-    z: 200,
-    date: new Date().toLocaleDateString("en-GB")
+    window.selectedPlanet = {
+      id: 4,
+      index: 7,
+      name: "Test Planet",
+      y: 10,
+      z: 200,
+      date: new Date().toLocaleDateString("en-GB")
+    };
+
+    // Fake MG1 values
+    window.mg1Height = 50;
+    window.mg1Water = 40;
+    minigameState[1].submitted = true;
+
+    // Fake MG2 result
+    pendingMG3Value = 22;
+    minigameState[2].submitted = true;
+
+    // Fake MG3 world (minimal structure)
+    storedMG3World = {
+      plants: [],
+      colors: ["#00ff00"],
+      landscape: []
+    };
+    minigameState[3].submitted = true;
+
+
+    if (mgNumber > 4) minigameState[4].submitted = true;
+    if (mgNumber > 5) minigameState[5].submitted = true;
+    storyPaused = false;
+    // Jump to correct story index
+    const target = story.findIndex(s => s.onEnd === `openMiniGame${mgNumber}`);
+    if (target !== -1) {
+      index = target;
+      showStory(index);
+    }
   };
-
-  // Fake MG1 values
-  window.mg1Height = 50;
-  window.mg1Water = 40;
-  minigameState[1].submitted = true;
-
-  // Fake MG2 result
-  pendingMG3Value = 22;
-  minigameState[2].submitted = true;
-
-  // Fake MG3 world (minimal structure)
-  storedMG3World = {
-    plants: [],
-    colors: ["#00ff00"],
-    landscape: []
-  };
-  minigameState[3].submitted = true;
-
-  storyPaused = false;
-
-  // Jump to correct story index
-  const target = story.findIndex(s => s.onEnd === `openMiniGame${mgNumber}`);
-  if (target !== -1) {
-    index = target;
-    showStory(index);
-  }
-};
 
 });

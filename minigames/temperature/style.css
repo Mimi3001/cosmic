@@ -52,3 +52,23 @@ body {
   width: 200px;
   margin-left: 10px;
 }
+/* slider */
+.temp-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.temp-sliders label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  
+  font-size: 12px;
+  color: var(--ui-text);
+}
+
+/* vertical sliders */
+.temp-sliders input[type="range"] {
+width: 200px;
+}
