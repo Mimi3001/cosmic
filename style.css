@@ -1,7 +1,7 @@
 /* ===== Figma Variables ===== */
 :root {
   --font-family-inter: 'Inter', sans-serif;
-  --ahra: 335;
+  --ahra: 325;
   --chura: 10;
   --hamarik: 95;
   --lete: 45;
@@ -976,7 +976,7 @@ body {
   font-family: 'Inter', sans-serif;
   font-weight: 300;
   /* thin font */
-  font-size: 26px;
+  font-size: clamp(18px, 2vw, 26px);   /* scales down on smaller windows */
   color: #fff;
   text-shadow:
     4px 4px 6px rgba(0, 0, 0, 0.8),
@@ -1006,7 +1006,7 @@ body {
   text-align: center;
   font-family: 'Inter', sans-serif;
   font-weight: 700;
-  font-size: 30px;
+  font-size: clamp(20px, 2vw, 30px);   /* scales down on smaller windows */
   color: #6ddefa;
   /*text-shadow: 0 0 8px rgba(0, 0, 0, 0.6);*/
    text-shadow:

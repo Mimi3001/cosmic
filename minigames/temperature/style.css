@@ -9,7 +9,7 @@ body {
     /*height: auto;*/
   position: sticky;
   top: 0;
-  left: 0;/**/
+  /*left: 0;*/
   z-index: 9999;
   width: 100%;              /* full width of the iframe document */
   padding: 12px 16px;       /* space inside the bar (explained below) */

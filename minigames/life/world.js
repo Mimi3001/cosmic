@@ -15,6 +15,7 @@ let civil = [];
 let currentCivilType = "human";
 let smudges = [];
 let civilDetail = 3;
+let pollutionLayers = 0;
 
 
 let regenerate = true;   // generate once on load
@@ -214,6 +215,7 @@ window.addEventListener("message", (event) => {
         plants = deserializePlants(worldState.plants || []);// plants = worldState.plants || [];
         animals = worldState.animals || [];
         civil = worldState.civil || [];
+        pollutionLayers = worldState.pollutionLayers || 0; 
         worldRestored = false;//3-telos ta regens 
 
         regenerate = true; // redraw from saved state
@@ -748,7 +750,7 @@ function handleCivilClick() {
             type: currentCivilType
         });
 
-        let smudgeMultiplier = 3; // poso thes
+        let smudgeMultiplier = 2; // poso thes
         for (let s = 0; s < smudgeMultiplier; s++) {
             addSmudgeRandom();
         }
@@ -762,6 +764,7 @@ function handleCivilClick() {
             animals.splice(Math.floor(Math.random() * animals.length), 1);
         }
     }
+    pollutionLayers++;
 }
 function addSmudgeRandom() {// pollution
     let x = random(width);
@@ -774,7 +777,7 @@ function addSmudgeRandom() {// pollution
         x,
         y,
         size,
-        alpha: random(30, 120)
+        alpha: random(20, 90)
     });
 }
 
@@ -988,6 +991,15 @@ function draw() { // draw dinei sxima generate dinei dedomena
     drawCivil();
     drawSmudges();
     pop();
+
+    // draw pollution overlay
+    if (pollutionLayers > 0) {
+        noStroke();
+        // slightly greenish-gray tint
+        fill(80, 8, 88, Math.min(pollutionLayers * 13, 200)); // HSB: muted olive-gray, capped at ~200 alpha
+        //The 13 per layer means 4 clicks = alpha 52, 8 clicks ≈ 104, 16 clicks hits the cap of 200.
+        rect(0, 0, width, height);
+    }
 }
 function determineValues() {
     horizonLine = height * horizonRatio;//*.42
@@ -1490,7 +1502,7 @@ function pickSpecies(zone, animalClass) {
 function drawSmudges() {
     noStroke();
     for (let s of smudges) {
-        fill(0, 0, 0, s.alpha);
+        fill(0, 0, 70, s.alpha);
         ellipse(s.x, s.y, s.size);
     }
 }
@@ -1513,9 +1525,10 @@ function removeSmudges(count = 2) {
             //  let index = floor(random(smudges.length));
             smudges.splice(Math.floor(Math.random() * smudges.length), 1);//sbinei tuxaia smudges
         }
+    if (pollutionLayers > 0) pollutionLayers--;// remove a pollution layer alongside each smudge
     }
     // if (smudges.length === 0 &&  currentMode !== "civil") {//only during mg6
-    if (smudges.length === 0 && currentMode === "mg6") {
+    if (smudges.length === 0 && pollutionLayers === 0 && currentMode === "mg6") {
         // 1. Freeze-no more interaction
         currentMode = "view";
         window.parent.postMessage({ type: "smudges_cleared" }, "*");  // 3. Tell parent we're done
@@ -2001,7 +2014,7 @@ window.addEventListener("message", (event) => {
         if (el) el.textContent = event.data.text || "";
     }*/
 
-    if (event.data?.type === "request_mg3_snapshot") {
+    if (event.data?.type === "request_mg3_snapshot") {//edw oti zitan ta ta paixnidia prow mg4 mg5 mg6 
         window.parent.postMessage({
             type: "minigame3_result",
             payload: {
@@ -2014,7 +2027,8 @@ window.addEventListener("message", (event) => {
                 },
                 plants: serializePlants(plants),
                 animals: animals.map(a => ({ ...a })),
-                civil: civil.map(c => ({ ...c }))
+                civil: civil.map(c => ({ ...c })),
+                pollutionLayers
             }
         }, "*");
 

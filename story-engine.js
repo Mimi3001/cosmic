@@ -402,8 +402,8 @@ document.addEventListener("DOMContentLoaded", () => {
       closeBtn.replaceWith(newClose);
 
       newClose.onclick = () => {
-        if (currentMinigame === 6|| currentMinigame === "view") {
-         // existingPopup.remove();//auto to katastrefei
+        if (currentMinigame === 6 || currentMinigame === "view") {
+          // existingPopup.remove();//auto to katastrefei
           existingPopup.style.display = "none";  // HIDE not remove
           storyPaused = false;
           index++;
@@ -873,14 +873,14 @@ document.addEventListener("DOMContentLoaded", () => {
       currentMinigame = "view"; // distinguish from active game
 
       const popup = document.getElementById("minigame-popup");
- // popup should always exist at this point — just show and configure it
-  if (!popup) {
-    console.error("[BUG] popup missing in openview — was it removed somewhere?");
-    return;
-  }
+      // popup should always exist at this point — just show and configure it
+      if (!popup) {
+        console.error("[BUG] popup missing in openview — was it removed somewhere?");
+        return;
+      }
 
-  popup.style.display = "flex";
-      function setupViewPopup(popup) {
+      popup.style.display = "flex";
+      //function setupViewPopup(popup) {//oxi
         // hide submit, keep close
         const submit = popup.querySelector(".submit-minigame");
         if (submit) submit.style.display = "none";
@@ -888,10 +888,11 @@ document.addEventListener("DOMContentLoaded", () => {
         // send hide_ui and save_canvas to iframe
         const iframe = popup.querySelector("iframe");
         if (iframe) {
+            
+            iframe.contentWindow.postMessage({ type: "save_canvas" }, "*");
+          setTimeout(() => {// delay close to let the canvas render fully
           iframe.contentWindow.postMessage({ type: "hide_ui" }, "*");
-          setTimeout(() => {// delay save to let the canvas render fully
-          iframe.contentWindow.postMessage({ type: "save_canvas" }, "*");
-           }, 1500);
+        }, 500);
         }
 
         // close button advances story
@@ -904,8 +905,8 @@ document.addEventListener("DOMContentLoaded", () => {
           index++;
           showStory(index);
         };
-      }
-
+      //}
+/*
       if (existingPopup && existingPopup.style.display !== "none") {
         // popup is already open — just configure it
         setupViewPopup(existingPopup);
@@ -939,13 +940,13 @@ document.addEventListener("DOMContentLoaded", () => {
             iframe.contentWindow.postMessage({ type: "init_world", payload: storedMG3World }, "*");
           }
           iframe.contentWindow.postMessage({ type: "set_mode", mode: "view" }, "*");
-          iframe.contentWindow.postMessage({ type: "hide_ui" }, "*");
           setTimeout(() => {
-          iframe.contentWindow.postMessage({ type: "save_canvas" }, "*");
-            }, 2000); // longer delay for fresh load
+            iframe.contentWindow.postMessage({ type: "save_canvas" }, "*");
+          }, 2000); // longer delay for fresh load
+          iframe.contentWindow.postMessage({ type: "hide_ui" }, "*");
         });
         setupViewPopup(popup);
-      }
+      }*/
     }
   };
 
