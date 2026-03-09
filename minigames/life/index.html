@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/FresnelShader.js"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../ui.css">
     <link rel="stylesheet" type="text/css" href="style.css">
     <script src="world.js"></script>
@@ -19,7 +20,7 @@
     <div class="mg-root">
         <div class="life-tools-container">
             <div class="flora-tools">
-            <button class="flora-tools-toggle ui-button">Tools</button>
+            <button class="flora-tools-toggle ui-button">Controls</button>
 
             <div class="flora-tools-panel">
                 <div class="flora-buttons">
@@ -44,14 +45,14 @@
             </div>
             </div>
             <div class="animal-tools ">
-            <button class="animal-tools-toggle ui-button">Tools</button>
+            <button class="animal-tools-toggle ui-button">Controls</button>
             <div class="animal-tools-panel">
 
                 <div class="animal-buttons">
                     <button data-animal="mammal" class="ui-button">Mammals</button>
                     <button data-animal="insect" class="ui-button">Bugs</button>
                     <button data-animal="reptile/ave/fish" class="ui-button">Non mammals</button>
-                    <button id="animalRandomBtn" class="ui-button">Randomize</button>
+                  <!--  <button id="animalRandomBtn" class="ui-button">Randomize</button>-->
                 </div>
 
                 <div class="animal-sliders">
@@ -63,13 +64,13 @@
             </div>
         </div>
         <div class="civil-tools">
-            <button class="civil-tools-toggle ui-button">Tools</button>
+            <button class="civil-tools-toggle ui-button">Controls</button>
             <div class="civil-tools-panel">
 
                 <div class="civil-buttons">
                     <button data-civil="human" class="ui-button">humans</button>
-                    <button data-civil="house" class="ui-button">accommodation</button>
-                    <button data-civil="production" class="ui-button">productivity</button>
+                    <button data-civil="house" class="ui-button">houses</button>
+                    <button data-civil="production" class="ui-button">factories</button>
                 </div>
 
                 <div class="civil-sliders">

@@ -1101,7 +1101,7 @@ body {
 }
 
 .choose-window p {
-  font-size: 24px;
+  font-size: 20px;
   font-family: Arial;
   margin-bottom: 10px;
 }
@@ -1260,7 +1260,7 @@ body {
   color: black;
   cursor: pointer;
   font-weight: bold;
-  font-size: 28px;
+  font-size: 20px;
 }
 
 .confirm-submit button:hover {

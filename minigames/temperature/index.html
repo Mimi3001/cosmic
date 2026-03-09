@@ -5,6 +5,7 @@
 	<meta charset="utf-8" />
 	<script src="https://cdn.jsdelivr.net/npm/p5@1.11.7/lib/p5.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/p5@1.11.7/lib/addons/p5.sound.min.js"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="../../ui.css">
 	<link rel="stylesheet" type="text/css" href="style.css">
 	<script src="mySketch.js"></script>
@@ -12,10 +13,21 @@
 
 <body>
 	<div class="mg-prompt" id="mg-prompt" aria-live="polite"></div>
-	
+
 
 	<div class="mg-root">
+		<div style="position: absolute; top: 40px; left: 20px; z-index: 5;">
+			<div class="temp-sliders">
+				<label class="ui-label">Temperature Range</label>
+				<div class="temp-labels-row">
+					<span class="temp-label">Cool</span>
+					<span class="temp-label">Hot</span>
+				</div>
+				<input type="range" id="hueSlider" class="ui-range" min="0" max="4" step="0.25" value="2">
+			</div>
+		</div>
 	</div>
+
 </body>
 
 </html>

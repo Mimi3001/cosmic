@@ -1,6 +1,6 @@
 index.html
 story-engine.js
-script.je
+script.js
 style.css
 minigames
 |_myplanets

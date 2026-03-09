@@ -1,5 +1,5 @@
 body {
-    font-family: 'Inter', sans-serif;
+    /*font-family: 'Inter', sans-serif;*/
     margin: 0; /* Reset default body margin */
     overflow: hidden; /* Prevent scrollbars */
     
@@ -48,7 +48,7 @@ h5 {
   align-items: center;
   
   text-align: center;
-  font-family: 'Inter', sans-serif;
+ /* font-family: 'Inter', sans-serif;*/
   font-weight: 700;
   font-size: clamp(12px, 1.5vw, 16px); /* scales with iframe size */
 

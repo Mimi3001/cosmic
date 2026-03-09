@@ -3,6 +3,12 @@
   --ui-text: #cdeeff;
   --ui-accent: #00ccff;
   --ui-border: rgba(0, 204, 255, 0.5);
+  --ui-font: 'Inter', sans-serif; 
+}
+
+/*font applies to everything in every minigame */
+* {
+  font-family: var(--ui-font);
 }
 
 /* Universal UI elements */
@@ -12,7 +18,7 @@
   border: 1px solid var(--ui-border);
   border-radius: 8px;
   padding: 6px 14px;
-  font-family: inherit;
+  font-family: 'Inter', sans-serif;
   cursor: pointer;
   transition: all 0.25s ease;
 }
@@ -28,4 +34,42 @@
 
 .ui-range {
   accent-color: var(--ui-accent);
+}
+
+/* Pulsing glow on closed tool toggles */
+.flora-tools-toggle,
+.animal-tools-toggle,
+.civil-tools-toggle,
+.terrain-tools-toggle {
+  border: 1px solid rgba(0, 200, 255, 0.6);
+  border-radius: 8px;
+  animation: panel-pulse 2s ease-in-out infinite;
+  cursor: pointer;
+}
+
+/* Stop pulsing when panel is open */
+.flora-tools.open .flora-tools-toggle,
+.animal-tools.open .animal-tools-toggle,
+.civil-tools.open .civil-tools-toggle,
+.terrain-tools.open .terrain-tools-toggle {
+  animation: none;
+  box-shadow: none;
+}
+
+@keyframes panel-pulse {
+  0%, 100% { box-shadow: 0 0 6px 1px rgba(0, 200, 255, 0.4); }
+  50%       { box-shadow: 0 0 16px 5px rgba(0, 200, 255, 0.9); }
+}
+/* prevent canvas from causing body overflow */
+canvas {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+/* ensure prompt never exceeds viewport */
+.mg-prompt {
+  width: 100vw;
+  max-width: 100vw;
+  box-sizing: border-box;
 }

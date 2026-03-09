@@ -187,8 +187,8 @@ function setup() {
   // Add clouds layer - feugei
 
   /* const cloudTexture = new THREE.TextureLoader().load("cloud_combined_2048-2.png");*/
-  const cloudGeo = new THREE.SphereGeometry(1.04, 64, 64);//auta einai ta sunnefa poso apexoun kai ti diametro exoun
-  const cloudMat = new THREE.MeshPhongMaterial({
+  const cloudGeo = new THREE.SphereGeometry(1.055, 64, 64);//auta einai ta sunnefa poso apexoun kai ti diametro exoun
+  const cloudMat = new THREE.MeshBasicMaterial({
     map: cloudTexture,
     transparent: true,
     opacity: 0.9, //fainontai ligo ta sunnefakia
@@ -205,24 +205,24 @@ function setup() {
     cloudMat.opacity = parseFloat(cloudSlider.value);
   });
 
-
+/*sbino*/
   // Add glow to earth
   const fresnelMaterial = getFresnelMat();
 
   // Slightly bigger sphere for atmosphere
-  const glowMesh = new THREE.Mesh(
+ const glowMesh = new THREE.Mesh(
     geometry,
     fresnelMaterial
   );
-  glowMesh.scale.setScalar(1.047),
+  glowMesh.scale.setScalar(1.06),
     earthGroup.add(glowMesh);
 
   // Add lighting
   // const hemiLight = new THREE.HemisphereLight(0xffffff, 0x080820, 3);
   // scene.add(hemiLight)
-  const sunLight = new THREE.DirectionalLight(0xffffff);
+ /* const sunLight = new THREE.DirectionalLight(0xffffff);
   sunLight.position.set(-2, 0.5, 1.5);
-  scene.add(sunLight);
+  scene.add(sunLight);*/
 
 
 
@@ -317,7 +317,7 @@ function getPointsMat(elevMap, waterElevMap) {
     //vec3 elevColor = texture2D(elevTexture, vUv).rgb;
     //float elv = dot(elevColor, vec3(0.299, 0.587, 0.114));//auta ta gkri kratane to 0 for land, only mountain pixels have strong peaks. 
     float elv = texture2D(elevTexture, vUv).r;
-          
+      elv = pow(elv, 0.3);  // lower = more stretching of dark values    
 		vElevation = elv; // pass to fragment shader
 
 
@@ -330,58 +330,39 @@ function getPointsMat(elevMap, waterElevMap) {
 		gl_Position = projectionMatrix * mvPosition;
 }`//tono
 
-  const fs = `
+const fs = `
   uniform sampler2D colorTexture;
   uniform sampler2D elevTexture;
   uniform float waterLevel;
-  ///uniform sampler2D waterElevTexture;
 
   varying vec2 vUv;
-  //varying float vVisible;
   varying float vElevation;
  
   void main() {
     vec4 baseColor = texture2D(colorTexture, vUv);
-        if (vElevation < waterLevel) {
-          vec3 waterColor = vec3(0.02, 0.04, 0.12); // dark blue water
-         // float depth = smoothstep(waterLevel, waterLevel - 0.4, vElevation);//07 kati ginetai
-          //vec3 col = mix(waterColor, baseColor.rgb, depth);
-          gl_FragColor = vec4(waterColor, 1.0);
-          return;
-        }
-          
-    gl_FragColor = baseColor;
 
-          /*  float waterMask = texture2D(waterElevTexture, vUv).r;
-          vec3 c = texture2D(waterElevTexture, vUv).rgb;
-          float mask = c.b * 0.6 + c.g * 0.3 + c.r * 0.1;
+    float remappedLevel = pow(waterLevel, 0.3);
+    float depth = remappedLevel - vElevation;
 
+    float coastBand = 0.04;
+    float underwater = smoothstep(-coastBand, coastBand, depth);
 
-            if (waterMask > waterLevel) {
-              vec3 waterColor = vec3(0.05, 0.02, 0.09);
-              float depth = smoothstep(waterLevel, 1.0, waterMask);
-              vec3 col = mix(waterColor, baseColor.rgb, depth);
-              gl_FragColor = vec4(col, 1.0);
-              return;
-             }*/
+    if (underwater < 0.01) {
+      gl_FragColor = baseColor;
+      return;
+    }
 
-/*
-    if (vElevation < waterLevel) {
-        vec3 waterColor = vec3(0.05, 0.02, 0.09);
-        float depth = smoothstep(waterLevel, waterLevel - 0.15, vElevation);
-        vec3 col = mix(waterColor, baseColor.rgb, depth);
-        gl_FragColor = vec4(col, 1.0);
-        return;
-    }*/
-   
-    
-    //float shade = mix(0.7, 1.3, vElevation); // valleys darker, mountains lighter
-    //shade = clamp(shade, 0.6, 1.4);
+    float depthFactor = clamp(depth / 0.15, 0.0, 1.0);
 
-   // vec3 finalColor = baseColor.rgb * shade;
-             //  if (vVisible < 0.5) discard;//wtf????????????????????
-   // gl_FragColor = vec4(finalColor, baseColor.a);
-}
+    vec3 shallowColor = vec3(0.10, 0.45, 0.55);
+    vec3 deepColor    = vec3(0.01, 0.03, 0.10);
+    vec3 waterColor   = mix(shallowColor, deepColor, depthFactor);
+
+    float waterOpacity = mix(0.55, 1.0, depthFactor);
+
+    vec3 finalColor = mix(baseColor.rgb, waterColor, waterOpacity * underwater);
+    gl_FragColor = vec4(finalColor, 1.0);
+  }
 `
 
 

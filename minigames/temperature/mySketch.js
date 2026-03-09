@@ -35,13 +35,16 @@ function setup() {
   colorMode(HSB, 360, 100, 100, 255);
   cloudLayer = createGraphics(width, height, WEBGL);
   frameRate(0.5);
-  // step slider
-  const promptHeight = 60;
+  hueSlider = document.getElementById("hueSlider");//apo html
+  //hueSlider.value = 2;
+
+  // step slider FEUGEI EPITELOUS
+  /*const promptHeight = 60;
   hueSlider = createSlider(0, 4, 2, 1);
   hueSlider.position(20, promptHeight);
   hueSlider.style('width', '200px');
   hueSlider.id("hueSlider");   // id
-  hueSlider.addClass("ui-range");//ui class
+  hueSlider.addClass("ui-range");//ui class*/
   determineValues();// generate initial geometry values
 
 }
@@ -58,7 +61,7 @@ function windowResized() {
 function draw() {
   background(100);
 
-  let step = hueSlider.value();
+  let step = parseInt(hueSlider.value);
   generateColorsForStep(step);
 
   // draw scene using generated colors
@@ -385,7 +388,7 @@ window.addEventListener("message", (event) => {
 
   if (event.data?.type === "request_slider_value") {
     //const sliderValue = document.getElementById("hueSlider").value;
-    const sliderValue = hueSlider.value();
+    const sliderValue = parseInt(hueSlider.value);
     // Send value back to parent
     window.parent.postMessage(
       { type: "minigame2_result", value: sliderValue },
@@ -401,7 +404,7 @@ window.addEventListener("message", (event) => {
 
 //auto pou leei :P 
 function sendTemperatureValueToParent() {
-  const value = hueSlider.value();     // <-- your slider
+  const value = parseInt(hueSlider.value);     // <-- your slider
   window.parent.postMessage(
     { type: "minigame2_result", value },
     "*"
