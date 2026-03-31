@@ -50,7 +50,7 @@ h5 {
   text-align: center;
  /* font-family: 'Inter', sans-serif;*/
   font-weight: 700;
-  font-size: clamp(12px, 1.5vw, 16px); /* scales with iframe size */
+  font-size: clamp(16px, 1.5vw, 20px); /* scales with iframe size */
 
   color: var(--ui-accent, #00ccff);
   background: rgba(10,10,30,0.55);

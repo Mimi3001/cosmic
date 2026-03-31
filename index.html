@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css?family=Inter&display=swap" rel="stylesheet" />
   <!-- Your main CSS file -->
   <link rel="stylesheet" href="style.css" />
-   <link rel="stylesheet" href="ui.css">
+  <link rel="stylesheet" href="ui.css">
 </head>
 
 
@@ -23,6 +23,8 @@
   <!-- USER ID DISPLAY -->
   <div id="user-id-display" class="user-id-display">Loading user ID…</div>
 
+  <!-- PLANET NAME DISPLAY (top right) -->
+  <div id="planet-name-display" class="planet-name-display"></div>
 
   <div class="space-container">
     <!-- stars behind everything -->
@@ -114,17 +116,17 @@
       </div>
     </div>
     <!-- Info panels (hidden by default) -->
-
+<!--
     <div class="planet-info" id="info-1">
       <button class="info-close" aria-label="Close info">✕</button>
       <h2>Hamarik</h2>
-      <p>The first planet in the solar system, low gravity light atmosphere and closest to the Sun.</p>
+      <p>The first planet in the solar system, low gravity because of its size and light atmosphere.</p>
     </div>
 
     <div class="planet-info" id="info-2">
       <button class="info-close" aria-label="Close info">✕</button>
       <h2>Tahay</h2>
-      <p>Second planet has a thicker atmosphere that traps heat, making it the hottest planet.</p>
+      <p>Second planet has a thicker atmosphere that traps heat, making it dessert type and the hottest planet.</p>
     </div>
 
     <div class="planet-info" id="info-3">
@@ -136,13 +138,13 @@
     <div class="planet-info" id="info-4">
       <button class="info-close" aria-label="Close info">✕</button>
       <h2>Santamasa</h2>
-      <p>The fourth planet has many oceans and various terrain. Its atmosphere is rich in carbon and oxygen.</p>
+      <p>The fourth planet has many oceans and terrain variety. Its atmosphere is rich in carbon and oxygen.</p>
     </div>
 
     <div class="planet-info" id="info-5">
       <button class="info-close" aria-label="Close info">✕</button>
       <h2>Ahra</h2>
-      <p>Planet 5 is bigger than the previous, rich in metals, but colder atmosphere.</p>
+      <p>Planet No5 is bigger than the previous, rich in metals, but colder atmosphere.</p>
     </div>
 
     <div class="planet-info" id="info-6">
@@ -154,10 +156,58 @@
     <div class="planet-info" id="info-7">
       <button class="info-close" aria-label="Close info">✕</button>
       <h2>Veles</h2>
-      <p>Last planet on this solar system, less light but bigger oceans and dense atmosphere.</p>
+      <p>Last planet on this solar system, less light but deeper oceans and dense atmosphere.</p>
+    </div>-->
+
+    <div class="planet-info" id="info-1">
+      <button class="info-close" aria-label="Close info">✕</button>
+      <h2 data-el="Χαμαρίκ">Hamarik</h2>
+      <p data-el="Ο πρώτος πλανήτης, χαμηλή βαρύτητα λόγω μεγέθους και ελαφριάς ατμόσφαιρας.">The first planet in the
+        solar system, low gravity because of its size and light atmosphere.</p>
     </div>
 
+    <div class="planet-info" id="info-2">
+      <button class="info-close" aria-label="Close info">✕</button>
+      <h2 data-el="Τάχαϊ">Tahay</h2>
+      <p data-el="Ο δεύτερος πλανήτης έχει πυκνή ατμόσφαιρα που παγιδεύει τη θερμότητα, ερημικός και ο πιο ζεστός.">
+        Second planet has a thicker atmosphere that traps heat, making it desert type and the hottest planet.</p>
+    </div>
 
+    <div class="planet-info" id="info-3">
+      <button class="info-close" aria-label="Close info">✕</button>
+      <h2 data-el="Τσούρα">Chura</h2>
+      <p data-el="Ο τρίτος πλανήτης έχει εποχιακές μεταβολές και είναι πλούσιος σε πυρίτιο.">The third planet is cool
+        enough for seasonal swings and is rich in silicon.</p>
+    </div>
+
+    <div class="planet-info" id="info-4">
+      <button class="info-close" aria-label="Close info">✕</button>
+      <h2 data-el="Σαντάμασα">Santamasa</h2>
+      <p
+        data-el="Ο τέταρτος πλανήτης έχει πολλούς ωκεανούς και ποικιλία εδάφους. Η ατμόσφαιρά του είναι πλούσια σε άνθρακα και οξυγόνο.">
+        The fourth planet has many oceans and terrain variety. Its atmosphere is rich in carbon and oxygen.</p>
+    </div>
+
+    <div class="planet-info" id="info-5">
+      <button class="info-close" aria-label="Close info">✕</button>
+      <h2 data-el="Άχρα">Ahra</h2>
+      <p data-el="Ο πέμπτος πλανήτης είναι μεγαλύτερος, πλούσιος σε μέταλλα, αλλά με ψυχρή ατμόσφαιρα.">Planet No5 is
+        bigger than the previous, rich in metals, but colder atmosphere.</p>
+    </div>
+
+    <div class="planet-info" id="info-6">
+      <button class="info-close" aria-label="Close info">✕</button>
+      <h2 data-el="Λητή">Lete</h2>
+      <p data-el="Ο μεγαλύτερος πλανήτης του συστήματος. Έχει πολλά ορυκτά και είναι πλούσιος σε νερό.">The biggest
+        planet of the solar system. Has many minerals and is rich in water.</p>
+    </div>
+
+    <div class="planet-info" id="info-7">
+      <button class="info-close" aria-label="Close info">✕</button>
+      <h2 data-el="Βέλες">Veles</h2>
+      <p data-el="Ο τελευταίος πλανήτης, λιγότερο φως αλλά βαθύτεροι ωκεανοί και πυκνή ατμόσφαιρα.">Last planet on this
+        solar system, less light but deeper oceans and dense atmosphere.</p>
+    </div>
     <!-- GDPR NOTICE -->
 
     <!-- RE-CENTER BUTTON -->
@@ -177,21 +227,34 @@
         <img src="images/right.svg" alt="Next">
       </button>
     </div>
-    
+  </div>
   <!--  <div id="prompt-text" class="prompt-text"></div>-->
 
 
-    <!-- SOUND TOGGLE -->
-    <div id="sound-toggle" class="sound-toggle" title="Toggle sound">
-      <img id="sound-icon" src="images/volume.svg" alt="Sound On">
-    </div>
-    <!-- START BUTTON -->
-    <button id="start-btn" class="start-btn">Press Start</button>
-   
-    <script src="script.js"></script>
+  <!-- land TOGGLE -->
+  <div id="lang-toggle" class="lang-toggle lang-toggle" >
+    <img id="lang-icon" src="images/Language.svg" alt="Greek">
+  </div>
 
-  
-    <script src="story-engine.js"></script>
+
+  <!-- MUSIC TOGGLE (above sound toggle) -->
+  <div id="music-toggle" class="music-toggle music-toggle">
+    <img id="music-icon" src="images/music.svg" alt="Music On">
+  </div>
+
+
+  <!-- SOUND TOGGLE -->
+  <div id="sound-toggle" class="sound-toggle">
+    <img id="sound-icon" src="images/volume.svg" alt="Sound On">
+  </div>
+  <!-- START BUTTON
+  <button id="start-btn" class="start-btn">Press Start</button> -->
+<button id="start-btn" class="start-btn" data-el="Έναρξη">Press Start</button>
+
+  <script src="script.js"></script>
+
+
+  <script src="story-engine.js"></script>
 
 </body>
 

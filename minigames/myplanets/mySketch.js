@@ -19,6 +19,19 @@ let elevMult; // parameter that controls height of terrain
 let exploding = false;
 let cloudMesh;
 
+let currentLang = "el";
+
+function updateUILang() {
+  document.querySelectorAll("[data-el]").forEach(el => {
+    if (currentLang === "el") {
+      if (!el.dataset.en) el.dataset.en = el.textContent.trim();
+      el.textContent = el.dataset.el;
+    } else {
+      if (el.dataset.en) el.textContent = el.dataset.en;
+    }
+  });
+}
+
 window.addEventListener("message", (event) => {
 
   if (event.data?.type === "request_mg1_height") {
@@ -49,6 +62,11 @@ window.addEventListener("message", (event) => {
     if (el) el.textContent = event.data.text || "";
   }
 
+
+  if (event.data?.type === "set_lang") {
+  currentLang = event.data.lang;
+  updateUILang();
+}
 });
 
 //---------------------------------------------
@@ -276,6 +294,8 @@ function setup() {
   toggle.onclick = () => {
     tools.classList.toggle("open");
   };
+
+updateUILang();
 
 }
 

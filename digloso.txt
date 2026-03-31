@@ -1,3 +1,77 @@
+  const story = [
+{ text: ["Hello cosmic explorer! Earth seemed boring and trashy,"],
+  textEl: ["Γεια σου κοσμικέ εξερευνητή! Η Γη έγινε λίγο βαρετή και βρομικη,"]}, 
+
+{ text: [ "so you've been invited to travel to a new world for restart."],
+  textEl:["οπότε σε καλέσαμε να ταξίδεψεις για restart."] },
+
+{ text: ["You mission: make a planet interesting and clean?"],
+  textEl: ["Αποστολή σου: φτιάξε έναν πλανήτη ομορφο και καθαρό."] },
+
+{ text: ["Before you stands this new solar system. Explorers come all the time like in Roblox servers"],
+  textEl: ["Μπροστά σου βρίσκεται ένα ολοκαίνουριο ηλιακό σύστημα. Οι εξερευνητές σκάνε σαν είναι Roblox servers"] },
+
+{ text: [ "to attempt what you do right now — build a new home."],
+  textEl:["για τον ίδιο λόγο που ήρθες και συ - να φτίαξουν ένα νέο σπίτι."] },
+
+{ text: ["Here stand 7 planets; and you can choose your own."],
+  prompt: "Available planets at this moment: 7",
+  promptEl: "Διαθέσιμοι πλανήτες: 7",
+  textEl: ["Εδώ βρίσκονται 7 διαθέσιμοι πλανήτες. Διάλεξε ποιον θες."] },
+/*
+{ text: ["NOTE: if a planet appears colorful, it means there's another explorer on that. Choose a white one."],
+  textEl: ["ΣΗΜΕΙΩΣΙΣ: Αν ένας πλανήτης είναι χρωματιστός, κάποιος άλλος τον πήρε. Διάλεξε καποιον άσπρο."] },
+
+{ text: ["Oh! and any similarities with your home solar system are purely coincidental!"],
+  textEl: ["Επίσης, Οποιαδήποτε ομοιότητα με το δικό σου ηλιακό σύστημα είναι καθαρά συμπτωματική."] },
+*/
+{ text: ["Read each planet's collected info. Take your time.. and pick any planet to conquer!"],
+  onEnd: "choosePlanet",
+  prompt: "Roll over a planet and click on it, ",
+  promptEl: "Πέρασε το ποντίκι πάνω από πλανήτη που θες και κάνε κλικ",
+  textEl: ["Διαβασε τις πληροφορίες του κάθε πλανήτη. Με το πάσο σου.. και διάλεξε πλανήτη να κατακτήσεις!"] },
+
+{ text: ["Great, you have chosen one!"],
+  prompt: () => `You chose the planet: ${window.selectedPlanet?.name || "[unknown]"}`,
+  promptEl: () => `Διάλεξες τον πλανήτη: ${window.selectedPlanet?.name || "[άγνωστο]"}`,
+  textEl: ["Τέλεια επιλογή. Καλορίζικο."] },
+
+{ //text: ["This many users chose it before you:"],
+  prompt: () => `${window.selectedPlanet?.y || 0} users of ${window.selectedPlanet?.z || 0} total players, last date: ${window.selectedPlanet?.date || ""}`,
+  promptEl: () => `${window.selectedPlanet?.y || 0} χρήστες από ${window.selectedPlanet?.z || 0} συνολικά, τελευταία ημερομηνία: ${window.selectedPlanet?.date || ""}`,
+ // textEl: ["Δεν είσαι ο πρώτος που είδε αυτήν την πέτρα και είπε «δικός μου». Αυτός ο πλανήτης έχει ιστορία…"] 
+ },
+
+{ text: ["Let's dive in and see how the world is in there shall we?"],
+  textEl: ["Ας ρίξουμε μία ματία να δούμε πως μπορούμε να το διαμορφώσουμε"] },
+
+{ text: ["This is your planet right now. A blank canvas!"],
+  textEl: ["Ιδού ο πλανήτης σου αυτή τη στιγμή. δίνει έντονο 'άδειο Minecraft seed'."] },
+
+{ text: ["You are scientist and artist. Mybe even overqualified for the occasion. Will you fill it with your touch of creativity? "],
+  textEl: ["Είσαι επιστήμονας. Είσαι καλλιτέχνης. Είσαι θεός...είσαι και λίγο overqualified για την περίσταση βασικά."] },
+
+{ text: ["You can make the terrain, the climate, and a place for a new civilization. Manipulate it with the notion of your hand! Vziin"],
+  textEl: ["Διαμόρφωσε έδαφος, το κλίμα και την ανρθρωπότητα, το περιβάλλον. Ολά με μία κινηση του χεριού σου. Βζιιν"] },
+
+{ text: ["Thus you are the admin here. You have limitl—well, not limitless—but still many options to make the planet as you wish!"],
+  textEl: ["Είσαι βασικά admin εδώ. Έχεις ατελειτ- νταξει όχι ατελειωτες- αλλά πολλές επιλογές."] },
+
+{ text: ["Let's sculpt this planet any%—give it lands, oceans, and some pretty clouds, shall we?"],
+  gamePrompt: "Move the bars with mouse. Adjust your terrain, atmosphere and water level",
+  gamePromptEl: "Κούνα τις μπάρες με το ποντίκι. Προσάρμοσε έδαφος, ατμόσφαιρα και επίπεδο νερού",
+  onEnd: "openMiniGame1",
+  textEl: ["Πάμε να σμιλέψουμε τον πλανήτη any%— βάλε στεριές, ωκεανούς και κανά ωραίο aesthetic σύννεφο."] },
+
+    /*********************************************** */
+
+  ];
+  //---------------------//
+  //  STORY AFTER MINIGAME 1 //
+  //---------------------//
+
+  story.push(
+
 
 { text: ["Let's move to more details."],
   textEl: ["Ωραία. Ώρα για περισσότερες λεπτομέρειες."],
@@ -11,7 +85,6 @@
 
 { text: ["Move your hand(slider) for temperature adjustments. Yes you are the thermostat now."],
   textEl: ["Κούνα το χέρι σου για να ρύθμισεις τη θερμοκρασία. Ναι, θα κάνεις το θερμοστάτη τώρα."],
-  gamePrompt: "Move the bars with mouse. Adjust your terrain, atmosphere and water level",
   gamePromptEl: "Κούνα τη μπάρα πάνω/κάτω ακολουθώντας τους δείκτες.",
   onEnd: "openMiniGame2" },
 
@@ -31,8 +104,6 @@
 
 { text: ["Build your landscape!...trees, plants, you know po ta toes. Time for cosmic gardening"],
   textEl: ["Βάλε λίγα δέντρα, λουλουδία, you know po ta toe. Ώρα για cosmic gardening.s"],
-  gamePrompt:
-        "Click on the landscape to draw flowers and trees. Adjust size and detail and randomise colors. Submit your design.",
   gamePromptEl: "Κάνε κλικ στο τοπίο για να τοποθετήσεις λουλούδια και δέντρα. Ρύθμισε μέγεθος και χρώματα.",
   onEnd: "openMiniGame3" },
 
@@ -55,8 +126,6 @@
 
 { text: ["Place animals, on your planet!"],
   textEl: ["Τοποθέτησε ζώα στον πλανήτη!"],
-  gamePrompt:
-        "Click on the landscape to draw flowers and trees. Adjust size and detail and randomise colors. Submit your design.",
   gamePromptEl: "Κάνε κλικ σε γη, ουρανό και νερό για να.. φυτρώσουν ζωακια.",
   onEnd: "openMiniGame4" },
 
@@ -87,17 +156,13 @@
 
 { text: ["phew phew! push them away!"],
   textEl: ["φου φου — διώξ' τα γρήγορα!"],
-      gamePrompt:
-        "Click on the smudges to clean them from the solar system",//3 leave 1 appear
-  gamePromptEl: "Κάνε κλικ στους ρύπους για να καθαρίσεις το ηλιακό σύστημα" },
+  gamePromptEl: "Κάνε κλικ στους λεκέδες για να καθαρίσεις το ηλιακό σύστημα" },
 
 { text: ["oh is it the humans doing it?"],
   textEl: ["Ωχ… Οι άνθρωποι το κάνουν αυτό;"] },
 
 { text: ["your paradise will become a dumbster if you don't clean it"],
   textEl: ["Ο παράδεισός σου πάει για τα μπάζα. Τώρα καθάριζε."],
-    gamePrompt:
-        "Wipe wave hand to clean the trash",
   gamePromptEl: "Κάνε wipe (κίνηση χεριού) για να καθαρίσεις τα σκουπίδια" },
 
 { text: ["Wait a minute —the plants and the animals go away too"],
@@ -119,8 +184,6 @@
 
 { text: ["Fix the balance between humans and nature. You got it."],
   textEl: ["Βρες την ισορρπία μεταξύ των ανθρώπων και της φύσης. Το 'χεις."],
-  gamePrompt:
-        "generate MOooORE plants, mOOoooOre green, moOore ANiMAls",
   gamePromptEl: "βάλε ΠΕΡΙΣΣΟΤΕΡΗ φυση, πιο πολύ πράσινάδα, περισσότερα ΖΩΑ",
   onEnd: "openMiniGame6" },
 

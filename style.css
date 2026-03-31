@@ -1,5 +1,5 @@
 /* ===== Figma Variables ===== */
-:root {
+/*:root {
   --font-family-inter: 'Inter', sans-serif;
   --ahra: 325;
   --chura: 10;
@@ -8,7 +8,7 @@
   --santamasa: 20;
   --tahay: 35;
   --veles: 215;
-}
+}*/
 
 /* ===== CSS Reset ===== */
 * {
@@ -71,7 +71,7 @@ body {
   position: relative;
   width: 100%;
   height: 100vh;
-  overflow: visible;
+  overflow: hidden;
   /* enables scrollbars when needed */
   touch-action: none;
   /* allows touch zoom */
@@ -715,6 +715,31 @@ body {
   user-select: none;
 }
 
+.planet-name-display { 
+  position: fixed;
+  top: 10px;
+  right: 15px;
+
+ background: rgba(10, 10, 30, 0.7);
+  color: #cdeeff;
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+
+
+  z-index: 19000;
+  user-select: none;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.planet-name-display.visible {
+  opacity: 1;
+}
+
 /* === GDPR PANEL === */
 /*
 .gdpr-panel {
@@ -860,7 +885,7 @@ body {
 
 /* ============================================ Re-center Button === */
 .recenter-btn {
-  position: absolute;
+  position: fixed;
   bottom: 10px;
   right: 15px;
   background: rgba(10, 10, 30, 0.6);
@@ -958,7 +983,7 @@ body {
 
 /* === STORY OVERLAY === */
 .story-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 199001;
@@ -999,7 +1024,7 @@ body {
   left: 0;
   width: 100vw;-----100% tou viewport
   padding: 14px 20px;*/
-  position: absolute;
+  position: fixed;
   top: 7%;
   left: 50%;
   transform: translateX(-50%);
@@ -1027,7 +1052,7 @@ body {
 
 /* ======================================== NAVIGATION ARROWS === */
 .story-nav {
-  position: absolute;
+  position: fixed;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
@@ -1058,11 +1083,10 @@ body {
   width: 100%;
   height: 100%;
 }
-
-/* =========================================== SOUND TOGGLE === */
-.sound-toggle {
-  position: absolute;
-  bottom: 40px;
+/* =========================================== lang TOGGLE === */
+.lang-toggle {
+  position: fixed;
+  bottom: 110px; /* above sound-toggle which is at 40px */
   left: 15px;
   background: none;
   border: none;
@@ -1072,16 +1096,126 @@ body {
   transition: transform 0.2s ease, opacity 0.2s ease;
   padding: 0;
 }
+.lang-toggle:hover {
+  transform: scale(1.2);
+  opacity: 1;
+}
+.lang-toggle img {
+  width: 16px;
+  height: 16px;
+  filter: drop-shadow(0 0 5px rgba(150, 230, 225, 0.7));
+}
 
-.sound-toggle:hover {
-  transform: scale(1.1);
+.lang-tooltip {
+  position: fixed;
+  bottom: 110px;
+  left: 40px;
+  background: rgba(10, 10, 30, 0.85);
+  color: #cdeeff;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 204, 255, 0.4);
+  box-shadow: 0 0 6px rgba(0,0,0,0.5);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 9001;
+  white-space: nowrap;
+}
+.lang-tooltip.visible {
   opacity: 1;
 }
 
+/* =========================================== music TOGGLE === */
+.music-toggle {
+  position: fixed;
+  bottom: 80px; /* above sound-toggle which is at 40px */
+  left: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 9000;
+  opacity: 0.9;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  padding: 0;
+}
+.music-toggle:hover {
+  transform: scale(1.2);
+  opacity: 1;
+}
+.music-toggle img {
+  width: 16px;
+  height: 16px;
+  filter: drop-shadow(0 0 5px rgba(150, 230, 225, 0.7));
+}
+
+.music-tooltip {
+  position: fixed;
+  bottom: 80px;
+  left: 40px;
+  background: rgba(10, 10, 30, 0.85);
+  color: #cdeeff;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 204, 255, 0.4);
+  box-shadow: 0 0 6px rgba(0,0,0,0.5);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 9001;
+  white-space: nowrap;
+}
+.music-tooltip.visible {
+  opacity: 1;
+}
+
+/* =========================================== SOUND TOGGLE === */
+.sound-toggle {
+  position: fixed;
+  bottom: 50px;
+  left: 17px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 9000;
+  opacity: 0.9;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  padding: 0;
+}
+.sound-toggle:hover {
+  transform: scale(1.2);
+  opacity: 1;
+}
 .sound-toggle img {
   width: 16px;
   height: 16px;
-  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.6));
+  filter: drop-shadow(0 0 5px rgba(150, 230, 225, 0.7));
+}
+
+.sound-tooltip {
+  position: fixed;
+  bottom: 50px;
+  left: 40px;
+  background: rgba(10, 10, 30, 0.85);
+  color: #cdeeff;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 204, 255, 0.4);
+  box-shadow: 0 0 6px rgba(0,0,0,0.5);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 9001;
+  white-space: nowrap;
+}
+.sound-tooltip.visible {
+  opacity: 1;
 }
 
 /*===================================EPILOGH PLANHTH=====*/

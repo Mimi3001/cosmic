@@ -9,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/FresnelShader.js"></script>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../ui.css">
     <link rel="stylesheet" type="text/css" href="style.css">
     <script src="world.js"></script>
@@ -20,62 +20,67 @@
     <div class="mg-root">
         <div class="life-tools-container">
             <div class="flora-tools">
-            <button class="flora-tools-toggle ui-button">Controls</button>
+                <button class="flora-tools-toggle ui-button" data-el="Χειριστήρια">Controls</button>
 
-            <div class="flora-tools-panel">
-                <div class="flora-buttons">
-                    <button id="treeBtn" class="ui-button">Trees</button>
-                    <button id="flowerBtn" class="ui-button">Flowers</button>
-                    <button id="randomizeColorsBtn" class="ui-button">Randomize</button>
+                <div class="flora-tools-panel">
+                    <div class="flora-buttons">
+                        <button id="flowerBtn" class="ui-button" data-el="Φυτά">Plants</button>
+                        <button id="treeBtn" class="ui-button" data-el="Δέντρα">Trees</button>
+                        <button id="randomizeColorsBtn" class="ui-button" data-el="Τυχαία χρώματα">Randomize</button>
+                    </div>
+
+                    <div class="flora-sliders">
+                        <label>
+                            <span data-el="Μέγεθος">Size</span>
+                            <input type="range" id="sizeSlider" min="20" max="80" value="20">
+                        </label>
+                        <label>
+                            <span data-el="Λεπτομέρεια">Detail</span>
+                            <input type="range" id="detailSlider" min="3" max="12" value="3">
+                        </label>
+                        <label>
+                            <span data-el="Ύψος">Height</span>
+                            <input type="range" id="heightSlider" min="30" max="100" value="30">
+                        </label>
+                    </div>
                 </div>
-
-                <div class="flora-sliders">
-                    <label>Size
-                        <input type="range" id="sizeSlider" min="20" max="80" value="20">
-                    </label>
-
-                    <label>Detail
-                        <input type="range" id="detailSlider" min="3" max="12" value="3">
-                    </label>
-
-                    <label>Height
-                        <input type="range" id="heightSlider" min="30" max="100" value="30">
-                    </label>
-                </div>
-            </div>
             </div>
             <div class="animal-tools ">
-            <button class="animal-tools-toggle ui-button">Controls</button>
-            <div class="animal-tools-panel">
+                <button class="animal-tools-toggle ui-button" data-el="Χειριστήρια">Controls</button>
+                <div class="animal-tools-panel">
 
-                <div class="animal-buttons">
-                    <button data-animal="mammal" class="ui-button">Mammals</button>
-                    <button data-animal="insect" class="ui-button">Bugs</button>
-                    <button data-animal="reptile/ave/fish" class="ui-button">Non mammals</button>
-                  <!--  <button id="animalRandomBtn" class="ui-button">Randomize</button>-->
-                </div>
+                    <div class="animal-buttons">
+                        <button data-animal="mammal" class="ui-button" data-el="Θηλαστικά">Mammals</button>
+                        <button data-animal="insect" class="ui-button" data-el="Έντομα">Bugs</button>
+                        <button data-animal="reptile/ave/fish" class="ui-button" data-el="Μη θηλαστικά">Non
+                            mammals</button>
 
-                <div class="animal-sliders">
-                    <label>Size
-                        <input type="range" id="animalSizeSlider" min="10" max="60" value="20">
-                    </label>
+                    </div>
+
+                    <div class="animal-sliders">
+                        <label>
+                            <span data-el="Μέγεθος">Size</span>
+                            <input type="range" id="animalSizeSlider" min="10" max="60" value="20">
+                        </label>
+                    </div>
                 </div>
-            </div>
             </div>
         </div>
+
         <div class="civil-tools">
-            <button class="civil-tools-toggle ui-button">Controls</button>
+            <button class="civil-tools-toggle ui-button" data-el="Χειριστήρια">Controls</button>
             <div class="civil-tools-panel">
 
                 <div class="civil-buttons">
-                    <button data-civil="human" class="ui-button">humans</button>
-                    <button data-civil="house" class="ui-button">houses</button>
-                    <button data-civil="production" class="ui-button">factories</button>
+                    <button data-civil="human" class="ui-button" data-el="Άνθρωποι">humans</button>
+                    <button data-civil="house" class="ui-button" data-el="Σπίτια">houses</button>
+                    <button data-civil="production" class="ui-button" data-el="Εργοστάσια">factories</button>
                 </div>
 
                 <div class="civil-sliders">
-                    <label>Detail
-                        <input type="range" id="detailCivilSlider" min="3" max="21" value="3">
+                    <label>
+                        <span data-el="Πλήθος">Detail</span>
+                        <input type="range" id="detailCivilSlider" min="1" max="18" value="3">
                     </label>
                 </div>
             </div>

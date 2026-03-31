@@ -17,18 +17,18 @@ document.addEventListener('DOMContentLoaded', () => {
     2: 35,   // Tahay
     3: 10,   // Chura
     4: 20,   // Santamasa
-    5: 335,  // Ahra
+    5: 325,  // Ahra
     6: 45,   // Lete
     7: 215   // Veles
   };
 
-  
+
   function clearPlanetStates() {
-  planets.forEach(p => {
-    p.classList.remove('temp-blue');
-  });
-}
-function closeAllPanels() {
+    planets.forEach(p => {
+      p.classList.remove('temp-blue');
+    });
+  }
+  function closeAllPanels() {
     panels.forEach(p => {
       p.classList.remove('active');
       // p.setAttribute('aria-hidden', 'true');
@@ -80,6 +80,16 @@ function closeAllPanels() {
 
       planet.style.setProperty("--planet-hue", hue);
       planet.classList.add("temp-blue");
+
+      const nameDisplay = document.getElementById("planet-name-display");// show planet name
+      if (nameDisplay && nameDisplay.dataset.locked !== "true") {
+        const names = {
+          1: "Hamarik", 2: "Tahay", 3: "Chura", 4: "Santamasa",
+          5: "Ahra", 6: "Lete", 7: "Veles"
+        };
+        nameDisplay.textContent = names[id] ?? "";
+        nameDisplay.classList.add("visible");
+      }
     });
     // This does nothing also (?)
 
@@ -117,6 +127,7 @@ function closeAllPanels() {
 // Weird logic
 
 // ===== USER ID BY IP =====
+/*
 async function showUserId() {
   const display = document.getElementById('user-id-display');
   if (!display) return;
@@ -139,7 +150,33 @@ async function showUserId() {
     console.error('Failed to get IP:', err);
     display.textContent = 'User ???';
   }
+}*/
+let storedUserId = "???";
+
+async function showUserId() {
+  const display = document.getElementById('user-id-display');
+  if (!display) return;
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    const ip = data.ip;
+    const num = ip.split('.').reduce((acc, part) => (acc * 256 + parseInt(part)) % 100000, 0);
+    storedUserId = String(num % 999).padStart(3, '0');
+    refreshUserDisplay();
+  } catch (err) {
+    storedUserId = "???";
+    refreshUserDisplay();
+  }
 }
+
+function refreshUserDisplay() {
+  const display = document.getElementById('user-id-display');
+  if (!display) return;
+  const lang = window.currentLang ?? "el";
+  display.textContent = lang === "el" ? `Χρήστης ${storedUserId}` : `User ${storedUserId}`;
+}
+
+window.refreshUserDisplay = refreshUserDisplay;
 
 document.addEventListener('DOMContentLoaded', showUserId);
 

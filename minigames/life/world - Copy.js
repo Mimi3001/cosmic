@@ -1,5 +1,6 @@
 let currentMode = "flora";
 let currentPlant = "tree";
+
 let plants = [];
 let sizeSlider, detailSlider, heightSlider;
 let step = 2; // default until message arrives
@@ -9,10 +10,18 @@ let currentAnimalClass = "mammal";
 let animalSize = 30;
 let animalHue = 200;
 
-let humans = [];
+let civil = [];
+//let civilEntities = [];//?
+let currentCivilType = "human";
+let smudges = [];
+let civilDetail = 3;
+let pollutionLayers = 0;
+
 
 let regenerate = true;   // generate once on load
 let landscape;
+let worldRestored = false;
+
 
 let cloudLayer;
 let horizonRatio = 0.42;  // 42% 
@@ -36,12 +45,15 @@ let hueRanges = [// RANGES FOR EACH SLIDER STEP 0–4
     { min1: 0, max1: 70, min2: 330, max2: 360 } // step 4 hot
 ];
 const params = new URLSearchParams(window.location.search);
-const planetIndex = Number(params.get("planetIndex")) || 4;
-const mg1Height = Number(params.get("mg1Height")) || 0;
-const waterValue = Number(params.get("mg1Water")) || 0;
+let planetIndex = Number(params.get("planetIndex")) || 4;
+let mg1Height = Number(params.get("mg1Height")) || 0;
+////const waterValue = Number(params.get("mg1Water")) || 0;
 
+
+
+let waterValue = Number(params.get("mg1Water")) || 0;
 //let waterValue = 0;
-let mg1Water = 0;
+////let mg1Water = 0;
 let hasWater = false;
 let waterShape = null; // stores polygon + bounds
 let seed = 0;
@@ -50,9 +62,9 @@ let landscapeSeed = Math.floor(Math.random() * 1e9);
 
 let depth = 1;
 let scaledHeight = 50;
-
+/* axristo pleon
 const speciesToType = {
-    bee: 3,
+    bee: 18,
     frog: 4,
     fish: 5,
     sheep: 6,
@@ -66,8 +78,13 @@ const speciesToType = {
     bat: 14,
     shrimp: 15,
     hippo: 16,
-    tit: 17
-};
+    duck: 17,
+    human: 1,
+    house: 2,
+    production: 3
+};*/
+
+
 
 function setMode(mode) { //Mode Tools Switch-deleitourgounakoma
     currentMode = mode;
@@ -79,16 +96,40 @@ function setMode(mode) { //Mode Tools Switch-deleitourgounakoma
      if (mode === "humans") enableHumanTools();*/
     console.log("Mode set to:", mode);
 
-    document.body.classList.remove("flora", "animals", "humans");
+    document.body.classList.remove("flora", "animals", "civil", "mg6");
+
+    if (mode === "mg6") {
+        //currentMode = "mg6"; // default click behaviour starts as flora
+        // open BOTH panels
+        document.body.classList.add("mg6"); // both CSS states active
+        document.querySelectorAll(".flora-tools-toggle, .animal-tools-toggle, .civil-tools-toggle")
+            .forEach(el => el.style.display = "none");
+        /*setTimeout(() => {
+            document.querySelector(".flora-tools")?.classList.add("open");
+            document.querySelector(".animal-tools")?.classList.add("open");
+        }, 100);*/
+        return;
+    }
+
+
+
     document.body.classList.add(mode);
+    // close all panels
+    document.querySelectorAll(".flora-tools, .animal-tools, .civil-tools")
+        .forEach(el => el.classList.remove("open"));
+
+    // open the active one
+    /* const active = document.querySelector("." + mode + "-tools");
+     if (active) active.classList.add("open");*/
+
 }
 function sunSizeFromPlanet(index) {
     return map(index, 1, 7, 80, 20);
 }
 //defines zones 
-function getZone(x,y) {
-    if (y < horizonLine && y>0) return "sky";
-    if (waterValue > 0 && isPointInWater(x, y))return "water";
+function getZone(x, y) {
+    if (y < horizonLine && y > 0) return "sky";
+    if (waterValue > 0 && isPointInWater(x, y)) return "water";
     //if (y > height - (window.mg1Water ?? 0) * height) return "water";
     return "land";
 }
@@ -96,7 +137,7 @@ function getZone(x,y) {
 //plirofories apo to game 2 kai prompt kai ui - ola se ena mplok ----------ENA ANA ARXEIO 
 window.addEventListener("message", (event) => {
     if (event.data?.type === "pref_from_parent") {
-        console.log("Received preference from parent:", event.data.value);
+        console.log("Received preference from parent:", event.data.value);//2-the hue from parent sent
         step = Number(event.data.value);   // NOW call your background generator // 0–4
         seed = step;
         regenerate = true; // paletteLocked = false; 
@@ -112,9 +153,30 @@ window.addEventListener("message", (event) => {
 
     //epitelous ena reset pou kanei kai neo generate tin eikona
     if (event.data?.type === "reset_game") {
+        const source = event.data.source;
+
+        // MG3 → delete plants only-+
+        /*
+        if (source === 3) {
+            plants = [];
+            console.log("[RESET] Flora → plants cleared");
+        }
+
+        // MG4 → delete animals only
+        if (source === 4) {
+            animals = [];
+            console.log("[RESET] Fauna → animals vanished");
+        }
+
+        //  MG5 → ignore reset
+        if (source === 5) {
+             civil = [];
+            console.log("[RESET] Civil terminated");
+        }*/
         plants = [];
         regenerate = true;
         //regenerateScene();
+        return;
     }
 
     //gia to prompt
@@ -125,15 +187,40 @@ window.addEventListener("message", (event) => {
 
     if (event.data?.type === "minigame1_water") {
         waterValue = Number(event.data.value) || 0;
-        console.log("[WATER] Received waterValue from parent:", waterValue);
+        console.log("[WATER] Received waterValue from parent:", waterValue);// 1-the water arrives from parent
         regenerate = true; // force landscape rebuild
     }
     if (event.data.type === "set_mode") {
         setMode(event.data.mode);
     }
+    if (event.data.type === "hide_ui") {
+        currentMode = "view";
+        document.querySelectorAll(".flora-tools, .flora-tools-toggle, .animal-tools, .animal-tools-toggle, .civil-tools, .civil-tools-toggle")
+            .forEach(el => el.style.display = "none");
+        const prompt = document.getElementById("mg-prompt");
+        if (prompt) prompt.style.display = "none";
+    }
 
     if (event.data.type === "init_world") {
-        worldState = event.data.payload;
+        const worldState = event.data.payload;
+        console.log("[WORLD] Restoring saved world from prev");
+
+        // restore parameters
+        step = worldState.landscape.step;
+        planetIndex = worldState.landscape.planetIndex;
+        mg1Height = worldState.landscape.mg1Height;
+        waterValue = worldState.landscape.mg1Water;
+        seed = worldState.landscape.seed;
+        //  landscape = worldState.landscape;
+        plants = deserializePlants(worldState.plants || []);// plants = worldState.plants || [];
+        animals = worldState.animals || [];
+        civil = worldState.civil || [];
+        pollutionLayers = worldState.pollutionLayers || 0;
+        worldRestored = false;//3-telos ta regens 
+
+        regenerate = true; // redraw from saved state
+
+
     }
 
 });
@@ -150,8 +237,11 @@ function setup() {
     const floraTools = document.querySelector(".flora-tools");
     const floraToggle = document.querySelector(".flora-tools-toggle");
     if (floraToggle && floraTools) {
-        floraToggle.onclick = () => floraTools.classList.toggle("open");
-          currentMode = "flora";
+        floraToggle.onclick = () => {
+            floraTools.classList.toggle("open");
+            // currentMode = "flora";
+            if (currentMode !== "mg6") currentMode = "flora";
+        };
     }
     //3 sliders
     sizeSlider = document.getElementById("sizeSlider");
@@ -176,7 +266,8 @@ function setup() {
     if (animalToggle && animalTools) {
         animalToggle.onclick = () => {
             animalTools.classList.toggle("open");
-              currentMode = "animals";   
+            //currentMode = "animals";
+            if (currentMode !== "mg6") currentMode = "animals";
         };
     }
     //size slideer
@@ -189,6 +280,37 @@ function setup() {
     if (randBtn) {
         randBtn.onclick = () => animalHue = random(360);
     };
+
+    // ******************************* CIVILIZATION (MG5)
+
+    let civilDetailSlider;
+
+    document.querySelectorAll("[data-civil]").forEach(btn => {
+        btn.onclick = () => {
+            currentCivilType = btn.dataset.civil;
+            console.log("civil type:", currentCivilType); // debu
+        };
+    });
+
+    const civilTools = document.querySelector(".civil-tools");
+    const civilToggle = document.querySelector(".civil-tools-toggle");
+
+    if (civilToggle && civilTools) {
+        civilToggle.onclick = () => {
+            civilTools.classList.toggle("open");
+            currentMode = "civil";   // switch mode
+        };
+    }
+
+    // detail slider
+    civilDetailSlider = document.getElementById("detailCivilSlider");
+    if (civilDetailSlider) {
+        civilDetail = parseInt(civilDetailSlider.value);
+        civilDetailSlider.oninput = () => {
+            civilDetail = parseInt(civilDetailSlider.value);
+        };
+    }
+
     /*document.getElementById("animalRandomBtn").onclick = () => {
        animalHue = Math.random() * 360;
    };*/
@@ -215,7 +337,12 @@ function setup() {
      document.getElementById("animalRandomize").onclick = () => {
          animalHue = Math.random() * 360;
      };*/
-
+    /*
+    if (regenerate) {
+        landscape = createGraphics(width, height);
+        generateLandscape(landscape, step);
+       
+    }*/
 
 
 
@@ -319,6 +446,13 @@ function generateBamboo(x, y, height, thickness) {
     };
 }
 function mousePressed() {//If a value depends on a click → mousePressed handler
+    // GUARD: ignore clicks on any UI panel or button
+    if (document.querySelector(".flora-tools:hover, .animal-tools:hover, .civil-tools:hover")) return;
+    // More reliable version:
+    const target = document.elementFromPoint(mouseX, mouseY);
+    if (target && target !== document.querySelector("canvas")) return;
+
+    if (currentMode === "view") return;//no interaction
 
     if (currentMode === "flora") {
         handleFloraClick();
@@ -330,27 +464,77 @@ function mousePressed() {//If a value depends on a click → mousePressed handle
         return;
     }
 
-    if (currentMode === "humans") {
-        handleHumanClick(mouseX, mouseY);
+    if (currentMode === "civil") {
+        handleCivilClick(mouseX, mouseY, currentCivilType);
         return;
     }
-  //  console.log("MODE:", currentMode);
+    if (currentMode === "view") return;
 
-}/*
-function mousePressed(){
+    if (currentMode === "mg6") {
+        const zone = getZone(mouseX, mouseY);
+        const roll = Math.random();
 
-  console.log("mouse pressed, mode:", currentMode);
+        if (zone === "land") { // randomly place tree OR flower OR land animal
 
-  if(currentMode === "animals"){
-    console.log("calling handleAnimalClick");
-    handleAnimalClick(mouseX, mouseY);
-    return;
-  }
+            if (roll < 0.4) {
+                currentPlant = "tree";
+                handleFloraClick();
+            } else if (roll < 0.6) {
+                currentPlant = "flower";
+                handleFloraClick();
+            } else {    // random land animal
+                const landTypes = [4, 6, 7, 8, 9, 10, 12, 13, 14, 17, 18]; // frog sheep,cow,fox,chicken,ladybug,tortoise,lizard  duck bat bee
+                animals.push({
+                    x: mouseX, y: mouseY,
+                    size: animalSize, hue: random(360),
+                    facing: random() > 0.5 ? 1 : -1,
+                    depth: depth,
+                    type: landTypes[Math.floor(Math.random() * landTypes.length)]
+                });
+                removeSmudges(1);
+            }
+        } else if (zone === "sky") {
+            const skyTypes = [14, 17, 18]; // bat, bird, bee
+            animals.push({
+                x: mouseX, y: mouseY,
+                size: animalSize, hue: random(360),
+                facing: random() > 0.5 ? 1 : -1,
+                depth: depth,
+                type: skyTypes[Math.floor(Math.random() * skyTypes.length)]
+            });
+            removeSmudges(1);
 
-  if(currentMode === "flora"){
-    console.log("flora click");
-  }
-}*/
+        } else if (zone === "water") {
+            const roll2 = Math.random();
+            if (roll2 < 0.4) {   //  bamboo or lotus
+                currentPlant = roll2 < 0.2 ? "tree" : "flower"; // tree bamboo, flower lotus in water
+                handleFloraClick();
+            } else { // water animals
+                const waterTypes = [4, 5, 11, 15, 16]; // frog, fish, turtle, shrimp, hippo
+                animals.push({
+                    x: mouseX, y: mouseY,
+                    size: animalSize, hue: random(360),
+                    facing: random() > 0.5 ? 1 : -1,
+                    depth: depth,
+                    type: waterTypes[Math.floor(Math.random() * waterTypes.length)]
+                });
+                removeSmudges(1);
+            }
+        }
+        return;
+    }
+    /*
+        if (currentMode === "mg6") {
+            const zone = getZone(mouseX, mouseY);
+            if (zone === "land") handleFloraClick();
+            else if (zone === "water" || zone === "sky") handleAnimalClick(mouseX, mouseY);
+            // or just always do both — your call
+            return;
+        }*/
+    //  console.log("MODE:", currentMode);
+
+}
+
 
 function handleFloraClick() {
     if (mouseY < mbgMin) return;
@@ -375,6 +559,7 @@ function handleFloraClick() {
                     detail,
                 )
             );
+            removeSmudges(1); //
             // return;
         }
         else if (currentPlant === "flower") {
@@ -387,6 +572,7 @@ function handleFloraClick() {
                     flowerScale
                 )
             );
+            removeSmudges(1); //
         }
         return;
     }
@@ -404,6 +590,7 @@ function handleFloraClick() {
             type: "tree",
             branches
         });
+        removeSmudges(2); //clean smudges
     }
 
     else if (currentPlant === "flower") {
@@ -415,6 +602,7 @@ function handleFloraClick() {
                 flowerScale
             )
         );
+        removeSmudges(1); //
     }
 }
 //syxnotita kate zoou
@@ -437,7 +625,7 @@ function weighted(list) {
 }
 
 function handleAnimalClick(x, y) {
-   // console.log("handleAnimalClick running");
+    // console.log("handleAnimalClick running");
 
     /* animals.push({
          x: mouseX,
@@ -448,14 +636,17 @@ function handleAnimalClick(x, y) {
     const zone = getZone(mouseX, mouseY);
 
     let type;
-
+    if (currentMode === "mg6") {
+        removeSmudges(1);
+    }
     // ====RANDOM MODE
     if (currentAnimalClass === "random") {
         type = getRandomAnimalForZone(zone);
     }
     // ===MAMMALS
     else if (currentAnimalClass === "mammal") {
-        if (zone === "sky") type = 14; // bat
+        if (zone === "sky") type = 14;  // bat
+
         else if (zone === "water") type = 16; // hippo
         //else type = random([6, 7, 8]); // sheep cow fox
         else { // land
@@ -464,6 +655,8 @@ function handleAnimalClick(x, y) {
                 [7, 3],   // cow
                 [8, 1]    // fox rare
             ]);
+            // bat
+
         }
     }
     // ====REPTILE
@@ -474,8 +667,10 @@ function handleAnimalClick(x, y) {
             type = weighted([
                 [5, 5],   // fish common
                 [11, 2],  // turtle
-                [4, 2]    // frog
+                [4, 2],    // frog
+                [17, 3] //duck
             ]);
+
         }
         // else type = random([9, 12, 13 ]); // lizard chicken tortoise
         else { // land
@@ -484,15 +679,16 @@ function handleAnimalClick(x, y) {
                 [13, 3],  // lizard
                 [12, 1]   // tortoise rare
             ]);
+
         }
     }
     // ===INSECTS
     else if (currentAnimalClass === "insect") {
-        if (zone === "sky") type = 3; // bee
+        if (zone === "sky") type = 18; // bee
         else if (zone === "water") type = 15; // shrimp
         else type = 10; // ladybug
     }
-console.log("pushing animal", type);
+    console.log("pushing animal", type);
 
     animals.push({
         x: mouseX,
@@ -502,6 +698,8 @@ console.log("pushing animal", type);
         //kind: currentAnimalClass,
         //zone: zone,
         //species: pickSpecies(zone, currentAnimalClass),
+        facing: random() > 0.5 ? 1 : -1,
+        depth: depth,
         type: type
         //type: speciesToType[species]
 
@@ -527,18 +725,77 @@ function getRandomAnimalForZone(zone) {
     }
 
     return weighted([
-    [6,5], [7,3], [8,1],//sheep,cow, fox
-    [9,4], [13,3], [12,1],//chicken. tortoise,lizard
-    [10,3]//ladybag
-  ]);
+        [6, 5], [7, 3], [8, 1],//sheep,cow, fox
+        [9, 4], [13, 3], [12, 1],//chicken. tortoise,lizard
+        [10, 3]//ladybag
+    ]);
+}
+function addSmudge(x, y) {
+    smudges.push({
+        x,
+        y,
+        size: random(20, 60),
+        alpha: random(40, 120)
+    });
 }
 
-//let humans = [];
-function handleHumanClick() {
-    humans.push({
-        x: mouseX,
-        y: mouseY,
-        role: "human"
+function handleCivilClick() {
+    /* humans.push({
+         x: mouseX,
+         y: mouseY,
+         role: "human"
+     });*/
+    //function handleHumanClick(x,y,type) {
+    if (mouseY < horizonLine) return;
+    const maxPerType = {
+        human: civilDetail,                    // full slider range
+        house: Math.min(civilDetail, 5),       // capped at 5 posa na einai
+        production: Math.min(civilDetail, 3)   // capped at 3
+    };
+    const count = maxPerType[currentCivilType] ?? civilDetail;
+
+    for (let i = 0; i < civilDetail; i++) {
+
+        let x = mouseX + random(-50, 90);
+        let y = mouseY + random(-70, 100);
+        if (y < horizonLine) continue;
+        civil.push({
+            x,
+            y,
+            type: currentCivilType,
+            skinHue: random(10, 40),
+            shirtHue: random(360),
+            depth: depth
+        });
+
+        let smudgeMultiplier = 2; // poso thes
+        for (let s = 0; s < smudgeMultiplier; s++) {
+            addSmudgeRandom();
+        }
+        if (plants.length > 0 && animals.length > 0) {//na svisei futa H zwa afou einai >0
+            // alternate removal
+            if (Math.random() > 0.5) plants.splice(Math.floor(Math.random() * plants.length), 1);
+            else animals.splice(Math.floor(Math.random() * animals.length), 1);
+        } else if (plants.length > 0) {
+            plants.splice(Math.floor(Math.random() * plants.length), 1);
+        } else if (animals.length > 0) {
+            animals.splice(Math.floor(Math.random() * animals.length), 1);
+        }
+    }
+    pollutionLayers++;
+}
+function addSmudgeRandom() {// pollution
+    let x = random(width);
+    let y = random(height);
+    let size = random(20, 120);
+    if (currentCivilType === "house") size = random(60, 150);
+    if (currentCivilType === "production") size = random(80, 200);
+
+    smudges.push({
+        x,
+        y,
+        size,
+        alpha: random(20, 90)
     });
 }
 
@@ -550,7 +807,7 @@ function drawFloraTools() {
 
 function draw() { // draw dinei sxima generate dinei dedomena
     //If a value depends on mouse position or canvas size =====draw
-//console.log("animals count:", animals.length);
+    //console.log("animals count:", animals.length);
 
 
     //one canvas to rule them all
@@ -563,6 +820,10 @@ function draw() { // draw dinei sxima generate dinei dedomena
 
     let baseHeight = parseInt(heightSlider.value);   // Smaller near mountains, larger near bottom.
     scaledHeight = baseHeight * depth;
+    // after restoring world, never regenerate again
+    if (worldRestored) {
+        regenerate = false;
+    }
 
     if (regenerate) {
         landscape = createGraphics(width, height);
@@ -572,6 +833,7 @@ function draw() { // draw dinei sxima generate dinei dedomena
     background(180, 20, 100, 255);
     noStroke();
     image(landscape, 0, 0, width, height);// draw static
+
 
     /*drawPlantsFromMG3(this, worldData);
     drawAnimals(worldData);
@@ -596,7 +858,8 @@ function draw() { // draw dinei sxima generate dinei dedomena
 
     push();
     scale(width / landscape.width, height / landscape.height);
-        drawAnimals();
+
+    drawAnimals();
     for (let p of plants) {
         if (p.type === "tree") {
             for (let b of p.branches) {
@@ -668,7 +931,7 @@ function draw() { // draw dinei sxima generate dinei dedomena
         else if (p.type === "lotus") {
             push();
             translate(p.x, p.y);
-            // scale(1);   // 🔹 1/4 size
+            // scale(1);   // 1/4 size
             scale(p.scale);//apply once
             // leaves
             noStroke();
@@ -721,7 +984,7 @@ function draw() { // draw dinei sxima generate dinei dedomena
         else if (p.type === "flower") {
             push();
             translate(p.x, p.y);
-            // scale(0.5);   // 🔹 1/4 size
+            // scale(0.5);   // 1/4 size
 
             for (let f of p.flowers) {
                 push();
@@ -743,7 +1006,18 @@ function draw() { // draw dinei sxima generate dinei dedomena
         }
 
     }
+    drawCivil();
+    drawSmudges();
+    pop();
 
+    // draw pollution overlay
+    if (pollutionLayers > 0) {
+        noStroke();
+        // slightly greenish-gray tint
+        fill(80, 8, 88, Math.min(pollutionLayers * 13, 200)); // HSB: muted olive-gray, capped at ~200 alpha
+        //The 13 per layer means 4 clicks = alpha 52, 8 clicks ≈ 104, 16 clicks hits the cap of 200.
+        rect(0, 0, width, height);
+    }
 }
 function determineValues() {
     horizonLine = height * horizonRatio;//*.42
@@ -764,7 +1038,21 @@ function determineValues() {
 
     sunSize = sunSizeFromPlanet(planetIndex);
     console.log("sunSize set from planetIndex", planetIndex, "sunSize:", sunSize);
+    lightMult = map(sunSize, 20, 80, 1.2, 0.8);
 
+}
+function getPlanetHue(index) {
+    const planetHues = {
+        1: 95,  // Hamarik – green tone
+        2: 35,  // Tahay – beige gray
+        3: 10,  // Chura – bordeaux base
+        4: 20,  // Santamasa – terracotta
+        5: 335, // Ahra – cold pink
+        6: 45,  // Lete – indian yellow
+        7: 215  // Veles – cobalt blue
+    };
+
+    return planetHues[index] || 45;
 }
 function generateColorsForStep(step) {
     let range = hueRanges[step];
@@ -785,12 +1073,12 @@ function generateColorsForStep(step) {
     mbgCol = hsbColor(
         pickHueWithinRange(range),
         random(20, 50),
-        random(70, 90)
+        random(70, 90) * lightMult
     );
     mmgCol = hsbColor(
         pickHueWithinRange(range),
         random(50, 70),
-        random(40, 70)
+        random(40, 70) * lightMult
     );
 
     // Trees
@@ -811,13 +1099,20 @@ function generateColorsForStep(step) {
 
     sky1 = hsbColor(h1, random(40, 70), random(75, 90));
     sky2 = hsbColor(h2, random(10, 50), random(80, 100));
+
+    landCol = color(getPlanetHue(planetIndex), 50, 65 * lightMult);
+
+
+
 }
 function generateLandscape(pg, step) {
+    randomSeed(seed);
+    noiseSeed(seed);
     randomSeed(landscapeSeed);
     noiseSeed(landscapeSeed);//auto pagwni to fonto gia panta
 
-    randomSeed(step * 10000 + millis());
-    noiseSeed(step * 20000 + millis());
+    /* randomSeed(step * 10000 + millis());
+     noiseSeed(step * 20000 + millis());*/
 
     pg.colorMode(HSB, 360, 100, 100, 255);
 
@@ -830,14 +1125,15 @@ function generateLandscape(pg, step) {
     makeClouds(pg);  // now because noiseSeed is fixed
 
     pg.noStroke();
-    pg.fill(mmgCol);
-    pg.rect(0, horizonLine, width, height - horizonLine);
+    pg.fill(landCol);
+    pg.rect(0, horizonLine, width, height - horizonLine);//the land
     //KLENO PROSORINA
     if (waterValue > 0) {
         console.log("[WATER] waterValue > 0 → generating water");
         generateWater(pg);
         cutLakeHole(pg, waterShape);
-        drawWaterGradient(pg);
+        //drawWaterGradient(pg);
+        drawWater(pg, waterShape);
         //KLEINO PROSOTINA
     } else {
         console.log("[WATER] waterValue = 0 → skipping water");
@@ -992,7 +1288,7 @@ function generateWater(pg) {
         radius: baseRadius
     };
 
-    drawWater(pg, waterShape);
+    // drawWater(pg, waterShape);
     let minY = height;
     let maxY = 0;
 
@@ -1065,7 +1361,7 @@ function cutLakeHole(pg, shape) {
     pg.noErase();
     pg.pop();
 }
-
+/*
 function drawWaterGradient(pg) {
     pg.push();
     pg.noStroke();
@@ -1080,7 +1376,7 @@ function drawWaterGradient(pg) {
     }
 
     pg.pop();
-}
+}*/
 function wrapHue(h) {
     let r = h % 360;
     return r < 0 ? r + 360 : r;
@@ -1161,7 +1457,7 @@ function generateAnimal(x, y) {
     animals.push({ x, y });
 }
 function generateHuman(x, y) {
-    humans.push({ x, y });
+    civil.push({ x, y, type: currentCivilType });
 }
 function buildTree(start, branch_length, branch_color, branch_width, angle, max_branch, segments) {
     if (max_branch === 0) return;
@@ -1200,22 +1496,7 @@ function buildTree(start, branch_length, branch_color, branch_width, angle, max_
         segments
     );
 }
-function drawFlower(x, y, col) {
-    push();
-    stroke(40, 100, 50);
-    line(x, y, x, y + 10);
-
-    noStroke();
-    fill(col.r, col.g, col.b);
-    for (let a = 0; a < TWO_PI; a += PI / 3) {
-        ellipse(x + 8 * cos(a), y + 8 * sin(a), 10, 10);
-    }
-
-    fill(55, 100, 100);
-    ellipse(x, y, 8, 8);
-    pop();
-
-}
+/* //PALIA LOGIKH
 function pickSpecies(zone, animalClass) {
     if (animalClass === "mammal") {
         if (zone === "sky") return random(["bat"]);
@@ -1234,15 +1515,109 @@ function pickSpecies(zone, animalClass) {
         if (zone === "water") return "fish"; //random(["frog", "fish"]);
         return "chicken";//return random(["tortoise", "lizard", "chicken" ]);
     }
-    /*if (zone === "sky") {
-      return random(["tit", "bee", "bat"]);
+
+}*/
+function drawSmudges() {
+    noStroke();
+    for (let s of smudges) {
+        fill(0, 0, 70, s.alpha);
+        ellipse(s.x, s.y, s.size);
     }
-  
-    if (zone === "water") {
-      return random(["stork", "shrimp","hippo" ]);
+}
+function drawCivil() {
+    /*for (let e of civilEntities) {
+        drawEntity(e.x, e.y, e.type);
+    }*/
+    push();
+    noStroke();
+    for (let c of civil) {
+        if (c.y < horizonLine) continue;
+        // drawHuman(c.x, c.y, c.type);
+        let d = c.depth ?? depthScale(c.y);
+        push();
+        translate(c.x, c.y);
+        scale(d);
+        drawHuman(0, 0, c.type, c.skinHue ?? 30, c.shirtHue ?? 210);
+        pop();
+
     }
-  
-    return random(["chicken", "ladybug", "sheep"]);*/
+    pop();
+
+}
+function removeSmudges(count = 2) {
+    for (let i = 0; i < count; i++) {
+        if (smudges.length > 0) {
+            //  let index = floor(random(smudges.length));
+            smudges.splice(Math.floor(Math.random() * smudges.length), 1);//sbinei tuxaia smudges
+        }
+        if (pollutionLayers > 0) pollutionLayers--;// remove a pollution layer alongside each smudge
+    }
+    // if (smudges.length === 0 &&  currentMode !== "civil") {//only during mg6
+    if (smudges.length === 0 && pollutionLayers === 0 && currentMode === "mg6") {
+        // 1. Freeze-no more interaction
+        currentMode = "view";
+        window.parent.postMessage({ type: "smudges_cleared" }, "*");  // 3. Tell parent we're done
+        /*  setTimeout(() => {//wait 2sec
+                 
+                 saveCanvas("my-planet", "png"); // p5.js triggers download // 2. Save canvas as image to user's PC
+               
+            }, 2000); // wait 2s for smudges to visually clear first*/
+    }
+}
+
+
+function drawHuman(x, y, type, skinHue = 30, shirtHue = 210) {
+
+    if (type === "production") {
+        push(); scale(3);
+        fill(210, 10, 70);
+        rect(x - 10, y - 4, 20, 12);
+
+        fill(0, 0, 85);
+        rect(x - 12, y - 8, 24, 6);
+
+        fill(50, 80, 95);
+        rect(x - 6, y - 1, 3, 3);
+        rect(x - 1, y - 1, 3, 3);
+        rect(x + 4, y - 1, 3, 3);
+
+        fill(0, 0, 60);
+        rect(x + 8, y - 14, 4, 8);
+
+        fill(0, 0, 80);
+        ellipse(x + 10, y - 16, 5, 4);
+        ellipse(x + 13, y - 19, 4, 3);
+        pop();
+    }
+
+
+    else if (type === "human") {
+        push(); scale(1.5);
+        fill(skinHue, 40, 85);
+        ellipse(x, y - 6, 5, 6);
+
+        fill(shirtHue, 60, 80);
+        ellipse(x, y + 1, 7, 10);
+
+        fill(25, 60, 60);
+        rect(x - 2, y + 6, 2, 6);
+        rect(x + 1, y + 6, 2, 6);
+        pop();
+    }
+
+
+    else if (type === "house") {
+        push(); scale(2);
+        fill(30, 60, 95);
+        rect(x - 8, y - 4, 16, 12);
+
+        fill(10, 80, 80);
+        triangle(x - 10, y - 4, x + 10, y - 4, x, y - 12);
+
+        fill(40, 30, 70);
+        rect(x - 2, y + 2, 4, 6);
+        pop();
+    }
 }
 
 function drawAnimals() {
@@ -1252,134 +1627,57 @@ function drawAnimals() {
 
     for (let a of animals) {
         push();
+        let d = a.depth ?? depthScale(a.y);
+        let facing = a.facing ?? 1;
         translate(a.x, a.y);
-        let s = a.size / 20;
-        scale(s);
 
-        drawAnimal(0, 0, a.type);
+        // let s = a.size / 20;
+        scale(facing * d, d);
+        drawAnimal(0, 0, a.type, a.hueShift ?? 0);
         pop();
-        /*
-               fill(a.hue, 70, 90);
-               if (a.species === "bat") {
-                   triangle(a.x, a.y,
-                       a.x - a.size, a.y + a.size / 2,
-                       a.x + a.size, a.y + a.size / 2);
-               }
-       
-               else if (a.species === "bee") {
-                   ellipse(a.x, a.y, a.size * 0.7, a.size * 0.4);
-                   stroke(0);
-                   line(a.x - 3, a.y, a.x + 3, a.y);
-                   noStroke();
-               }
-       
-               else if (a.species === "tit") {
-                   ellipse(a.x, a.y, a.size * 1.2, a.size * 0.6);
-                   triangle(a.x + a.size / 2, a.y,
-                       a.x + a.size, a.y - 4,
-                       a.x + a.size, a.y + 4);
-               }
-       
-               // WATER
-               else if (a.species === "hippo") {
-                   ellipse(a.x, a.y, a.size * 1.4, a.size);
-               }
-       
-               else if (a.species === "shrimp") {
-                   arc(a.x, a.y, a.size, a.size, 0, PI);
-               }
-       
-               else if (a.species === "fish") {
-                   ellipse(a.x, a.y, a.size, a.size * 0.6);
-                   triangle(a.x + a.size / 2, a.y,
-                       a.x + a.size, a.y - 5,
-                       a.x + a.size, a.y + 5);
-               }
-       
-               // LAND
-               else if (a.species === "sheep") {
-                   ellipse(a.x, a.y, a.size, a.size * 0.8);
-               }
-       
-               else if (a.species === "ladybug") {
-                   ellipse(a.x, a.y, a.size * 0.6, a.size * 0.6);
-                   stroke(0);
-                   line(a.x, a.y - a.size / 3, a.x, a.y + a.size / 3);
-                   noStroke();
-               }
-       
-               else if (a.species === "chicken") {
-                   ellipse(a.x, a.y, a.size * 0.8, a.size * 0.6);
-                   triangle(a.x + a.size / 2, a.y,
-                       a.x + a.size, a.y - 4,
-                       a.x + a.size, a.y + 4);
-               }
-               /*
-                if (a.species === "cat") {
-             ellipse(a.x, a.y, 18, 14);
-             ellipse(a.x + 6, a.y - 6, 10, 10);
-           }
-       
-           else if (a.species === "sheep") {
-             ellipse(a.x, a.y, a.size, a.size * 0.8);
-           }
-       
-           else if (a.species === "bee") {
-             ellipse(a.x, a.y, a.size * 0.6, a.size * 0.3);
-           }
-       
-           else if (a.species === "turtle") {
-             ellipse(a.x, a.y, a.size, a.size * 0.6);
-           }*/
 
+        switch (a.species) {
 
-        /*
-    switch (a.species) {
+            case "tit":
+                ellipse(a.x, a.y, a.size * 1.2, a.size * 0.6);
+                break;
 
-        case "tit":
-            ellipse(a.x, a.y, a.size * 1.2, a.size * 0.6);
-            break;
+            case "libellula":
+                ellipse(a.x, a.y, a.size, a.size * 0.3);
+                break;
 
-        case "libellula":
-            ellipse(a.x, a.y, a.size, a.size * 0.3);
-            break;
+            case "hippo":
+                ellipse(a.x, a.y, a.size * 1.4, a.size);
+                break;
 
-        case "hippo":
-            ellipse(a.x, a.y, a.size * 1.4, a.size);
-            break;
+            case "frog":
+                ellipse(a.x, a.y, a.size, a.size);
+                break;
 
-        case "frog":
-            ellipse(a.x, a.y, a.size, a.size);
-            break;
+            case "stork":
+                rect(a.x, a.y, a.size * 0.3, a.size);
+                break;
 
-        case "stork":
-            rect(a.x, a.y, a.size * 0.3, a.size);
-            break;
+            case "sheep":
+                ellipse(a.x, a.y, a.size, a.size * 0.8);
+                break;
 
-        case "sheep":
-            ellipse(a.x, a.y, a.size, a.size * 0.8);
-            break;
+            case "turtle":
+                ellipse(a.x, a.y, a.size, a.size * 0.6);
+                break;
 
-        case "turtle":
-            ellipse(a.x, a.y, a.size, a.size * 0.6);
-            break;
-
-        case "fox":
-            triangle(
-                a.x, a.y - a.size,
-                a.x - a.size, a.y + a.size,
-                a.x + a.size, a.y + a.size
-            );
-            break;
-    }*/
+            case "fox":
+                triangle(
+                    a.x, a.y - a.size,
+                    a.x - a.size, a.y + a.size,
+                    a.x + a.size, a.y + a.size
+                );
+                break;
+        }
     }
 
     //  colorMode(HSB, 360, 100, 100, 255);
 }
-// =====================================================
-// MAIN ANIMAL DRAWER
-// type is a number (0–16)
-// =====================================================
 function drawAnimal(x, y, type) {
 
     push();
@@ -1387,28 +1685,7 @@ function drawAnimal(x, y, type) {
 
     //stroke(0);
     //strokeWeight(1);
-    if (type === 3) {
-        // bee
-        // body
-        fill(50, 90, 95);
-        ellipse(x, y, 18, 12);
-        // stripes
-        stroke(0, 0, 20);
-        line(x - 4, y - 5, x - 4, y + 5);
-        line(x, y - 6, x, y + 6);
-        noStroke();
-        // head
-        fill(0, 0, 30);
-        ellipse(x - 9, y - 1, 6, 6);
-        // wings
-        fill(0, 0, 100, 50);
-        ellipse(x + 2, y - 7, 12, 8);
-        ellipse(x + 4, y - 4, 15, 6);
-        // stinger
-        fill(60);
-        triangle(x + 9, y + 2, x + 9, y - 2, x + 14, y);
 
-    }
     if (type === 4) {
         // frog
         // body
@@ -1506,6 +1783,7 @@ function drawAnimal(x, y, type) {
     }
     if (type === 10) {
         // ladybug
+        push(); scale(0.5);
         fill(0, 220, 220);
         ellipse(x, y, 13, 10); // shell
         // head
@@ -1515,7 +1793,7 @@ function drawAnimal(x, y, type) {
         ellipse(x + 2, y - 2, 3, 2);
         ellipse(x - 1, y + 2, 3, 3);
         ellipse(x + 4, y + 2, 3, 2);
-
+        pop();
     }
     if (type === 11) {
         // turtle
@@ -1572,6 +1850,7 @@ function drawAnimal(x, y, type) {
     }
     if (type === 15) {
         // shrimp
+        push(); scale(0.3);
         fill(15, 50, 95);
         // body curve
         ellipse(x, y, 12, 9);
@@ -1587,7 +1866,7 @@ function drawAnimal(x, y, type) {
         line(x + 8, y + 3, x + 16, y + 8);
         line(x + 6, y + 3, x + 14, y + 9);
         noStroke();
-
+        pop();
     }
     if (type === 16) {
         // hippo
@@ -1606,8 +1885,9 @@ function drawAnimal(x, y, type) {
         ellipse(x + 15, y, 2, 2);
         ellipse(x + 19, y - 1, 2, 2);
     }
-    if (type === 17) {
+    if (type === 17) {//duck
         // body — yellow
+        push(); scale(0.7);
         fill(55, 80, 100);
         ellipse(x, y, 14, 8);
         fill(210, 70, 60);
@@ -1622,120 +1902,651 @@ function drawAnimal(x, y, type) {
         // eye
         fill(0, 0, 0);
         ellipse(x + 6, y - 6, 1.5, 1.5);
+        pop();
     }
-    /*
-      // 0 = bee
-      if (type === 0) {
-        fill(255, 220, 0);
-        ellipse(0, 0, 20, 12);
-        fill(0);
-        rect(-6, -6, 3, 12);
-        rect(2, -6, 3, 12);
-        fill(200);
-        ellipse(-5, -8, 10, 6);
-        ellipse(5, -8, 10, 6);
-      }
-    
-      // 1 = fish
-      if (type === 1) {
-        fill(100, 150, 255);
-        ellipse(0, 0, 24, 14);
-        triangle(12, 0, 22, -6, 22, 6);
-        fill(0);
-        circle(-6, -2, 2);
-      }
-    
-      // 2 = frog
-      if (type === 2) {
-        fill(80, 200, 80);
-        ellipse(0, 0, 22, 14);
-        circle(-6, -8, 6);
-        circle(6, -8, 6);
-        fill(0);
-        circle(-6, -8, 2);
-        circle(6, -8, 2);
-      }
-    
-      // 3 = sheep
-      if (type === 3) {
-        fill(255);
-        ellipse(0, 0, 24, 16);
-        fill(0);
-        circle(10, 2, 10);
-      }
-    
-      // 4 = cow
-      if (type === 4) {
-        fill(255);
-        rect(-12, -6, 24, 12, 4);
-        fill(0);
-        circle(6, 0, 6);
-        circle(-4, 2, 4);
-      }
-    
-      // 5 = fox
-      if (type === 5) {
-        fill(255, 120, 50);
-        triangle(-10, 6, 10, 6, 0, -10);
-        fill(255);
-        triangle(-4, 0, 4, 0, 0, -6);
-      }
-    
-      // 6 = chicken
-      if (type === 6) {
-        fill(255);
-        ellipse(0, 0, 18, 14);
-        fill(255, 200, 0);
-        triangle(8, 0, 14, -2, 14, 2);
-        fill(255, 0, 0);
-        circle(2, -8, 4);
-      }
-    
-      // 7 = ladybug
-      if (type === 7) {
-        fill(255, 0, 0);
-        ellipse(0, 0, 16, 12);
-        fill(0);
-        circle(-3, -2, 3);
-        circle(3, 2, 3);
-      }
-    
-      // 8 = turtle
-      if (type === 8) {
-        fill(80, 150, 80);
-        ellipse(0, 0, 20, 14);
-        fill(60, 120, 60);
-        circle(10, 0, 6);
-      }
-    
-      // 9 = lizard
-      if (type === 9) {
-        fill(80, 200, 120);
-        rect(-12, -3, 24, 6, 3);
-        triangle(12, 0, 20, -4, 20, 4);
-      }
-    
-      // 10 = bat
-      if (type === 10) {
-        fill(80);
-        triangle(-14, 0, 0, -10, 14, 0);
-        rect(-4, 0, 8, 6);
-      }
-    
-      // 11 = shrimp
-      if (type === 11) {
-        fill(255, 150, 120);
-        arc(0, 0, 20, 16, PI/2, PI*1.5);
-        line(6, -6, 12, -10);
-      }
-    
-      // 12 = hippo
-      if (type === 12) {
-        fill(160, 120, 160);
-        rect(-12, -6, 24, 12, 6);
-        circle(10, 0, 6);
-      }
-    */
+    if (type === 18) {// bee
+
+        push(); scale(0.7);
+        // body
+        fill(50, 90, 95);
+        ellipse(x, y, 18, 12);
+        // stripes
+        stroke(0, 0, 20);
+        line(x - 4, y - 5, x - 4, y + 5);
+        line(x, y - 6, x, y + 6);
+        noStroke();
+        // head
+        fill(0, 0, 30);
+        ellipse(x - 9, y - 1, 6, 6);
+        // wings
+        fill(0, 0, 100, 50);
+        ellipse(x + 2, y - 7, 12, 8);
+        ellipse(x + 4, y - 4, 15, 6);
+        // stinger
+        fill(60);
+        triangle(x + 9, y + 2, x + 9, y - 2, x + 14, y);
+        pop();
+    }
+    if (type === 19) {// polar bear
+
+        fill(0, 0, 92);
+        ellipse(x, y, 28, 20);           // body
+        ellipse(x + 10, y - 4, 14, 12); // head
+        ellipse(x + 10, y + 8, 8, 12);//legs
+        ellipse(x - 10, y + 8, 8, 12);
+        fill(0, 0, 88);
+        ellipse(x + 9, y - 9, 6, 6);    // ear L
+        ellipse(x + 13, y - 9, 6, 6);    // ear R
+        fill(0, 0, 0);
+        ellipse(x + 15, y - 5, 2, 2);   // eye
+        ellipse(x + 12, y - 5, 2, 2);
+        fill(0, 0, 35);
+        ellipse(x + 15, y - 1, 4, 3);   // nose
+    }
+    if (type === 20) {// penguin
+
+        fill(0, 0, 15);
+        ellipse(x - 2, y + 15, 6, 4);
+        ellipse(x + 3, y + 15, 6, 4);
+        ellipse(x, y + 2, 18, 26);       // body
+        fill(0, 0, 95);
+        ellipse(x, y + 3, 12, 18);       // belly
+        fill(52, 52, 90);
+        ellipse(x, y - 4, 8, 4);      //neck
+        fill(0, 0, 10);
+        ellipse(x, y - 10, 12, 12);      // head
+        fill(10, 80, 50);
+        ellipse(x, y - 8, 6, 3);         // beak
+        fill(235, 35, 30);
+        ellipse(x - 8, y + 1, 4, 10);    // wing L
+        ellipse(x + 8, y + 1, 4, 9);    // wing R
+        fill(0, 0, 95);
+        ellipse(x - 2, y - 11, 3, 3);    // eye L
+        ellipse(x + 2, y - 11, 3, 3);    // eye R
+        fill(0, 0, 0);
+        ellipse(x - 2, y - 10, 1.5, 2);
+        ellipse(x + 2, y - 10, 1.5, 2);
+    }
+    if (type === 21) { // seal
+
+        fill(30, 15, 50);
+        ellipse(x + 14, y + 6, 7, 4);   // flipper L
+        fill(30, 20, 60);
+        ellipse(x, y, 32, 18);           // body
+        ellipse(x - 17, y + 5, 18, 8); //taail
+        ellipse(x - 16, y + 1, 14, 8);
+        ellipse(x + 15, y - 7, 14, 11); // head
+        fill(30, 15, 50);
+        ellipse(x + 6, y + 8, 11, 4);   // flipper R
+        fill(0, 0, 0);
+        ellipse(x + 14, y - 8, 3, 2);   // eye
+        ellipse(x + 19, y - 8, 3, 2);
+        fill(10, 20, 30);
+        ellipse(x + 18, y - 5, 5, 3);   // nose
+        stroke(30, 20, 35);
+        strokeWeight(0.7);
+        line(x + 19, y - 5, x + 23, y - 4);  // whiskers
+        line(x + 19, y - 6, x + 23, y - 7);
+        noStroke();
+    }
+    if (type === 22) {//fish
+        let h = random(360), s = random(50, 90), b = random(80, 100);
+        fill(h, 70, 70);
+        ellipse(x, y, 20, 11);           // body
+        triangle(x - 9, y, x - 17, y - 6, x - 17, y + 6); // tail
+        fill(h, 50, b);
+        ellipse(x - 1, y, 16, 7);        // colour stripe (lighter)
+        triangle(x + 2, y - 5, x - 4, y - 5, x - 4, y - 10);
+        fill(0, 0, 100);
+        ellipse(x + 6, y - 1, 5, 5);     // eye
+        fill(0, 0, 0);
+        ellipse(x + 6, y - 1, 2.5, 2.5);
+        fill(h, s, 60);
+        rect(x - 1, y - 5, 2, 10, 1);// vertical stripe detail
+    }
+    if (type === 23) {// parrot green
+
+        fill(120, 65, 75);
+        ellipse(x, y + 2, 18, 22); // body
+        ellipse(x, y - 10, 14, 14); // head
+        ellipse(x - 3, y + 16, 9, 20); // tail
+        fill(110, 70, 60);
+        ellipse(x - 8, y + 4, 8, 20); // wing L
+
+        fill(0, 0, 95);
+        ellipse(x + 3, y - 11, 4, 4); // eye R
+        fill(0, 0, 0);
+        ellipse(x + 3, y - 11, 2, 2);
+
+        fill(40, 90, 100);
+        ellipse(x + 7, y - 7, 4, 6); // beak top
+        triangle(x + 9, y - 9, x + 6, y - 5, x + 10, y - 2); // beak tip
+        fill(50, 50, 95); // yellow cheek patch
+        ellipse(x, y - 7, 5, 4);
+    }
+    if (type === 24) {// parrot  red
+
+        fill(0, 80, 85);
+        ellipse(x, y + 2, 18, 22); // body
+        ellipse(x, y - 10, 14, 14); // head
+        ellipse(x - 3, y + 18, 9, 22); // tail
+
+        fill(220, 75, 80); // blue wings
+        ellipse(x - 8, y + 7, 8, 21);
+        fill(50, 90, 95); // yellow wing
+        ellipse(x - 8, y + 3, 8, 18);
+        fill(0, 70, 70); //red wing
+        ellipse(x - 8, y, 8, 16);
+
+        fill(10, 20, 85); // yellow cheek patch
+        ellipse(x + 3, y - 8, 7, 7);
+
+        fill(0, 0, 95);
+        ellipse(x + 3, y - 11, 4, 4); // eye R
+        fill(0, 0, 0);
+        ellipse(x + 3, y - 11, 2, 2);
+
+        fill(40, 90, 10);
+        ellipse(x + 7, y - 7, 4, 6); // beak top
+        triangle(x + 9, y - 9, x + 6, y - 5, x + 10, y - 2); // beak tip
+    }
+    if (type === 25) {// iguana
+
+        fill(120, 55, 70);
+        ellipse(x, y, 30, 8);           // body
+        ellipse(x + 12, y - 1, 12, 8);  // head
+        triangle(x - 13, y - 2, x - 38, y, x - 12, y + 3); // tail
+        stroke(120, 55, 70);
+        strokeWeight(1.3);
+        line(x - 29, y + 1, x - 50, y + 2);
+        noStroke();
+
+        fill(120, 50, 60);
+        ellipse(x - 8, y + 3, 4, 9);    // leg L-back
+        ellipse(x - 8, y + 7, 8, 2);
+        stroke(120, 55, 60);
+        strokeWeight(3);
+        line(x + 8, y + 2, x + 12, y + 7);// leg R-back
+        strokeWeight(2);
+        line(x + 12, y + 7, x + 15, y + 7);
+        noStroke();
+
+        // dorsal spines
+        fill(110, 60, 80);
+        for (let i = -8; i <= 8; i += 4) {
+            triangle(x + i, y - 4, x + i - 1, y - 8, x + i + 1, y - 4);
+        }
+        fill(0, 0, 0);
+        ellipse(x + 14, y - 3, 2.5, 2.5); // eye
+        fill(120, 40, 80);
+        ellipse(x + 14, y, 3, 3);         // dewlap hint
+    }
+    if (type === 26) { // blue bird 
+
+        let h = random(150, 270);
+        fill(h, 75, 85);
+        ellipse(x, y, 18, 12);           // body
+        ellipse(x + 7, y - 2, 12, 10);  // head
+        fill(h, 80, 65);
+        triangle(x - 8, y + 2, x - 8, y - 2, x - 16, y); // tail
+
+        fill(40, 90, 100);
+        triangle(x + 12, y - 5, x + 15, y - 3, x + 12, y - 1); // beak
+        fill(h, 70, 55);
+        ellipse(x - 1, y - 1, 13, 5);// wing stripe
+        fill(0, 0, 95);
+        ellipse(x + 9, y - 4, 4, 4);    // eye
+        fill(0, 0, 0);
+        ellipse(x + 9, y - 4, 2, 2);
+    }
+    if (type === 27) {// leopard
+
+        fill(40, 65, 85);
+        rect(x, y, 32, 10, 10);           // body
+        ellipse(x + 32, y - 7, 10, 8); // head
+        ellipse(x + 28, y - 10, 3, 3);
+        ellipse(x + 32, y - 11, 3, 3); //ears
+
+        stroke(40, 60, 85);
+        strokeWeight(7);
+        line(x + 28, y, x + 30, y - 5);
+        strokeWeight(3);
+        line(x, y + 4, x - 20, y + 6);//tail
+        strokeWeight(5);
+        line(x + 2, y + 6, x, y + 14);
+        line(x, y + 14, x + 2, y + 20);
+        line(x + 7, y + 6, x + 8, y + 18);
+        strokeWeight(6);
+        line(x + 26, y + 6, x + 29, y + 18);
+        noStroke();
+
+
+        fill(25, 80, 35);// spots — rosette style
+        ellipse(x + 25, y + 1, 5, 4);
+        ellipse(x + 15, y + 2, 4, 3);
+        ellipse(x + 4, y + 2, 4, 3);
+        ellipse(x + 29, y + 5, 3, 3);
+        ellipse(x + 12, y + 6, 4, 3);
+        ellipse(x + 22, y + 8, 4, 3);
+        ellipse(x + 27, y + 16, 3, 3);
+        ellipse(x, y + 14, 4, 3);
+
+        fill(0, 0, 0);
+        ellipse(x + 36, y - 8, 2, 2);
+        ellipse(x + 32, y - 8, 3, 2);   // eyes
+        fill(10, 20, 30);
+        ellipse(x + 36, y - 6, 4, 2);        // nose
+        stroke(40, 30, 30);
+        strokeWeight(0.5);
+        line(x + 38, y - 6, x + 42, y - 5);
+        line(x + 38, y - 7, x + 42, y - 8);
+        noStroke();
+    }
+    if (type === 28) {// toucan
+
+        fill(0, 0, 12);
+        ellipse(x - 3, y + 5, 18, 22);       // body
+        ellipse(x, y - 5, 14, 14);       // head
+        ellipse(x - 7, y + 15, 8, 14);       // tail
+        fill(20, 0, 20);
+        ellipse(x + 2, y + 14, 3, 4);
+        ellipse(x - 1, y + 14, 3, 4);
+        fill(0, 0, 95);
+        ellipse(x, y - 2, 10, 8);        // white throat
+        // big beak
+        fill(40, 90, 100);               // yellow top
+        ellipse(x + 6, y - 5, 16, 5);
+        fill(40, 80, 80);               // green mid
+        ellipse(x + 6, y - 4, 16, 4);
+        fill(20, 80, 60);                 // red tip
+        ellipse(x + 11, y - 4, 6, 4);
+        fill(0, 0, 95);
+        ellipse(x - 2, y - 7, 4, 4);    // eye ring
+        fill(0, 0, 0);
+        ellipse(x - 2, y - 7, 2.5, 2.5);
+    }
+    if (type === 29) { // poison dart frog 
+
+        fill(215, 85, 80);               // blue body
+        ellipse(x, y, 18, 12);
+        fill(190, 80, 80);                // yellow pattern stripe
+        ellipse(x - 1, y - 3, 16, 6);
+        fill(215, 85, 80);
+        ellipse(x + 6, y - 2, 10, 9);   // head bump
+        fill(190, 80, 80);
+        ellipse(x + 4, y - 5, 8, 6);
+        fill(215, 90, 65);
+        ellipse(x - 6, y + 4, 10, 6);    // leg L
+        rect(x - 6, y + 6, 8, 2, 2);
+        ellipse(x + 7, y + 5, 6, 4);    // leg R
+
+        fill(0, 0, 95);
+        ellipse(x + 8, y - 6, 4, 4);    // eye
+        ellipse(x + 3, y - 6, 5, 5);
+        fill(0, 0, 0);
+        ellipse(x + 8, y - 6, 2, 2);
+        ellipse(x + 3, y - 6, 2, 2);
+    }
+    if (type === 30) {// giraffe
+        let s = random(55, 80);
+        let b = random(75, 95);
+        fill(40, s, b);
+        ellipse(x + 3, y, 18, 17);
+        ellipse(x - 4, y + 2, 14, 14);        // body
+        rect(x + 4, y - 25, 8, 22, 2);    // neck
+        ellipse(x + 10, y - 24, 10, 8);  // head
+        ellipse(x + 3, y - 24, 5, 3);        //ear
+        ellipse(x - 8, y + 12, 5, 14);    // leg L
+        rect(x - 9, y + 16, 2, 12)
+        ellipse(x + 5, y + 12, 4, 14);    // leg R
+        ellipse(x + 11, y + 9, 4, 14);
+        rect(x + 11, y + 14, 2, 12)
+        rect(x + 5, y + 16, 2, 12)
+
+        fill(35, 70, 55);                // patches
+        ellipse(x + 7, y - 12, 6, 5);
+        ellipse(x + 9, y - 18, 4, 3);
+        ellipse(x + 3, y - 3, 5, 3);
+        ellipse(x - 5, y + 2, 6, 5);
+        ellipse(x + 7, y + 3, 5, 4);
+
+        fill(35, 70, 65);// ossicones
+        rect(x + 8, y - 32, 2, 5, 1);
+        rect(x + 5, y - 31, 2, 6, 1);
+        ellipse(x + 4, y - 23, 5, 3);//ear
+        fill(0, 0, 0);
+        ellipse(x + 11, y - 25, 3, 2.5); // eye
+    }
+    if (type === 31) {// camel 
+
+        fill(35, 40, 65);// legs
+        rect(x - 18, y + 8, 4, 19, 3);
+        rect(x - 12, y + 10, 4, 21, 3);
+        rect(x + 12, y + 14, 4, 17, 3);
+        rect(x + 10, y + 7, 5, 9, 3);
+        rect(x + 5, y + 8, 4, 21, 3);
+
+        fill(35, 50, 75);
+        // ellipse(x, y + 2, 36, 18);       // body
+        rect(x - 20, y - 6, 34, 18, 10);
+        ellipse(x - 5, y - 6, 14, 12); // humps
+        ellipse(x + 7, y - 4, 12, 10);
+        rect(x - 21, y - 16, 7, 16, 4)// neck ;
+        ellipse(x - 23, y - 14, 13, 8);// head
+
+        fill(0, 0, 0);
+        ellipse(x - 24, y - 15, 2, 3); // eye
+        fill(35, 30, 60);
+        ellipse(x - 29, y - 12, 4, 5);    // nostril
+        fill(35, 30, 50);
+        ellipse(x - 18, y - 18, 3, 4);//ear
+    }
+    if (type === 32) {// jerboa
+
+        fill(35, 30, 65);
+        ellipse(x + 2, y + 6, 4, 12);//leg
+
+        stroke(35, 25, 65);
+        strokeWeight(2);
+        line(x - 5, y + 12, x + 5, y + 14);
+        line(x + 2, y + 11, x + 8, y + 12);
+        noStroke();
+        fill(35, 30, 72);
+        ellipse(x, y, 16, 12); // body
+        ellipse(x + 7, y - 1, 10, 10); // head
+
+        // huge ears
+        fill(30, 20, 80);
+        ellipse(x + 4, y - 8, 4, 10);
+        ellipse(x + 9, y - 8, 4, 10);
+        fill(10, 30, 95);
+        ellipse(x + 4, y - 8, 2, 7); // inner ear
+        ellipse(x + 9, y - 8, 2, 7);
+        // long hind legs
+        fill(35, 30, 65);
+        ellipse(x - 4, y + 8, 4, 12);
+
+        // front paw
+        ellipse(x + 6, y + 5, 3, 5);
+        // long tail
+        //line(x - 7, y + 2, x - 20, y + 12); // drawn with stroke
+        stroke(35, 25, 55);
+        strokeWeight(1.5);
+        line(x - 7, y + 2, x - 24, y + 14);
+        noStroke();
+        fill(10, 10, 80);
+        ellipse(x - 27, y + 14, 8, 3); // tail tuft
+
+        fill(0, 0, 0);
+        ellipse(x + 9, y - 3, 2.5, 2.5); // eye
+        fill(10, 30, 90);
+        ellipse(x + 12, y + 1, 3, 2); // nose
+    }  
+     if (type === 33) {// horse
+
+        fill(25, 50, 45); // legs
+        ellipse(x - 3, y + 10, 7, 12);
+        rect(x - 5, y + 15, 4, 10, 5);
+        ellipse(x + 9, y + 10, 5, 12);
+        rect(x + 8, y + 11, 4, 12, 5);
+
+        fill(25, 55, 50);
+        rect(x - 16, y - 9, 32, 18, 8); // body
+        //fill(25, 55, 40);//
+        rect(x + 12, y - 16, 8, 20, 5);
+        ellipse(x + 19, y - 19, 14, 10); // head
+        rect(x + 20, y - 20, 12, 6, 4);
+        ellipse(x + 20, y - 17, 10, 8);
+
+        ellipse(x - 10, y + 10, 8, 12); //legs
+        rect(x - 12, y + 15, 4, 12, 5);
+        ellipse(x + 16, y + 8, 6, 15);
+        rect(x + 14, y + 13, 4, 13, 5);
+
+        fill(25, 60, 45);
+        ellipse(x + 13, y - 15, 5, 20); // mane
+        ellipse(x + 9, y - 7, 9, 7);
+        rect(x + 17, y - 28, 3, 5, 4); //ears
+        rect(x + 14, y - 28, 3, 7, 4);
+        ellipse(x + 31, y - 17, 4, 5); // nostril
+        ellipse(x - 16, y, 8, 14); // tail
+        triangle(x - 12, y, x - 20, y + 1, x - 18, y + 15);
+
+        fill(0, 0, 0);
+        ellipse(x + 21, y - 19, 3, 2); // eye
+        // fill(25, 30, 40);
+    }
+    if (type === 34) {// snake 
+
+        stroke(115, 55, 55);
+        strokeWeight(5);
+        line(x + 15, y - 2, x - 6, y - 1);
+        line(x - 6, y - 1, x - 15, y + 6);
+        line(x - 15, y + 6, x - 25, y + 6);
+        line(x - 25, y + 6, x - 39, y + 2);
+        strokeWeight(4);
+        line(x - 40, y + 2, x - 55, y + 3);
+        noStroke();
+
+        // head
+        fill(115, 50, 60);
+        ellipse(x + 16, y - 3, 10, 7);
+        // tongue
+        stroke(0, 90, 70);
+        strokeWeight(1);
+        line(x + 21, y - 2, x + 27, y - 1);
+        line(x + 27, y - 1, x + 30, y - 3);
+        line(x + 27, y - 1, x + 30, y + 1);
+        noStroke();
+        fill(0, 0, 0);
+        ellipse(x + 17, y - 5, 2.5, 2.5); // eye
+    }
+    if (type === 35) { // scorpion
+
+        fill(40, 55, 55);
+        ellipse(x, y, 20, 10);           // cephalothorax
+        fill(40, 50, 45);
+        ellipse(x - 10, y, 12, 8);       // abdomen
+        // tail segments curling up
+        ellipse(x - 18, y - 2, 7, 8);
+        ellipse(x - 22, y - 8, 6, 8);
+        ellipse(x - 20, y - 14, 5, 7);
+        // stinger
+        fill(0, 60, 60);
+        ellipse(x - 19, y - 18, 5, 4);
+        triangle(x - 19, y - 20, x - 17, y - 28, x - 21, y - 20);
+        // claws
+        fill(40, 50, 50);
+        ellipse(x + 14, y - 4, 10, 5);
+        ellipse(x + 13, y + 4, 12, 5);
+        fill(40, 45, 40);
+        triangle(x + 16, y - 2, x + 22, y - 8, x + 17, y - 6);
+        triangle(x + 15, y - 4, x + 24, y - 5, x + 17, y);
+        triangle(x + 17, y + 4, x + 23, y - 2, x + 18, y);
+        triangle(x + 16, y + 2, x + 26, y + 6, x + 18, y + 7);
+
+
+        stroke(40, 45, 40);
+        strokeWeight(2);
+        for (let i = -2; i <= 2; i++) {// legs 
+            if (i !== 0) {
+                //line(x + i * 2, y - 5, x + i * 3, y - 11);
+                line(x + i * 2, y + 5, x + i * 3, y + 11);
+            }
+        }
+        noStroke();
+        //fill(0, 0, 0);
+        // ellipse(x + 6, y - 3, 2, 2);    // eyes
+        // ellipse(x + 6, y + 3, 2, 2);
+    }
+    if (type === 36) { // meerkat (suricata)
+
+        // tail
+        fill(30, 35, 55);
+        rect(x - 6, y + 8, 3, 14, 2);//tail
+        ellipse(x - 8, y + 22, 7, 2);
+
+        fill(30, 30, 60);
+        ellipse(x - 3, y + 18, 3, 14);//legs
+        ellipse(x + 3, y + 18, 4, 14);
+        ellipse(x + 7, y + 6, 3, 12);//arm
+
+        fill(30, 30, 72);
+        ellipse(x, y + 5, 14, 20);       // body
+
+        fill(30, 15, 85);
+        ellipse(x, y + 6, 8, 14); // belly patch
+
+        fill(30, 30, 68);
+        ellipse(x, y - 8, 12, 12);// head
+
+        fill(30, 25, 50);// ears
+        ellipse(x - 6, y - 11, 3, 4);
+        ellipse(x + 6, y - 11, 3, 4);
+
+        fill(0, 0, 20); // eye mask (dark)
+        ellipse(x - 3, y - 9, 4, 4);
+        ellipse(x + 3, y - 9, 4, 4);
+        fill(0, 0, 95);
+        ellipse(x - 3, y - 9, 2.5, 2.5);
+        ellipse(x + 3, y - 9, 2.5, 2.5);
+        fill(0, 0, 0);
+        ellipse(x - 3, y - 9, 1.5, 1.5);
+        ellipse(x + 3, y - 9, 1.5, 1.5);
+
+        fill(0, 0, 25);// nose
+        ellipse(x, y - 6, 3, 2);
+
+        fill(30, 30, 60);// arms out to sides
+        ellipse(x - 6, y + 5, 2, 12);
+        ellipse(x - 3, y + 10, 7, 2);
+        ellipse(x + 4, y + 11, 4, 2);
+
+
+
+
+    }
+    if (type === 37) {// fennec fox
+
+        fill(35, 40, 90);
+        ellipse(x, y, 24, 14);           // body
+        ellipse(x + 10, y - 2, 12, 10); // head
+        ellipse(x + 10, y + 6, 2, 10);
+        ellipse(x + 6, y + 6, 2, 10);
+        ellipse(x - 4, y + 5, 2, 10);
+        ellipse(x - 8, y + 6, 2, 10);
+        // HUGE ears
+        fill(35, 35, 85);
+        ellipse(x + 5, y - 14, 8, 18);
+        ellipse(x + 14, y - 14, 8, 18);
+        fill(10, 30, 100);               // inner ear
+        ellipse(x + 5, y - 14, 4, 12);
+        ellipse(x + 14, y - 14, 4, 12);
+
+
+        fill(10, 30, 45);
+        ellipse(x + 2, y + 6, 7, 6);   // tail tip 
+
+        fill(10, 50, 65);
+        ellipse(x - 1, y + 5, 7, 6);   // tail tip 
+
+        fill(35, 35, 80);//tail
+        ellipse(x - 8, y + 4, 16, 7);
+        ellipse(x - 12, y + 1, 9, 8);
+
+
+        fill(0, 0, 0);
+        ellipse(x + 10, y - 3, 3, 2);   // eye
+        ellipse(x + 14, y - 3, 3, 2);
+        fill(0, 0, 20);
+        ellipse(x + 13, y, 2, 2);        // nose
+        stroke(35, 30, 65);
+        strokeWeight(0.7);
+        line(x + 15, y - 1, x + 21, y - 1);
+        line(x + 15, y + 1, x + 21, y + 2);
+        noStroke();
+    }
+     if (type === 38) { // spider
+       
+        fill(270, 55, 32);
+        ellipse(x - 10, y, 24, 18);      // abdomen
+        fill(270, 48, 40);
+        ellipse(x + 6, y + 3, 14, 10);   // cephalothorax
+        fill(270, 55, 32);
+        ellipse(x + 13, y + 5, 3, 6);    // fang
+        // 4 legs down from body
+        stroke(0, 0, 10);
+        strokeWeight(1.5);
+        line(x - 5, y + 1, x - 18, y + 14);
+        line(x - 3, y + 5, x - 6,  y + 16);
+        line(x + 1, y + 3, x + 6,  y + 16);
+        line(x + 4, y + 4, x + 12, y + 14);
+        noStroke();
+    }
+
+    if (type === 39) { // mosquito
+       
+         fill(210, 30, 96, 30);
+        ellipse(x - 12, y , 36, 10);// wing
+       
+        // abdomen
+        fill(85, 45, 40);
+        ellipse(x - 10, y + 1, 22, 10);
+        // thorax
+        fill(85, 42, 46);
+        ellipse(x + 2, y - 2, 12, 12);
+        // head
+        fill(85, 40, 40);
+        ellipse(x + 10, y - 3, 10, 10);
+        // proboscis
+        stroke(85, 40, 28);
+        strokeWeight(1.2);
+        line(x + 14, y, x + 26, y + 6);
+        noStroke(); 
+      fill(210, 30, 96, 30);
+        ellipse(x - 10, y - 5, 36, 10);// wing
+        // antenna
+        stroke(85, 35, 40);
+        strokeWeight(1);
+        line(x + 10, y - 7, x + 8,  y - 16);
+        line(x + 8,  y - 16, x + 4, y - 21);
+        noStroke();
+        // 3 legs
+        stroke(85, 35, 45);
+        strokeWeight(1.2);
+        line(x - 4, y + 3, x - 14, y + 14);
+        line(x + 2, y + 4, x + 2,  y + 16);
+        line(x + 7, y + 3, x + 16, y + 12);
+        noStroke();
+    }
+
+    if (type === 40) {  // ant
+      
+        // gaster
+        fill(0, 78, 55);
+        ellipse(x - 14, y, 22, 18);
+        // petiole
+        fill(0, 75, 48);
+        ellipse(x - 2, y + 1, 6, 8);
+        // thorax
+        fill(0, 72, 55);
+        ellipse(x + 6, y - 1, 14, 12);
+        // head
+        fill(0, 70, 52);
+        ellipse(x + 15, y - 5, 14, 12);
+      
+        stroke(0, 70, 38);
+        strokeWeight(1.5);  // mandible
+        line(x + 20, y - 3, x + 25, y );
+        stroke(0, 80, 55);
+        strokeWeight(1.2);
+        line(x + 16,  y - 10, x + 20, y - 18);// antenna
+        line(x + 20, y - 18, x + 24, y - 14);
+        line(x - 6, y + 4, x - 16, y + 14);// 3 legs
+        line(x + 2, y + 5, x + 2,  y + 16);
+        line(x + 9, y + 4, x + 18, y + 13);
+        noStroke();
+    }
     pop();
 }
 
@@ -1840,20 +2651,21 @@ window.addEventListener("message", (event) => {
 
     if (event.data?.type === "request_slider_value") {
         //const sliderValue = document.getElementById("hueSlider").value;
-        const sliderValue = hueSlider.value();
-        // Send value back to parent
-        window.parent.postMessage(
-            { type: "minigame2_result", value: sliderValue },
-            "*"
-        );
+        /*  const sliderValue = hueSlider.value();
+          // Send value back to parent
+          window.parent.postMessage(
+              { type: "minigame2_result", value: sliderValue },
+              "*"
+          ); */
+        return;
     }
 
-    if (event.data?.type === "set_prompt") {
+    /*if (event.data?.type === "set_prompt") {
         const el = document.getElementById("mg-prompt");
         if (el) el.textContent = event.data.text || "";
-    }
+    }*/
 
-    if (event.data?.type === "request_mg3_snapshot") {
+    if (event.data?.type === "request_mg3_snapshot") {//edw oti zitan ta ta paixnidia prow mg4 mg5 mg6 
         window.parent.postMessage({
             type: "minigame3_result",
             payload: {
@@ -1864,8 +2676,45 @@ window.addEventListener("message", (event) => {
                     mg1Water: waterValue,
                     seed
                 },
-                plants: serializePlants(plants)
+                plants: serializePlants(plants),
+                animals: animals.map(a => ({ ...a })),
+                civil: civil.map(c => ({ ...c })),
+                pollutionLayers
             }
         }, "*");
+
+        console.log("[WORLD] Snapshot sent to parent");
+    }
+
+    if (event.data.type === "save_canvas") {
+        saveCanvas("my-planet", "png");
     }
 });
+function deserializePlants(data) {
+    return data.map(p => {
+
+        if (p.type === "tree") {
+            return {
+                ...p,
+                type: "tree"
+            };
+        }
+
+        if (p.type === "bamboo") {
+            return {
+                ...p,
+                color: color(p.color.h, p.color.s, p.color.b)
+            };
+        }
+
+        if (p.type === "lotus" || p.type === "flower") {
+            return {
+                ...p,
+                col: color(...p.col),
+                leafCol: p.leafCol ? color(...p.leafCol) : null
+            };
+        }
+
+        return p;
+    });
+}

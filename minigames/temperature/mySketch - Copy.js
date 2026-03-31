@@ -23,23 +23,7 @@ const planetIndex = Number(params.get("planetIndex")) || 4;//to 4 einai default
 const mg1Height = Number(params.get("mg1Height")) || 0;
 const mg1Water = Number(params.get("mg1Water")) || 0;
 
-let landCol;
-let lightMult;
-
 console.log("[MG2] mg1Height mg1Water received:", mg1Water, mg1Height);
-
-let currentLang = "el";
-
-function updateUILang() {
-  document.querySelectorAll("[data-el]").forEach(el => {
-    if (currentLang === "el") {
-      if (!el.dataset.en) el.dataset.en = el.textContent.trim();
-      el.textContent = el.dataset.el;
-    } else {
-      if (el.dataset.en) el.textContent = el.dataset.en;
-    }
-  });
-}
 
 function sunSizeFromPlanet(index) {
   return map(index, 1, 7, 80, 20);
@@ -62,7 +46,7 @@ function setup() {
   hueSlider.id("hueSlider");   // id
   hueSlider.addClass("ui-range");//ui class*/
   determineValues();// generate initial geometry values
-  updateUILang();
+
 }
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
@@ -91,11 +75,6 @@ function draw() {
   makeClouds(cloudLayer);   // NEW clouds each time
 
   image(cloudLayer, 0, 0);
-
-noStroke();
-fill(landCol);// land fill
-rect(0, horizonLine, width, height - horizonLine);
-
   mountainsBG();
   mountainsMG();
   trees();
@@ -133,15 +112,8 @@ console.log("[MG2] mg1Height:", mg1Height, "multiplier:", heightNorm);
   //mbgMax = random(mbgMin, mbgMin - 50);
   mbgMax = mbgMin - random(10,   30 + heightNorm * 160);
  // console.log("mountains biased by height:", mountainMult);
-  sunSize = sunSizeFromPlanet(planetIndex);
-  lightMult = map(sunSize, 20, 80, 1.2, 0.8);
-landCol = color(getPlanetHue(planetIndex), 50, 65 * lightMult);
+  sunSize = sunSizeFromPlanet(planetIndex);;
   console.log("sunSize set from planetIndex", planetIndex, "sunSize:", sunSize);
-}
-
-function getPlanetHue(index) {
-  const hues = {1: 95, 2: 35, 3: 10, 4: 20, 5: 335, 6: 45, 7: 215};
-  return hues[index] ?? 20;
 }
 
 function generateColorsForStep(step) {
@@ -428,12 +400,6 @@ window.addEventListener("message", (event) => {
     const el = document.getElementById("mg-prompt");
     if (el) el.textContent = event.data.text || "";
   }
-
-  if (event.data?.type === "set_lang") {
-  currentLang = event.data.lang;
-  updateUILang();
-}
-
 });
 
 //auto pou leei :P 
