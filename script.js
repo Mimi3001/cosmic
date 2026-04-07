@@ -183,6 +183,7 @@ document.addEventListener('DOMContentLoaded', showUserId);
 
 // ===== ZOOM + DRAG PAN CONTROL =====
 (function setupZoomAndPan() {
+
   const container = document.querySelector('.space-container');
   const space = document.querySelector('.space');
   if (!container || !space) return;
@@ -195,6 +196,7 @@ document.addEventListener('DOMContentLoaded', showUserId);
   let posY = 0;
   let isDragging = false;
   let startX, startY;
+  let cameraLocked = false; 
 
   function updateTransform() {
     // Apply the transform (keeps your translate/scale formatting consistent)
@@ -208,6 +210,7 @@ document.addEventListener('DOMContentLoaded', showUserId);
 
   // Mouse drag
   container.addEventListener('mousedown', (e) => {
+    if (cameraLocked) return;
     isDragging = true;
     startX = e.clientX;
     startY = e.clientY;
@@ -220,7 +223,8 @@ document.addEventListener('DOMContentLoaded', showUserId);
   });
 
   window.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
+    if (!isDragging || cameraLocked) return;
+    //if (!isDragging) return;
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
     startX = e.clientX;
@@ -232,6 +236,7 @@ document.addEventListener('DOMContentLoaded', showUserId);
 
   // Touch drag
   container.addEventListener('touchstart', (e) => {
+    if (cameraLocked) return; 
     if (e.touches.length === 1) {
       isDragging = true;
       startX = e.touches[0].clientX;
@@ -242,6 +247,7 @@ document.addEventListener('DOMContentLoaded', showUserId);
   container.addEventListener('touchend', () => (isDragging = false));
 
   container.addEventListener('touchmove', (e) => {
+    if (cameraLocked) return; 
     if (e.touches.length === 1 && isDragging) {
       const dx = e.touches[0].clientX - startX;
       const dy = e.touches[0].clientY - startY;
@@ -256,6 +262,7 @@ document.addEventListener('DOMContentLoaded', showUserId);
   // Pinch zoom
   let lastDist = 0;
   container.addEventListener('touchmove', (e) => {
+    if (cameraLocked) return; 
     if (e.touches.length === 2) {
       e.preventDefault();
       const dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -274,6 +281,7 @@ document.addEventListener('DOMContentLoaded', showUserId);
 
   // Mouse wheel zoom
   container.addEventListener('wheel', (e) => {
+    if (cameraLocked) return; 
     if (e.ctrlKey) return;
     e.preventDefault();
     const zoomAmount = -e.deltaY * 0.001;
@@ -289,6 +297,67 @@ document.addEventListener('DOMContentLoaded', showUserId);
       updateTransform();
     }
   });
+
+  //==================================neo function-------------------------------
+  // ===== CINEMATIC ZOOM TO CHOSEN PLANET =====
+  window.zoomToChosenPlanet = function (holdSeconds = 4) {
+    const planetIndex = window.selectedPlanet?.index ?? window.selectedPlanet?.id;
+    if (!planetIndex) { console.warn("zoomToChosenPlanet: no planet selected"); return; }
+
+    const planetEl = document.querySelector(`.planet[data-planet="${planetIndex}"]`);
+    if (!planetEl) { console.warn("zoomToChosenPlanet: planet element not found"); return; }
+
+    // save current state
+    const savedPosX = posX;
+    const savedPosY = posY;
+    const savedScale = scale;
+
+    // get planet center in viewport coords
+    const pRect = planetEl.getBoundingClientRect();
+    const planetCX = pRect.left + pRect.width / 2;
+    const planetCY = pRect.top + pRect.height / 2;
+
+    // viewport center
+    const vpCX = window.innerWidth / 2;
+    const vpCY = window.innerHeight / 2;
+
+    const offsetX = vpCX - planetCX;
+    const offsetY = vpCY - planetCY;
+
+    // zoom in 30% (capped at maxScale)
+    const targetScale = Math.min(maxScale, scale * 1.45);
+    const scaleRatio = targetScale / scale;
+    const targetPosX = posX * scaleRatio + offsetX;
+    const targetPosY = posY * scaleRatio + offsetY;
+
+    // lock controls
+    cameraLocked = true;
+    isDragging = false;
+    container.style.cursor = 'default';
+
+    // smooth zoom in
+    space.style.transition = 'transform 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    posX = targetPosX;
+    posY = targetPosY;
+    scale = targetScale;
+    updateTransform();
+
+    // hold, then return
+    setTimeout(() => {
+      space.style.transition = 'transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      posX = savedPosX;
+      posY = savedPosY;
+      scale = savedScale;
+      updateTransform();
+
+      // unlock after return animation
+      setTimeout(() => {
+        space.style.transition = 'transform 0.3s ease-out';
+        cameraLocked = false;
+        container.style.cursor = 'grab';
+      }, 1300);
+    }, holdSeconds * 1000);
+  };
 })();
 
 // === RE-CENTER BUTTON LOGIC (robust) ===

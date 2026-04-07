@@ -135,7 +135,12 @@ console.log("[MG2] mg1Height:", mg1Height, "multiplier:", heightNorm);
  // console.log("mountains biased by height:", mountainMult);
   sunSize = sunSizeFromPlanet(planetIndex);
   lightMult = map(sunSize, 20, 80, 1.2, 0.8);
-landCol = color(getPlanetHue(planetIndex), 50, 65 * lightMult);
+//landCol = color(getPlanetHue(planetIndex), 50, 65 * lightMult);
+if (mg1Water > 0) {
+  landCol = color(getPlanetHue(planetIndex), 50, 65 * lightMult, 80); // semi-transparent tint over lake
+} else {
+  landCol = color(getPlanetHue(planetIndex), 50, 65 * lightMult);     // solid, no water
+}
   console.log("sunSize set from planetIndex", planetIndex, "sunSize:", sunSize);
 }
 

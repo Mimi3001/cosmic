@@ -1962,7 +1962,7 @@ function drawAnimals() {
         } else if (a.dark) {
             drawingContext.filter = "saturate(120%) brightness(70%)";
         }
-        drawAnimal(0, 0, a.type, a.hueShift ?? 0);
+        drawAnimal(0, 0, a.type, a ?? 0);
         drawingContext.filter = "none";
         pop();
 
@@ -2008,7 +2008,7 @@ function drawAnimals() {
 
     //  colorMode(HSB, 360, 100, 100, 255);
 }
-function drawAnimal(x, y, type) {
+function drawAnimal(x, y, type, animal) {
 
     push();
     translate(x, y);
@@ -2325,7 +2325,13 @@ function drawAnimal(x, y, type) {
         pop();
     }
     if (type === 22) {//fish
-        let h = random(360), s = random(50, 90), b = random(80, 100);
+   //     let h = random(360), s = random(50, 90), b = random(80, 100);
+   if (animal && animal.h === undefined) {
+     animal.h = random(360); 
+     animal.s = random(50, 90); 
+     animal.b = random(80, 100); 
+    }
+        let h = animal.h, s = animal.s, b = animal.b; 
         fill(h, 70, 70);
         ellipse(x, y, 20, 11);           // body
         triangle(x - 9, y, x - 17, y - 6, x - 17, y + 6); // tail
@@ -2419,7 +2425,11 @@ function drawAnimal(x, y, type) {
     }
     if (type === 26) { // blue bird 
 
-        let h = random(150, 270);
+       // let h = random(150, 270);
+       if (animal && animal.h === undefined) {
+         animal.h = random(150, 270); 
+        }
+        let h = animal.h;
         fill(h, 75, 85);
         ellipse(x, y, 18, 12);           // body
         ellipse(x + 7, y - 2, 12, 10);  // head
