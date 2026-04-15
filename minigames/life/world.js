@@ -170,30 +170,30 @@ let currentLang = "el";
 
 function updateUILang() {
     document.querySelectorAll("[data-el]").forEach(el => {
-         // skip elements that contain child elements (like labels with inputs)
-    /*if (el.children.length > 0) {
-      // // has child elements (like label with input) /only update the first text node
-      for (let node of el.childNodes) {
-        if (node.nodeType === 3 && node.textContent.trim()) {
-          if (currentLang === "el") {
-            if (!el.dataset.en) el.dataset.en = node.textContent.trim();
-            node.textContent = el.dataset.el + " ";
-          } else {
-            if (el.dataset.en) node.textContent = el.dataset.en + " ";
+        // skip elements that contain child elements (like labels with inputs)
+        /*if (el.children.length > 0) {
+          // // has child elements (like label with input) /only update the first text node
+          for (let node of el.childNodes) {
+            if (node.nodeType === 3 && node.textContent.trim()) {
+              if (currentLang === "el") {
+                if (!el.dataset.en) el.dataset.en = node.textContent.trim();
+                node.textContent = el.dataset.el + " ";
+              } else {
+                if (el.dataset.en) node.textContent = el.dataset.en + " ";
+              }
+              break;
+            }
           }
-          break;
-        }
-      }
-    } else {*/
-      // no children — safe to replace textContent
-      if (currentLang === "el") {
-        if (!el.dataset.en) el.dataset.en = el.textContent.trim();
-        el.textContent = el.dataset.el;
+        } else {*/
+        // no children — safe to replace textContent
+        if (currentLang === "el") {
+            if (!el.dataset.en) el.dataset.en = el.textContent.trim();
+            el.textContent = el.dataset.el;
 
-      } else {
-        if (el.dataset.en) el.textContent = el.dataset.en;
-      }
-       // }
+        } else {
+            if (el.dataset.en) el.textContent = el.dataset.en;
+        }
+        // }
     });
 }
 
@@ -460,7 +460,7 @@ function setup() {
        
     }*/
 
-updateUILang();
+    updateUILang();
 
 }
 function windowResized() {//resize support
@@ -569,6 +569,9 @@ function mousePressed() {//If a value depends on a click → mousePressed handle
     if (target && target !== document.querySelector("canvas")) return;
 
     if (currentMode === "view") return;//no interaction
+    
+// Notify parent of every game click (for narration triggers)
+try { window.parent.postMessage({ type: "minigame_click", mode: currentMode }, "*"); } catch(e) {}
 
     if (currentMode === "flora") {
         handleFloraClick();
@@ -1346,7 +1349,11 @@ function generateColorsForStep(step) {
     sky2 = hsbColor(h2, random(10, 50), random(80, 100));
 
     landCol = color(getPlanetHue(planetIndex), 50, 65 * lightMult);
-
+    let planetHue = getPlanetHue(planetIndex);
+    let h_lake1 = wrapHue(lerp(hue(sky2), planetHue, 0.1));
+    let h_lake2 = wrapHue(lerp(hue(sky1), planetHue, 0.2));
+    lake1 = hsbColor(h_lake1, saturation(sky2), brightness(sky2) * 0.8);
+    lake2 = hsbColor(h_lake2, saturation(sky1), brightness(sky1) * 0.7);
 
 
 }
@@ -1559,8 +1566,8 @@ function drawWater(pg, shape) {
     for (let y = shape.minY; y <= shape.maxY; y++) {
 
         let inter = map(y, gradTop, gradBottom, 0, 1);
-        let col = lerpColor(sky2, sky1, inter);
-
+        //let col = lerpColor(sky2, sky1, inter);
+let col = lerpColor(lake1, lake2, inter);
         pg.stroke(col);
 
         for (let x = 0; x <= width; x += 2) {
@@ -2325,13 +2332,13 @@ function drawAnimal(x, y, type, animal) {
         pop();
     }
     if (type === 22) {//fish
-   //     let h = random(360), s = random(50, 90), b = random(80, 100);
-   if (animal && animal.h === undefined) {
-     animal.h = random(360); 
-     animal.s = random(50, 90); 
-     animal.b = random(80, 100); 
-    }
-        let h = animal.h, s = animal.s, b = animal.b; 
+        //     let h = random(360), s = random(50, 90), b = random(80, 100);
+        if (animal && animal.h === undefined) {
+            animal.h = random(360);
+            animal.s = random(50, 90);
+            animal.b = random(80, 100);
+        }
+        let h = animal.h, s = animal.s, b = animal.b;
         fill(h, 70, 70);
         ellipse(x, y, 20, 11);           // body
         triangle(x - 9, y, x - 17, y - 6, x - 17, y + 6); // tail
@@ -2425,9 +2432,9 @@ function drawAnimal(x, y, type, animal) {
     }
     if (type === 26) { // blue bird 
 
-       // let h = random(150, 270);
-       if (animal && animal.h === undefined) {
-         animal.h = random(150, 270); 
+        // let h = random(150, 270);
+        if (animal && animal.h === undefined) {
+            animal.h = random(150, 270);
         }
         let h = animal.h;
         fill(h, 75, 85);

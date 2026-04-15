@@ -172,6 +172,12 @@ async function showUserId() {
 function refreshUserDisplay() {
   const display = document.getElementById('user-id-display');
   if (!display) return;
+
+/*display.dataset.el = `Χρήστης ${storedUserId}`;
+  display.dataset.en = `User ${storedUserId}`;
+  const lang = window.currentLang ?? "el";
+  display.textContent = lang === "el" ? display.dataset.el : display.dataset.en;*/
+
   const lang = window.currentLang ?? "el";
   display.textContent = lang === "el" ? `Χρήστης ${storedUserId}` : `User ${storedUserId}`;
 }
@@ -291,7 +297,7 @@ document.addEventListener('DOMContentLoaded', showUserId);
 
   // Optional: press "C" to recenter
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'c' || e.key === 'C') {
+    if (e.key === 'c' || e.key === 'C' || e.key === 'ψ' || e.key === 'Ψ') {
       posX = 0;
       posY = 0;
       updateTransform();

@@ -1,10 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
+  if (window.availablePlanets === undefined) window.availablePlanets = 7;//posoi planites
+  //Using window.availablePlanets (instead of a local let) so it survives the replay reset. 
+  //We initialize it only once — it persists across replays.
+
   //to lock the minigames
   let storyPaused = false;
   let waitingForMG2Value = false;
   let waitingForMG1Height = false;
   let waitingForMG3Value = false;
   let smudgesPending = false;
+  //let mgClickCount = 0;
 
   const minigameState = {
     1: { url: "minigames/myplanets/index.html", submitted: false },
@@ -45,18 +50,24 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   let onEndFired = false;
+  let subHideTimer = null;
+  function scheduleSubHide() {
+    if (subHideTimer) clearTimeout(subHideTimer);
+    subHideTimer = setTimeout(() => { textEl.classList.remove("show"); }, 1500);
+  }
+  let narrativePaused = false; // space bar pause
   // === Story data ===
- 
-const story = [
+
+  const story = [
     {
       text: ["Hello cosmic explorer!"],
       textEl: ["Γεια σου κοσμικέ εξερευνητή!"],
       audio: "audio/en/00_hello_explorer.mp3",
       audioEl: "audio/el/00_hello_explorer.mp3"
     },
-      {
+    {
       text: ["Earth seemed boring and trashy,"],
-      textEl: ["Η Γη έγινε λίγο βαρετή και βρομικη,"],
+      textEl: ["Η Γη έγινε λίγο βαρετή και βρόμικη,"],
       audio: "audio/en/00_trashy.mp3",
       audioEl: "audio/el/00_trashy.mp3"
     },
@@ -69,8 +80,8 @@ const story = [
     },
 
     {
-      text: ["You mission: make a planet interesting and clean?"],
-      textEl: ["Αποστολή σου: φτιάξε έναν πλανήτη ομορφο και καθαρό."],
+      text: ["You mission: make a planet interesting and clean."],
+      textEl: ["Αποστολή σου: φτιάξε έναν πλανήτη όμορφο και καθαρό."],
       audio: "audio/en/02_your_mission.mp3",
       audioEl: "audio/el/02_your_mission.mp3"
     },
@@ -83,7 +94,7 @@ const story = [
     },
 
     {
-      text: ["to attempt what you do right now — build a new home."],
+      text: ["to attempt what you do right now - build a new home."],
       textEl: ["για τον ίδιο λόγο που ήρθες και συ - να φτίαξουν ένα νέο σπίτι."],
       audio: "audio/en/04_build_home.mp3",
       audioEl: "audio/el/04_build_home.mp3"
@@ -91,8 +102,8 @@ const story = [
 
     {
       text: ["Here stand 7 planets; and you can choose your own."],
-      prompt: "Available planets at this moment: 7",
-      promptEl: "Διαθέσιμοι πλανήτες: 7",
+      prompt: () => `Available planets at this moment: ${window.availablePlanets}`,
+      promptEl: () => `Διαθέσιμοι πλανήτες αυτήν την στιγμή: ${window.availablePlanets}`,
       textEl: ["Εδώ βρίσκονται 7 διαθέσιμοι πλανήτες. Διάλεξε όποιον θέλεις."],
       audio: "audio/en/05_seven_planets.mp3",
       audioEl: "audio/el/05_seven_planets.mp3"
@@ -103,7 +114,7 @@ const story = [
       onEnd: "choosePlanet",
       prompt: "Roll over a planet and click on it, ",
       promptEl: "Πέρασε το ποντίκι πάνω από πλανήτη που θες και κάνε κλικ",
-      textEl: ["Διαβασε τις πληροφορίες του κάθε πλανήτη. Με το πάσο σου.. και διάλεξε πλανήτη να κατακτήσεις!"],
+      textEl: ["Διάβασε τις πληροφορίες του κάθε πλανήτη. Με το πάσο σου.. και διάλεξε πλανήτη να κατακτήσεις!"],
       audio: "audio/en/06_pick_planet.mp3",
       audioEl: "audio/el/06_pick_planet.mp3"
     },
@@ -116,19 +127,19 @@ const story = [
       audio: "audio/en/07_great_choice.mp3",
       audioEl: "audio/el/07_great_choice.mp3"
     },
-
-    {
-      text: ["This many users chose it before you:"],
-      prompt: () => `${window.selectedPlanet?.y || 0} users of ${window.selectedPlanet?.z || 0} total players, last date: ${window.selectedPlanet?.date || ""}`,
-      promptEl: () => `${window.selectedPlanet?.y || 0} χρήστες από ${window.selectedPlanet?.z || 0} συνολικά, τελευταία ημερομηνία: ${window.selectedPlanet?.date || ""}`,
-      textEl: ["Δεν είσαι ο πρώτος που είδε αυτήν την πέτρα και είπε «δικός μου»."],
-      audio: "audio/en/08_users_before.mp3",
-      audioEl: "audio/el/08_users_before.mp3"
-    },
-
+    /*
+        {
+          text: ["This many users chose it before you:"],
+          prompt: () => `${window.selectedPlanet?.y || 0} users of ${window.selectedPlanet?.z || 0} total players, last date: ${window.selectedPlanet?.date || ""}`,
+          promptEl: () => `${window.selectedPlanet?.y || 0} χρήστες από ${window.selectedPlanet?.z || 0} συνολικά, τελευταία ημερομηνία: ${window.selectedPlanet?.date || ""}`,
+          textEl: ["Δεν είσαι ο πρώτος που είδε αυτήν την πέτρα και είπε «δικός μου»."],
+          audio: "audio/en/08_users_before.mp3",
+          audioEl: "audio/el/08_users_before.mp3"
+        },
+    */
     {
       text: ["Let's dive in and see how the world is in there shall we?"],
-      textEl: ["Ας ρίξουμε μία ματία να δούμε πως μπορούμε να το διαμορφώσουμε"],
+      textEl: ["Ας ρίξουμε μία ματία να δούμε πως μπορούμε να το διαμορφώσουμε."],
       audio: "audio/en/09_dive_in.mp3",
       audioEl: "audio/el/09_dive_in.mp3"
     },
@@ -138,7 +149,7 @@ const story = [
       textEl: ["Ιδού ο πλανήτης σου αυτή τη στιγμή."],
       audio: "audio/en/10_blank_canvas.mp3",
       audioEl: "audio/el/10_blank_canvas.mp3",
-      onStart: "zoomToChosenPlanet"  
+      onStart: "zoomToChosenPlanet"
     },
 
     {
@@ -155,9 +166,9 @@ const story = [
       audioEl: "audio/el/12_terrain_climate.mp3"
     },
 
-     {
-      text: ["Manipulate it with the notion of your hand! Vziin"],
-      textEl: [" Ολά με μία κινηση του χεριού σου. Βζιιν"],
+    {
+      text: ["Manipulate it with the notion of your hand!"],
+      textEl: [" Ολά με μία κινηση του χεριού σου."],
       audio: "audio/en/12_hand.mp3",
       audioEl: "audio/el/12_hand.mp3"
     },
@@ -168,18 +179,18 @@ const story = [
       audio: "audio/en/13_admin_here.mp3",
       audioEl: "audio/el/13_admin_here.mp3"
     },
-   {
+    {
       text: ["You have limitl—well, not limitless—but still many options to make the planet as you wish!"],
       textEl: [" Έχεις ατελειτ- νταξει όχι ατελειωτες- αλλά πολλές επιλογές."],
       audio: "audio/en/13_limitless.mp3",
       audioEl: "audio/el/13_limitless.mp3"
     },
     {
-      text: ["Let's sculpt this planet any%—give it lands, oceans, and some pretty clouds, shall we?"],
+      text: ["Let's sculpt this planet and give it lands, oceans and some pretty clouds, shall we?"],
       gamePrompt: "Move the bars with mouse. Adjust your terrain, atmosphere and water level",
       gamePromptEl: "Κούνα τις μπάρες με το ποντίκι. Προσάρμοσε έδαφος, ατμόσφαιρα και επίπεδο νερού",
       onEnd: "openMiniGame1",
-      textEl: ["Πάμε να σμιλέψουμε τον πλανήτη any%— βάλε στεριές, ωκεανούς και κανά ωραίο aesthetic σύννεφο."],
+      textEl: ["Πάμε να σμιλέψουμε τον πλανήτη. Βάλε στεριές, ωκεανούς και κανά ωραίο aesthetic σύννεφο."],
       audio: "audio/en/14_sculpt_planet.mp3",
       audioEl: "audio/el/14_sculpt_planet.mp3"
     },
@@ -203,7 +214,7 @@ const story = [
 
     {
       text: ["What's the temperature range ? Are we getting hot or freezing?"],
-      textEl: ["Πάμε τωρα για τη θερμοκρασία. Θα ψηθούμε ή θα ξυλιασουμε;"],
+      textEl: ["Πάμε τώρα για τη θερμοκρασία. Θα ψηθούμε ή θα ξυλιασουμε;"],
       audio: "audio/en/16_temperature.mp3",
       audioEl: "audio/el/16_temperature.mp3"
     },
@@ -216,10 +227,10 @@ const story = [
     },
 
     {
-      text: ["Move your hand(slider) for temperature adjustments. Yes you are the thermostat now."],
+      text: ["Move your hand(slider) for temperature adjustments. Yes, you are the thermostat now."],
       textEl: ["Κούνα το χέρι σου για να ρύθμισεις τη θερμοκρασία. Ναι, θα κάνεις το θερμοστάτη τώρα."],
-      gamePrompt: "Move the bars with mouse. Adjust your terrain, atmosphere and water level",
-      gamePromptEl: "Κούνα τη μπάρα πάνω/κάτω ακολουθώντας τους δείκτες.",
+      gamePrompt: "Move your hand up/down or move the bar with mouse to adjust temperature",
+      gamePromptEl: "Κούνα το χέρι σου πάνω/κάτω, ή  χρησιμοποίσε ποντίκι, για να αλλάξεις θερμοκρασία.",
       onEnd: "openMiniGame2",
       audio: "audio/en/18_thermostat.mp3",
       audioEl: "audio/el/18_thermostat.mp3"
@@ -260,7 +271,7 @@ const story = [
 
     {
       text: ["LIFE! Flora and fauna in their chaotic form should thrive here."],
-      textEl: ["LIFE! Η χλωρίδα και η πανίδα στη χαοτική και θορυβώδη μορφή της."],
+      textEl: ["ΖΩΗ! Η χλωρίδα και η πανίδα στη χαοτική και θορυβώδη μορφή της."],
       audio: "audio/en/23_life.mp3",
       audioEl: "audio/el/23_life.mp3"
     },
@@ -272,7 +283,7 @@ const story = [
       audioEl: "audio/el/24_potatoes.mp3"
     },
 
-       {
+    {
       text: ["Time for cosmic gardening."],
       textEl: ["Ώρα για cosmic gardening."],
       gamePrompt: "Click on the landscape to draw flowers and trees. Adjust size and detail and randomise colors. Submit your design.",
@@ -324,9 +335,9 @@ const story = [
       audioEl: "audio/el/29_birds_fish.mp3"
     },
 
-       {
+    {
       text: ["Maybe a labubu will live behind this little tree."],
-      textEl: ["Πίσω απο αυτό το δεντράκι ίσως ζει ενα μικρό labubu."],
+      textEl: ["Πίσω από αυτό το δεντράκι ίσως ζει ένα μικρό labubu."],
       audio: "audio/en/29_labubu.mp3",
       audioEl: "audio/el/29_labubu.mp3"
     },
@@ -349,7 +360,8 @@ const story = [
       text: ["How do they sound? give them a voice, time for ASMR."],
       textEl: ["Πώς ακούγονται; Δώσε τους φωνή, ώρα για ASMR."],
       audio: "audio/en/31_asmr.mp3",
-      audioEl: "audio/el/31_asmr.mp3"
+      audioEl: "audio/el/31_asmr.mp3",
+      delayMs: 4500
     },
 
     {
@@ -357,7 +369,8 @@ const story = [
       textEl: ["Τι ντοκιμαντέρ national geografic είναι αυτό!"],
       onEnd: "waitForMiniGame4",
       audio: "audio/en/32_natgeo.mp3",
-      audioEl: "audio/el/32_natgeo.mp3"
+      audioEl: "audio/el/32_natgeo.mp3",
+      waitForClicks: 3
     },
 
     {
@@ -369,7 +382,7 @@ const story = [
 
     {
       text: ["Where's the civilization? Let's spice things up"],
-      textEl: ["Πού είναι ο πολιτισμός; Ξέρεις τι σημαίνει αυτό; ώρα για αλατάκι."],
+      textEl: ["Πού είναι ο πολιτισμός; Ξέρεις τι σημαίνει αυτό; ώρα για αλατάκι!"],
       onEnd: "lockAfterMiniGame4",
       audio: "audio/en/34_civilization.mp3",
       audioEl: "audio/el/34_civilization.mp3"
@@ -382,16 +395,14 @@ const story = [
       audioEl: "audio/el/35_add_humans.mp3"
     },
 
-      {
+    {
       text: ["Add a few NPCs-uh humans, Ι mean!"],
-      textEl: ["Πρόσθεσε NPCs- εε εννοω ανθρώπoυς!"],
+      textEl: ["Πρόσθεσε NPCs- εε εννοώ ανθρώπoυς!"],
       gamePrompEl: "Click on the land to add population, cities and factories.",
       gamePromptEl: "Κάνε κλικ στο έδαφος για να προσθέσεις κοινότητες, πόλεις και εργοστάσια.",
-      
-      /////////////////////////////////////////////////////
       onEnd: "openMiniGame5",
-      audio: "audio/en/35_add_humans.mp3",
-      audioEl: "audio/el/35_add_humans.mp3"
+      audio: "audio/en/35_npc.mp3",
+      audioEl: "audio/el/35_npc.mp3"
     },
 
 
@@ -403,14 +414,16 @@ const story = [
       text: ["Bravo! civilization speedrun just started"],
       textEl: ["Μπράβο! Πολιτιστικό speedrun ξεκίνησε."],
       audio: "audio/en/36_speedrun.mp3",
-      audioEl: "audio/el/36_speedrun.mp3"
+      audioEl: "audio/el/36_speedrun.mp3",
+      waitForClicks: 3
     },
 
     {
-      text: ["But wait what are these clouds?"],
+      text: ["But wait.. what are these clouds?"],
       textEl: ["..κάτσε. Τι είναι αυτά τα νέφη;;"],
       audio: "audio/en/37_clouds.mp3",
-      audioEl: "audio/el/37_clouds.mp3"
+      audioEl: "audio/el/37_clouds.mp3",
+      delayMs: 2000
     },
 
     {
@@ -447,10 +460,10 @@ const story = [
 
     {
       text: ["You should stop generating that much civilization. Stop it"],
-      textEl: ["Ναι… ίσως μην κάνεις spawn ανθρώπους. ΣΤΑΜΑΤΑAΑ"],
+      textEl: ["Ναι… ίσως μην κάνεις generate ανθρώπους άλλο. ΣΤΑΜΑΤΑAΑ"],
       onEnd: "waitForMiniGame5",
-      audio: "audio/en/42_stop_spawning.mp3",
-      audioEl: "audio/el/42_stop_spawning.mp3"
+      audio: "audio/en/42_stop_generating.mp3",
+      audioEl: "audio/el/42_stop_generating.mp3"
     },
 
     //---------------------//
@@ -459,14 +472,14 @@ const story = [
 
     {
       text: ["Humans are too many. they must eat and build and build"],
-      textEl: ["Οι άνθρωποι πλήθυναν. Τρώνε χτίζουν..η ρύπανση ανέβηκε."],
+      textEl: ["Οι άνθρωποι πλήθυναν. Τρώνε, χτίζουν..η ρύπανση ανέβηκε."],
       audio: "audio/en/43_too_many.mp3",
       audioEl: "audio/el/43_too_many.mp3"
     },
 
     {
       text: ["Their actions keep polluting"],
-      textEl: ["Αυτοί είστε."],
+      textEl: ["Οι πράξεις τους βρομίζουν."],
       audio: "audio/en/44_polluting.mp3",
       audioEl: "audio/el/44_polluting.mp3"
     },
@@ -493,7 +506,7 @@ const story = [
       audioEl: "audio/el/46_fix_balance.mp3"
     },
 
-     {
+    {
       text: ["You got it."],
       textEl: ["Το 'χεις."],
       audio: "audio/en/46_got.mp3",
@@ -502,12 +515,12 @@ const story = [
 
     {
       text: ["Keep adding"],
-      textEl: ["Συνέχισε λίγο ακόμα.."],
+      textEl: ["Συνέχισε, λίγο ακόμα.."],
       onEnd: "waitForSmudgesCleared",
       audio: "audio/en/47_keep_adding.mp3",
       audioEl: "audio/el/47_keep_adding.mp3"
     },
-
+ 
     {
       text: ["That's it. Pollution left the chat"],
       textEl: ["ΝΑΙ. Η ρύπανση left the chat."],
@@ -576,234 +589,12 @@ const story = [
       prompt: "The end",
       promptEl: "Τέλος",
       audio: "audio/en/56_thank_you.mp3",
-      audioEl: "audio/el/56_thank_you.mp3"
+      audioEl: "audio/el/56_thank_you.mp3",
+      onEnd: "showReplayButton"
     },
 
   );
-  
-  /*
-  {
-    text: ["Hello cosmic explorer! Earth seemed boring and trashy, so you've been invited to travel to the new world."],
-    // audio: "audio/intro1_1.mp3",
-  },
-  {
-    text: ["Can you make it interesting and clean?"],
-    // audio: "audio/intro1_2.mp3"
-  },
-  {
-    text: [
-      "Before you stands this new solar system, far away from Earth. Explorers come all the time to attempt what you do right now — build a new home."
-    ],
-    // audio: "audio/intro1_3.mp3"
-  },
-  {
-    text: ["Make a new multiplanet community. Expand, compete, collaborate."],
-    // audio: "audio/intro1_4.mp3"
-  },
 
-  {
-    text: ["Here stand 7 planets; and you can choose your own."],
-    //audio: "audio/intro2_1.mp3"
-    prompt: "Available planets at this moment: 7"
-  },
-  {
-    text: [
-      "NOTE: if a planet appears colorful, it means there's another explorer on that. Choose a white one."
-    ],
-    //audio: "audio/intro2_2.mp3"
-  },
-  {
-    text: [
-      "Oh! and any similarities with your home solar system are purely coincidental!"
-    ],
-    // audio: "audio/intro2_3.mp3"
-  },
-
-  {
-    text: ["Pick any planet to conquer!"],
-    // audio: "audio/choose_planet.mp3",
-    onEnd: "choosePlanet",
-    prompt: "Roll over a planet and click on it"
-  },
-
-  //------------------//
-  //next//
-  //------------------//
-
-  {
-    text: ["Great, you have chosen one!"],
-    prompt: () => `You chose the planet: ${window.selectedPlanet?.name || "[unknown]"}`
-  },
-
-  {
-    text: ["This many users chose it before you:"],
-    prompt: () =>
-      `${window.selectedPlanet?.y || 0} users of ${window.selectedPlanet?.z || 0} total players, last date: ${window.selectedPlanet?.date || ""}`
-  },
-
-  { text: ["Let's dive in and see how the world is in there shall we?"] },
-
-  { text: ["This is your planet right now. A blank canvas!"] },
-
-  { text: ["Will you fill it with your touch of creativity? You are scientist and artist."] },
-
-  { text: ["You can make the terrain, the climate, and a place for a new civilization. Manipulate it with the notion of your hand!"] },
-
-  { text: ["Thus you are the god here. You have limitl—well, not limitless—but still many options to make the planet as you wish!"] },
-
-  {
-    text: ["Let's sculpt this planet—give it lands, oceans, and some pretty clouds, shall we?"],
-    gamePrompt: "Move the bars with mouse. Adjust your terrain, atmosphere and water level",
-    onEnd: "openMiniGame1" // triggers the canvas popup
-  }
-*/
-/*
-                              ];
-  //---------------------//
-  //  STORY AFTER MINIGAME 1 //
-  //---------------------//
-
-  story.push(
-    {
-      text: ["Let's move to more details."],
-      onEnd: "lockAfterMiniGame1"
-    },
-    { text: ["What's the temperature range / atmosphere?"] },
-    {
-      text: ["Move your hand(slider) for tempersture adjustments in front of the camera."],
-      gamePrompt:
-        "Move (slider) your hands up/down following the number markers.",
-      onEnd: "openMiniGame2"
-    },
-
-    // AFTER MINIGAME 2
-    {
-      text: ["Great, you almost completed the first step."],
-      onEnd: "lockAfterMiniGame2"
-    },
-    { text: ["Le petit paradise!"] },
-    { text: ["Here’s your world now."] },
-    { text: ["It is not ready yet though.."] },
-    { text: ["Something is still missing..."] },
-    { text: ["LIFE! Fauna and flora should thrive here."] },
-    {
-      text: ["Build your landscape! Design your animals"],
-      //
-      gamePrompt:
-        "Click on the landscape to draw flowers and trees. Adjust size and detail and randomise colors. Submit your design.",
-      onEnd: "openMiniGame3"
-    },
-
-    // during MINIGAME 3
-    {
-      text: ["Lets start with plants, then!"],
-      onEnd: "waitForMiniGame3"  //mg3 closes and story continues
-    },
-    { text: ["beautyfull. like a true urban architect"] },
-
-    {
-      text: ["but it's still too silent."],
-      onEnd: "lockAfterMiniGame3",
-
-    },
-    { text: ["lets make some noisy animals to live in this pretty planet "] },
-    { text: ["birds, fish, mammals, incects, you name it! "] },
-    {
-      text: ["Place animals, on your planet!"],
-      //
-      gamePrompt:
-        "Click on the landscape to draw flowers and trees. Adjust size and detail and randomise colors. Submit your design.",
-      onEnd: "openMiniGame4"
-    },
-    //during mg4
-    {
-      text: ["how do they sound? give them a voice "]
-    },
-    {
-      text: ["what a nature!"],
-      onEnd: "waitForMiniGame4"
-    },
-    // AFTER MINIGAME 4
-    { text: ["it is lonely for the explorer"] },
-    {
-      text: ["where's the civilization?"],
-      onEnd: "lockAfterMiniGame4"
-    },
-    {
-      text: ["humans must enjoy your paradise"],
-      gamePrompt:
-        "Click on the planet, to add human population, build cities and factories.",
-      onEnd: "openMiniGame5"
-    },
-    // DURING MINIGAME 5
-    {
-      text: ["Bravo! you made a new home for humans"]
-    },
-    { text: ["but wait what are these clouds?"] },
-    {
-      text: ["phew phew! push them away!"],
-      gamePrompt:
-        "Click on the smudges to clean them from the solar system",//3 leave 1 appear
-    },
-    { text: ["oh is it the humans doing it?"] },
-    {
-      text: ["your paradise will become a dumbster if you don't clean it"],
-      gamePrompt:
-        "Wipe wave hand to clean the trash"
-    },
-    { text: ["wait the plants and the animals go away too"] },//kathe click na afairei ena animal/futo
-    {
-      text: ["you should stop generating that much civilization"],
-      onEnd: "waitForMiniGame5"// story stops , wait mg5  to close
-    },
-
-    //AFTER MINIGAME 5
-    { text: ["humans are too many. they must eat and build and build"] },//afou kleisti to game
-    { text: ["their actions keep polluting"] },
-    {
-      text: ["you should generate more nature."],
-      onEnd: "lockAfterMiniGame5"
-    },
-    {
-      text: ["fix the balance between humans and nature"],
-      //
-      gamePrompt:
-        "generate MOooORE plants, mOOoooOre green, moOore ANiMAls",
-      onEnd: "openMiniGame6"
-    },
-    // DURING AND AFTER MINIGAME 6 - the end
-    { text: ["that's it. pollution goes away"] },
-    {
-      text: ["keep adding"],
-      //  onEnd: "lockAfterMiniGame6",
-      onEnd: "waitForSmudgesCleared"
-    },
-    {
-      text: ["you made it!"],
-      onEnd: "lockAfterMiniGame6",
-    },//IMAGE of the landscape gets saved locally
-    {
-      text: ["this planet is balanced and thriving!"],
-      // onEnd: "waitForMG6Close" //GAME CLOSES HERE
-    },
-    { text: "you see humans should give more.. space to nature" },
-    { text: "but you did a great job explorer!" },
-    {
-      text: ["you may rest now and enjoy the view"],//edw kleinei to paixnidi
-      onEnd: "openview"
-
-
-    },
-    // after the save - mg6 close
-    { text: ["you are a caring god that made a clean and safe space for all the creatures"] },
-    {
-      text: ["thank you for your input explorer"],
-      prompt: "the end"
-    },
-
-
-
-  );*/
 
   const neoindex = story.findIndex(item => item.onEnd === "choosePlanet");
 
@@ -1355,7 +1146,7 @@ const story = [
 
   // === Actions triggered by story lines ===
   const storyActions = {
-//===========neo zoom==========
+    //===========neo zoom==========
     zoomToChosenPlanet: () => {
       if (typeof window.zoomToChosenPlanet === "function") {
         window.zoomToChosenPlanet(4);
@@ -1382,7 +1173,7 @@ const story = [
     openMiniGame2: () => openMinigame(2),//temp
 
     openMiniGame3: () => {
-      openMinigame(3); setTimeout(() => { storyPaused = false;  index++; showStory(index);}, 0);
+      openMinigame(3); setTimeout(() => { storyPaused = false; index++; showStory(index); }, 0);
     },
     waitForMiniGame3: () => { if (!minigameState[3].submitted) storyPaused = true; },//flora // freezes here
 
@@ -1542,6 +1333,75 @@ const story = [
               });
               setupViewPopup(popup);
             }*/
+    },
+    showReplayButton: () => {
+      setTimeout(() => {//=======================replay
+        const replayBtn = document.createElement("button");
+        replayBtn.id = "replay-btn";
+        replayBtn.className = "start-btn";  // same style as START
+        replayBtn.textContent = currentLang === "el" ? "Παίξε ξανά" : "Play Again?";
+        replayBtn.dataset.el = "Παίξε ξανά";
+        replayBtn.dataset.en = "Play Again?";
+        document.body.appendChild(replayBtn);
+
+        replayBtn.addEventListener("click", () => {
+          // We'll wire up the full reset logic later
+          console.log("Replay clicked");
+          const chosenEl = document.querySelector(".planet.chosen-permanent");
+          if (chosenEl) {
+            chosenEl.classList.remove("chosen-permanent");
+            chosenEl.classList.remove("temp-blue");
+            chosenEl.classList.add("used-planet");
+            window.availablePlanets--;
+          }
+
+            replayBtn.classList.add("hidden");// Hide replay button
+            setTimeout(() => replayBtn.remove(), 600);
+
+            // Reset story state
+            choice = false;
+            storyPaused = false;
+            onEndFired = false;
+            window.lockPoint = undefined;
+            window.selectedPlanet = null;
+            window.mg1Height = undefined;
+            window.mg1Water = undefined;
+            storedMG3World = null;
+            pendingMG3Value = null;
+            waitingForMG2Value = false;
+            waitingForMG1Height = false;
+            waitingForMG3Value = false;
+            smudgesPending = false;
+            currentMinigame = null;
+            currentMinigamePrompt = "";
+
+            // Reset all minigame submitted flags
+            Object.keys(minigameState).forEach(k => minigameState[k].submitted = false);
+
+            // Remove minigame popup if it exists
+            const popup = document.getElementById("minigame-popup");
+            if (popup) popup.remove();
+
+            // Unlock planet name display
+            const nameDisplay = document.getElementById("planet-name-display");
+            if (nameDisplay) {
+              nameDisplay.textContent = "";
+              nameDisplay.classList.remove("visible");
+              nameDisplay.dataset.locked = "false";
+            }
+
+            index = 0;// Reset story to beginning and start narration
+            btnNext.style.display = "block";
+            btnPrev.style.display = "block";
+            showStory(0);
+          
+        });
+      }, 3500);
+
+      setTimeout(() => {//=========================the end
+        promptText.textContent = "";
+        promptText.classList.remove("visible");
+      }, 5000);
     }
   };
 
@@ -1549,6 +1409,68 @@ const story = [
   function showStory(i) {
     const entry = story[i];
     if (!entry) return;
+// --- delayMs: hold text+audio until delay passes ---
+  /*  if (entry.delayMs && !entry._gateOpen) {
+      scheduleSubHide(); // hide the PREVIOUS subtitle
+      setTimeout(() => {
+        entry._gateOpen = true;
+        showStory(i);
+      }, entry.delayMs);
+      return;
+    }
+    if (entry._gateOpen) delete entry._gateOpen;
+
+    // --- waitForClicks: hold text+audio until N clicks in minigame ---
+    if (entry.waitForClicks && !entry._gateOpen) {
+      scheduleSubHide(); // hide the PREVIOUS subtitle
+      let clicksSoFar = 0;
+      const needed = entry.waitForClicks;
+      const handler = (event) => {
+        if (event.data?.type === "minigame_click") {
+          clicksSoFar++;
+          if (clicksSoFar >= needed) {
+            window.removeEventListener("message", handler);
+            entry._gateOpen = true;
+            showStory(i);
+          }
+        }
+      };
+      window.addEventListener("message", handler);
+      return;
+    }
+    if (entry._gateOpen) delete entry._gateOpen;*/
+
+
+// --- delayMs: hold text+audio until delay passes ---
+    if (entry.delayMs && !entry._delayDone) {
+      scheduleSubHide();
+      setTimeout(() => {
+        entry._delayDone = true;
+        showStory(i);
+      }, entry.delayMs);
+      return;
+    }
+    if (entry._delayDone) delete entry._delayDone;
+
+    // --- waitForClicks: hold text+audio until N clicks in minigame ---
+    if (entry.waitForClicks && !entry._clicksDone) {
+      scheduleSubHide();
+      let clicksSoFar = 0;
+      const needed = entry.waitForClicks;
+      const handler = (event) => {
+        if (event.data?.type === "minigame_click") {
+          clicksSoFar++;
+          if (clicksSoFar >= needed) {
+            window.removeEventListener("message", handler);
+            entry._clicksDone = true;
+            showStory(i);
+          }
+        }
+      };
+      window.addEventListener("message", handler);
+      return;
+    }
+    if (entry._clicksDone) delete entry._clicksDone;
 
     // pick text based on language
     const textLines = (currentLang === "el" && entry.textEl) ? entry.textEl : entry.text;
@@ -1595,38 +1517,51 @@ const story = [
 
     // διγλωσσο play narration
     if (audio) { audio.pause(); audio = null; }
- onEndFired = false;
+    onEndFired = false;
+    if (subHideTimer) { clearTimeout(subHideTimer); subHideTimer = null; }//cancels any pending hide when a new line appears
     const audioKey = (currentLang === "el" && entry.audioEl) ? "audioEl" : "audio";
     const audioSrc = entry[audioKey];
 
     if (audioSrc && soundEnabled) {
       audio = new Audio(audioSrc);
-      audio.play();
+      //audio.play();
+      if (!narrativePaused) audio.play();
 
       audio.onended = () => {
         // If this step has a story action (like opening a minigame), fire that
         if (entry.onEnd && typeof storyActions[entry.onEnd] === "function") {
           onEndFired = true;
           storyActions[entry.onEnd]();
-        }
+        }/*
         // Otherwise, auto-advance like pressing "next"
          if (!storyPaused && index < story.length - 1) {
           if (!choice && index >= neoindex) return; // planet gate
           index++;
+          showStory(index);*/
+
+        // If story paused (minigame, planet choice, waiting), hide subs after 1.5s
+        if (storyPaused) { scheduleSubHide(); return; }
+        // Otherwise, auto-advance like pressing "next"
+        if (!storyPaused && index < story.length - 1) {
+          if (!choice && index >= neoindex) { scheduleSubHide(); return; } // planet gate
+          index++;
           showStory(index);
+        } else {
+          scheduleSubHide(); // end of story or can't advance
         }
       };
     } else if (entry.onEnd && !langSwitching) {
       // No audio file — fire action immediately (current behavior)
       onEndFired = true;
       storyActions[entry.onEnd]();
+      if (storyPaused) scheduleSubHide();
     }
 
 
     // buttons
     btnPrev.disabled = i === 0;
     btnNext.disabled = i === story.length - 1;
-     if (i === story.length - 1) {
+    if (i === story.length - 1) {
       btnNext.style.display = "none";
       btnPrev.style.display = "none";
     }
@@ -1641,10 +1576,43 @@ const story = [
         btnPrev.style.display = "block"; // show arrows when story starts
         showStory(0); // start narration after 3 seconds
       }, 1000);//GIATI ARGEISSSSSSS
+
+      // Show pause hint for 5 seconds
+      const pauseHint = document.getElementById("pause-hint");
+      if (pauseHint) {
+        pauseHint.textContent = currentLang === "el" ? "Πάτα Space για παύση" : "Press Space to pause";
+        pauseHint.classList.add("show");
+        setTimeout(() => pauseHint.classList.remove("show"), 5000);
+      }
     });
   } else {
     showStory(0);
   }
+
+  // === SPACE BAR PAUSE ===
+  document.addEventListener("keydown", (e) => {
+    if (e.key === " " || e.key === "Spacebar") {
+      e.preventDefault();
+      const pauseHint = document.getElementById("pause-hint");
+
+      if (!narrativePaused) {
+        // PAUSE
+        narrativePaused = true;
+        if (audio) audio.pause();
+        if (pauseHint) {
+          pauseHint.textContent = currentLang === "el" ? "Παύση" : "Paused";
+          pauseHint.classList.add("show");
+        }
+      } else {
+        // UNPAUSE
+        narrativePaused = false;
+        if (audio) audio.play();
+        if (pauseHint) {
+          pauseHint.classList.remove("show");
+        }
+      }
+    }
+  });
 
   // === Navigation ===
   btnNext.addEventListener("click", () => {
@@ -1668,7 +1636,7 @@ const story = [
       onEndFired = true;
       storyActions[currentEntry.onEnd]();
       if (storyPaused) return; // action opened a minigame — stop here
-    } 
+    }
 
     if (!choice && index >= neoindex) return;
     if (index < story.length - 1) {
@@ -1704,12 +1672,12 @@ const story = [
     if (audio) { audio.pause(); audio = null; }
     if (choice && index <= neoindex + 1) {
       console.log("Cannot go back after confirming a planet.");
-       showStory(index); // replay current entry so audio restarts
+      showStory(index); // replay current entry so audio restarts
       return;
     }
     if (window.lockPoint !== undefined && index <= window.lockPoint) {
       console.log("You cannot go back from this point.");
-       showStory(index); // replay current entry so audio restarts
+      showStory(index); // replay current entry so audio restarts
       return;
     }
 
@@ -1781,6 +1749,7 @@ const story = [
       langTooltip.textContent = currentLang === "en" ? "English / en" : "Ελληνικά / el";
       updatePlanetPanels();
       updateStaticUI();
+      if (window.refreshUserDisplay) window.refreshUserDisplay();
 
       // send lang to open iframe
       const popup = document.getElementById("minigame-popup");
@@ -1871,6 +1840,18 @@ const story = [
   }
 
   function showChooseWindow(planetEl) {
+    if (planetEl.classList.contains("used-planet") && index === neoindex) {
+      const msg = currentLang === "el"
+        ? "Αυτός ο πλανήτης είναι κατειλημμένος. Διάλεξε άλλον."
+        : "This planet is taken. Choose a different one.";
+
+      const warn = document.createElement("div");
+      warn.className = "choose-window";
+      warn.innerHTML = `<div class="choose-content"><p>${msg}</p></div>`;
+      document.body.appendChild(warn);
+      setTimeout(() => warn.remove(), 2500);
+      return;
+    }
 
     // Prevent multiple windows
     document.querySelector(".choose-window") ? document.querySelector(".choose-window").remove() : '';
@@ -2163,58 +2144,95 @@ const story = [
   });
 
 
-});
-// ===== DEV SKIP SYSTEM =====
-window.devSkipTo = function (mgNumber) {
-  console.log("DEV SKIP to minigame", mgNumber);
 
-  // Fake required previous states
-  choice = true;
-
-  window.selectedPlanet = {
-    id: 4,
-    index: 7,
-    name: "Test Planet",
-    y: 10,
-    z: 200,
-    date: new Date().toLocaleDateString("en-GB")
+  // ===== DEV SKIP SYSTEM =====
+  
+  window.devSkipTo = function (mgNumber) {
+    console.log("DEV SKIP to minigame", mgNumber);
+  
+    // Fake required previous states
+    choice = true;
+  
+    window.selectedPlanet = {
+      id: 4,
+      index: 7,
+      name: "Test Planet",
+      y: 10,
+      z: 200,
+      date: new Date().toLocaleDateString("en-GB")
+    };
+  
+    // Fake MG1 values
+    window.mg1Height = 50;
+    window.mg1Water = 40;
+    minigameState[1].submitted = true;
+  
+    // Fake MG2 result
+    pendingMG3Value = 2;
+    minigameState[2].submitted = true;
+  
+    // Fake MG3 world (minimal structure)
+    storedMG3World = {
+      landscape: {           // ADD landscape wrapper
+        step: 2,
+        planetIndex: 7,
+        mg1Height: 50,
+        mg1Water: 40,
+        seed: 2
+      },
+      plants: [],
+      // colors: ["#00ff00"],
+      //landscape: [],
+      animals: [],
+      civil: []
+    };
+    minigameState[3].submitted = true;
+  
+  
+    if (mgNumber > 4) minigameState[4].submitted = true;
+    if (mgNumber > 5) minigameState[5].submitted = true;
+    if (mgNumber > 6) minigameState[6].submitted = true;
+    storyPaused = false;
+    // Jump to correct story index
+    const target = story.findIndex(s => s.onEnd === `openMiniGame${mgNumber}`);
+    if (target !== -1) {
+      index = target;
+      showStory(index);
+    }
   };
+  window.devSkipToEnd = function () {
+    console.log("DEV SKIP to end");
 
-  // Fake MG1 values
-  window.mg1Height = 50;
-  window.mg1Water = 40;
-  minigameState[1].submitted = true;
+    choice = true;
+    const fakePlanet = document.querySelector('.planet[data-planet="4"]');
+    if (fakePlanet) {
+      fakePlanet.style.setProperty("--planet-hue", 20);
+      fakePlanet.classList.add("chosen-permanent");
+    }
+    const startBtn = document.getElementById("start-btn");
+    if (startBtn) startBtn.classList.add("hidden");
+    const nameDisplay = document.getElementById("planet-name-display");
+    if (nameDisplay) {
+      nameDisplay.textContent = "Santamasa";
+      nameDisplay.classList.add("visible");
+      nameDisplay.dataset.locked = "true";
+    }
+    window.selectedPlanet = {
+      id: 4, index: 7, name: "Test Planet",
+      y: 10, z: 200, date: new Date().toLocaleDateString("en-GB")
+    };
+    window.mg1Height = 50;
+    window.mg1Water = 40;
 
-  // Fake MG2 result
-  pendingMG3Value = 2;
-  minigameState[2].submitted = true;
+    Object.keys(minigameState).forEach(k => minigameState[k].submitted = true);
 
-  // Fake MG3 world (minimal structure)
-  storedMG3World = {
-    landscape: {           // ADD landscape wrapper
-      step: 2,
-      planetIndex: 7,
-      mg1Height: 50,
-      mg1Water: 40,
-      seed: 2
-    },
-    plants: [],
-    // colors: ["#00ff00"],
-    //landscape: [],
-    animals: [],
-    civil: []
-  };
-  minigameState[3].submitted = true;
+    storedMG3World = {
+      landscape: { step: 2, planetIndex: 7, mg1Height: 50, mg1Water: 40, seed: 2 },
+      plants: [], animals: [], civil: []
+    };
 
-
-  if (mgNumber > 4) minigameState[4].submitted = true;
-  if (mgNumber > 5) minigameState[5].submitted = true;
-  if (mgNumber > 6) minigameState[6].submitted = true;
-  storyPaused = false;
-  // Jump to correct story index
-  const target = story.findIndex(s => s.onEnd === `openMiniGame${mgNumber}`);
-  if (target !== -1) {
-    index = target;
+    storyPaused = false;
+    index = story.length - 1;
     showStory(index);
-  }
-};
+  };
+});

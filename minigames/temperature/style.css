@@ -49,30 +49,10 @@ body {
   
 }
 
-/* slider */
-.temp-sliders {
-  margin-top: 8px;
-  background: rgba(10, 10, 30, 0.9);
-  border: 1px solid var(--ui-border);
-  border-radius: 10px;
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 200px;
-  box-shadow: 0 0 18px rgba(0,0,0,0.5);
-}
 
-.temp-labels-row {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-}
-.temp-label {
-  font-size: 13px;
-  color: var(--ui-text);
-  white-space: nowrap;
-}
+
+
+
 .ui-label{
   font-size: 13px; 
 }
@@ -82,3 +62,77 @@ body {
   margin: 0;
   accent-color: var(--ui-accent, #00ccff);
 }
+.handpose-strip {
+  position: absolute;
+  top: 54px;
+  left: 12px;
+  bottom: 220px;
+  z-index: 20;
+  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  
+  padding: 8px 4px;
+  background: rgba(10, 10, 30, 0.9);
+  border: 1px solid rgba(83, 210, 233, 0.5);
+  border-radius: 12px;
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.5);
+  
+  font-family: 'Inter', sans-serif;
+  color: #c0e8ff;
+}
+
+.strip-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #c0e8ff;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.strip-middle {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 4px;
+  min-height: 0;           /* allows flex children to shrink */
+  width: 100%;
+}
+
+/* Vertical title text along the left */
+/*
+.strip-title {
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+  font-size: 11px;
+  font-weight: 700;
+  color: #c0e8ff;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}*/
+/* Camera canvas placeholder — p5 will draw into this area */
+.strip-cam {
+  flex: 0 0 14px;
+  width: 16px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+}
+
+/* Vertical slider */
+.strip-slider {
+  -webkit-appearance: slider-vertical; /* Chrome/Safari */
+  appearance: slider-vertical;
+  width: 18px;
+  height: 100%;
+  margin: 0;
+  accent-color: var(--ui-accent, #00ccff);
+  cursor: pointer;
+  background: transparent;
+}
+

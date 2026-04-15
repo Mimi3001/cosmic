@@ -29,7 +29,7 @@ let lightMult;
 console.log("[MG2] mg1Height mg1Water received:", mg1Water, mg1Height);
 
 let currentLang = "el";
-
+let lastLandscapeTime = 0;
 function updateUILang() {
   document.querySelectorAll("[data-el]").forEach(el => {
     if (currentLang === "el") {
@@ -45,12 +45,19 @@ function sunSizeFromPlanet(index) {
   return map(index, 1, 7, 80, 20);
 }
 
+// ── p5 preload: ml5 model must load here ──
+function preload() {
+  if (typeof preloadHandpose === "function") {
+    preloadHandpose();
+  }
+}
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   // cloudLayer = createGraphics(windowWidth, windowHeight / 2, { willReadFrequently: true });
   colorMode(HSB, 360, 100, 100, 255);
   cloudLayer = createGraphics(width, height, WEBGL);
-  frameRate(0.5);
+  frameRate(30); // bumped from 0.5 so hand tracking is responsive
   hueSlider = document.getElementById("hueSlider");//apo html
   //hueSlider.value = 2;
 
@@ -63,6 +70,11 @@ function setup() {
   hueSlider.addClass("ui-range");//ui class*/
   determineValues();// generate initial geometry values
   updateUILang();
+
+  // ── Start handpose webcam control ──
+  if (typeof initHandpose === "function") {
+    initHandpose();
+  }
 }
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
@@ -75,7 +87,12 @@ function windowResized() {
   //regenerateScene();
 }
 function draw() {
+     if (millis() - lastLandscapeTime > 500) {
+    lastLandscapeTime = millis();
   background(100);
+noStroke();
+fill(landCol);// land fill
+rect(0, horizonLine, width, height - horizonLine);
 
   let step = parseInt(hueSlider.value);
   generateColorsForStep(step);
@@ -86,15 +103,16 @@ function draw() {
   lake(0, horizonLine, width, height - horizonLine, lake1, lake2);//diavathimisi
   }
   noStroke();
+fill(landCol);// land fill
+rect(0, horizonLine, width, height - horizonLine);
+
+  noStroke();
   sun();
   clouds();
   makeClouds(cloudLayer);   // NEW clouds each time
 
   image(cloudLayer, 0, 0);
 
-noStroke();
-fill(landCol);// land fill
-rect(0, horizonLine, width, height - horizonLine);
 
   mountainsBG();
   mountainsMG();
@@ -111,7 +129,10 @@ rect(0, horizonLine, width, height - horizonLine);
   }
 
   pop();//xreiazontia?
-
+     }
+  // ── Handpose: update slider + draw camera preview ──
+  if (typeof updateHandpose === "function") updateHandpose();
+  if (typeof drawHandPreview === "function") drawHandPreview();
 
 }
 
@@ -137,7 +158,7 @@ console.log("[MG2] mg1Height:", mg1Height, "multiplier:", heightNorm);
   lightMult = map(sunSize, 20, 80, 1.2, 0.8);
 //landCol = color(getPlanetHue(planetIndex), 50, 65 * lightMult);
 if (mg1Water > 0) {
-  landCol = color(getPlanetHue(planetIndex), 50, 65 * lightMult, 80); // semi-transparent tint over lake
+  landCol = color(getPlanetHue(planetIndex), 50, 65 * lightMult, 100); // semi-transparent tint over lake
 } else {
   landCol = color(getPlanetHue(planetIndex), 50, 65 * lightMult);     // solid, no water
 }
@@ -214,14 +235,21 @@ function generateColorsForStep(step) {
   sky1 = hsbColor(h_sky1, random(40, 70), random(75, 90));
   sky2 = hsbColor(h_sky2, random(10, 50), random(80, 100));
 
-  // Lake gradient: two hues that may be near sky or different; darker 
+   let planetHue = getPlanetHue(planetIndex); //  mirror  sky, tinted toward planet hue
+  // (30% planet tint)
+    let h_lake1 = wrapHue(lerp(hue(sky2), planetHue, 0.1)); // sky2 is bottom of sky = top of lake
+  let h_lake2 = wrapHue(lerp(hue(sky1), planetHue, 0.2)); // sky1 is top of sky = bottom of lake (reversed)
+ 
+  lake1 = hsbColor(h_lake1, saturation(sky2) , brightness(sky2) * 0.8);
+  lake2 = hsbColor(h_lake2, saturation(sky1), brightness(sky1) * 0.8);
+   /*// Lake gradient: two hues that may be near sky or different; darker 
   let h_lake1 = pickHueWithinRange(range);//same with sky
   let h_lake2 = pickHueWithinRange(range);//same with sky
   if (abs(h_lake1 - h_lake2) < 6) {// if they are too close
     h_lake2 = wrapHue(h_lake1 + 25);// push one a bit
   }
   lake1 = hsbColor(h_lake1, random(40, 60), random(70, 80));
-  lake2 = hsbColor(h_lake2, random(30, 70), random(60, 70));
+  lake2 = hsbColor(h_lake2, random(30, 70), random(60, 70));*/
 }
 
 // Helpers for hue wrapping / distance (kept small/simple)
