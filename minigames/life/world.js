@@ -304,6 +304,18 @@ window.addEventListener("message", (event) => {
     if (event.data.type === "set_mode") {
         setMode(event.data.mode);
     }
+      if (event.data?.type === "start_wipe_camera") {
+            console.log("[WORLD] received start_wipe_camera!");
+            if (typeof initWipeHandpose === "function") {
+                initWipeHandpose();
+            }
+        }
+      if (event.data?.type === "stop_wipe_camera") {
+            console.log("[WORLD] received stop_wipe_camera");
+            if (typeof stopWipeHandpose === "function") {
+                stopWipeHandpose();
+            }
+        }
     if (event.data.type === "hide_ui") {
         currentMode = "view";
         document.querySelectorAll(".flora-tools, .flora-tools-toggle, .animal-tools, .animal-tools-toggle, .civil-tools, .civil-tools-toggle")
@@ -340,6 +352,7 @@ window.addEventListener("message", (event) => {
     }
 
 });
+
 function setup() {
     prevW = width;
     prevH = height;
@@ -565,13 +578,21 @@ function mousePressed() {//If a value depends on a click → mousePressed handle
     // GUARD: ignore clicks on any UI panel or button
     if (document.querySelector(".flora-tools:hover, .animal-tools:hover, .civil-tools:hover")) return;
     // More reliable version:
-    const target = document.elementFromPoint(mouseX, mouseY);
-    if (target && target !== document.querySelector("canvas")) return;
+    // Use p5's own canvas element (drawingContext.canvas) to avoid matching
+    // the handpose preview canvas or any other <canvas> in the DOM
+    const cnv = drawingContext?.canvas;
+    if (cnv) {
+        const rect = cnv.getBoundingClientRect();
+        const vpX = rect.left + (mouseX / width) * rect.width;
+        const vpY = rect.top + (mouseY / height) * rect.height;
+        const target = document.elementFromPoint(vpX, vpY);
+        if (target && target !== cnv) return;
+    }
 
     if (currentMode === "view") return;//no interaction
-    
-// Notify parent of every game click (for narration triggers)
-try { window.parent.postMessage({ type: "minigame_click", mode: currentMode }, "*"); } catch(e) {}
+
+    // Notify parent of every game click (for narration triggers)
+    try { window.parent.postMessage({ type: "minigame_click", mode: currentMode }, "*"); } catch (e) { }
 
     if (currentMode === "flora") {
         handleFloraClick();
@@ -1062,6 +1083,7 @@ function draw() { // draw dinei sxima generate dinei dedomena
 
     let baseHeight = parseInt(heightSlider.value);   // Smaller near mountains, larger near bottom.
     scaledHeight = baseHeight * depth;
+    if (typeof updateWipeHandpose === "function") updateWipeHandpose();
     // after restoring world, never regenerate again
     if (worldRestored) {
         regenerate = false;
@@ -1567,7 +1589,7 @@ function drawWater(pg, shape) {
 
         let inter = map(y, gradTop, gradBottom, 0, 1);
         //let col = lerpColor(sky2, sky1, inter);
-let col = lerpColor(lake1, lake2, inter);
+        let col = lerpColor(lake1, lake2, inter);
         pg.stroke(col);
 
         for (let x = 0; x <= width; x += 2) {

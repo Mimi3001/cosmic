@@ -78,11 +78,11 @@ function updateHandpose() {
     const wristY = hand.keypoints[0].y;
 
     // Map: hand high (small Y ~60) → 4 (hot), hand low (big Y ~420) → 0 (cold)
-    const rawTarget = map(wristY, 100, 380, 4, 0);
+    const rawTarget = map(wristY, 150, 350, 4, 0);
     const clamped = constrain(rawTarget, 0, 4);
 
     // Smooth lerp toward target
-    handSliderTarget = lerp(handSliderTarget, clamped, 0.15);
+    handSliderTarget = lerp(handSliderTarget, clamped, 0.4);
 
     // Snap to nearest 0.25 step (matches slider step="0.25")
     const snapped = Math.round(handSliderTarget * 4) / 4;
@@ -272,10 +272,14 @@ function drawHandPreview() {
   const srcW = srcH * (dw / dh);
   const srcX = (640 - srcW) / 2;
   const srcY = 0;
-
-  // Draw webcam feed cropped
+ // Draw webcam feed cropped — mirrored horizontally
   ctx.clearRect(0, 0, dw, dh);
+  ctx.save();
+  ctx.translate(dw, 0);
+  ctx.scale(-1, 1);
   ctx.drawImage(webcamVideo.elt, srcX, srcY, srcW, srcH, 0, 0, dw, dh);
+  ctx.restore();
+ 
 
   // Draw keypoints
   if (hands.length > 0) {

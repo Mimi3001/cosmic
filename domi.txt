@@ -1,0 +1,20 @@
+index.html
+story-engine.js
+script.js
+style.css
+minigames
+|_myplanets
+	|_index.html
+	  mySketch.js
+	  style.css
+|_temperature
+	|_index.html
+	  mySketch.js
+	  style.css
+|_life
+	|_index.html
+	  world.js
+	  style.css
+
+i have a site with minigames .games appear lineraly with a narration going on and each game's actions will affect the following ones.
+(life has 4 games in unified landscape: flora/animals/civil)

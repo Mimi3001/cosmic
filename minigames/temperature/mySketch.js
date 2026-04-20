@@ -56,7 +56,10 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   // cloudLayer = createGraphics(windowWidth, windowHeight / 2, { willReadFrequently: true });
   colorMode(HSB, 360, 100, 100, 255);
-  cloudLayer = createGraphics(width, height, WEBGL);
+  //na mikriniei
+  //cloudLayer = createGraphics(width, height, WEBGL);
+cloudLayer = createGraphics(Math.floor(width), Math.floor(height), WEBGL);
+
   frameRate(30); // bumped from 0.5 so hand tracking is responsive
   hueSlider = document.getElementById("hueSlider");//apo html
   //hueSlider.value = 2;
@@ -81,13 +84,14 @@ function windowResized() {
 
   // resize offscreen graphics too
   if (cloudLayer) {
-    cloudLayer.resizeCanvas(windowWidth, windowHeight);
+   // cloudLayer.resizeCanvas(windowWidth, windowHeight); // na mikrini
+    cloudLayer.resizeCanvas(Math.floor(windowWidth), Math.floor(windowHeight));
   }
 
   //regenerateScene();
 }
 function draw() {
-     if (millis() - lastLandscapeTime > 500) {
+     if (millis() - lastLandscapeTime > 1900) {
     lastLandscapeTime = millis();
   background(100);
 noStroke();
@@ -423,7 +427,8 @@ In WEBGL mode, pg.loadPixels() reads uninitialized memory â†’ becomes garbage â†
   noiseSeed(frameCount);
   pg.loadPixels();
 
-  for (let x = 0; x < pg.width; x++) {
+  for (let x = 0; x < pg.width; x++){
+  //  for (let x = 0; x < pg.width; x += 2) {
     for (let y = 0; y < pg.height * 0.5; y += floor(random(0, 3))) {
 
       let index = (x + y * pg.width) * 4;

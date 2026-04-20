@@ -428,7 +428,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     {
       text: ["phew phew! push them away!"],
-      textEl: ["φου φου — διώξ' τα γρήγορα!"],
+      textEl: ["φου φου - διώξ' τα γρήγορα!"],
       gamePrompt: "Click on the smudges to clean them from the solar system",
       gamePromptEl: "Κάνε κλικ στους ρύπους για να καθαρίσεις το ηλιακό σύστημα",
       audio: "audio/en/38_phew_phew.mp3",
@@ -445,10 +445,11 @@ document.addEventListener("DOMContentLoaded", () => {
     {
       text: ["Your paradise will become a dumbster if you don't clean it"],
       textEl: ["Ο παράδεισός σου πάει για τα μπάζα. Τώρα καθάριζε."],
-      gamePrompt: "Wipe wave hand to clean the trash",
-      gamePromptEl: "Κάνε wipe (κίνηση χεριού) για να καθαρίσεις τα σκουπίδια",
+      gamePrompt: "Wipe. Move your hand left and right to clean the pollution",
+      gamePromptEl: "Σκούπισε. Κούνα το χέρι δεξία-αριστερά για να καθαρίσεις τους ρύπους",
       audio: "audio/en/40_dumpster.mp3",
-      audioEl: "audio/el/40_dumpster.mp3"
+      audioEl: "audio/el/40_dumpster.mp3",
+      onStart: "startWipeCamera"
     },
 
     {
@@ -518,9 +519,10 @@ document.addEventListener("DOMContentLoaded", () => {
       textEl: ["Συνέχισε, λίγο ακόμα.."],
       onEnd: "waitForSmudgesCleared",
       audio: "audio/en/47_keep_adding.mp3",
-      audioEl: "audio/el/47_keep_adding.mp3"
+      audioEl: "audio/el/47_keep_adding.mp3",
+      waitForClicks: 2
     },
- 
+
     {
       text: ["That's it. Pollution left the chat"],
       textEl: ["ΝΑΙ. Η ρύπανση left the chat."],
@@ -1167,7 +1169,14 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
       document.body.appendChild(chooseWindow);
     },
-
+    startWipeCamera: () => {
+      const popup = document.querySelector(".minigame-popup iframe");
+      const iframe = popup?.querySelector("iframe");
+      console.log("[Story] startWipeCamera firing, iframe found:", !!iframe);
+      if (popup) {
+        popup.contentWindow.postMessage({ type: "start_wipe_camera" }, "*");
+      }
+    },
 
     openMiniGame1: () => openMinigame(1),//planetsterain
     openMiniGame2: () => openMinigame(2),//temp
@@ -1355,46 +1364,46 @@ document.addEventListener("DOMContentLoaded", () => {
             window.availablePlanets--;
           }
 
-            replayBtn.classList.add("hidden");// Hide replay button
-            setTimeout(() => replayBtn.remove(), 600);
+          replayBtn.classList.add("hidden");// Hide replay button
+          setTimeout(() => replayBtn.remove(), 600);
 
-            // Reset story state
-            choice = false;
-            storyPaused = false;
-            onEndFired = false;
-            window.lockPoint = undefined;
-            window.selectedPlanet = null;
-            window.mg1Height = undefined;
-            window.mg1Water = undefined;
-            storedMG3World = null;
-            pendingMG3Value = null;
-            waitingForMG2Value = false;
-            waitingForMG1Height = false;
-            waitingForMG3Value = false;
-            smudgesPending = false;
-            currentMinigame = null;
-            currentMinigamePrompt = "";
+          // Reset story state
+          choice = false;
+          storyPaused = false;
+          onEndFired = false;
+          window.lockPoint = undefined;
+          window.selectedPlanet = null;
+          window.mg1Height = undefined;
+          window.mg1Water = undefined;
+          storedMG3World = null;
+          pendingMG3Value = null;
+          waitingForMG2Value = false;
+          waitingForMG1Height = false;
+          waitingForMG3Value = false;
+          smudgesPending = false;
+          currentMinigame = null;
+          currentMinigamePrompt = "";
 
-            // Reset all minigame submitted flags
-            Object.keys(minigameState).forEach(k => minigameState[k].submitted = false);
+          // Reset all minigame submitted flags
+          Object.keys(minigameState).forEach(k => minigameState[k].submitted = false);
 
-            // Remove minigame popup if it exists
-            const popup = document.getElementById("minigame-popup");
-            if (popup) popup.remove();
+          // Remove minigame popup if it exists
+          const popup = document.getElementById("minigame-popup");
+          if (popup) popup.remove();
 
-            // Unlock planet name display
-            const nameDisplay = document.getElementById("planet-name-display");
-            if (nameDisplay) {
-              nameDisplay.textContent = "";
-              nameDisplay.classList.remove("visible");
-              nameDisplay.dataset.locked = "false";
-            }
+          // Unlock planet name display
+          const nameDisplay = document.getElementById("planet-name-display");
+          if (nameDisplay) {
+            nameDisplay.textContent = "";
+            nameDisplay.classList.remove("visible");
+            nameDisplay.dataset.locked = "false";
+          }
 
-            index = 0;// Reset story to beginning and start narration
-            btnNext.style.display = "block";
-            btnPrev.style.display = "block";
-            showStory(0);
-          
+          index = 0;// Reset story to beginning and start narration
+          btnNext.style.display = "block";
+          btnPrev.style.display = "block";
+          showStory(0);
+
         });
       }, 3500);
 
@@ -1409,39 +1418,39 @@ document.addEventListener("DOMContentLoaded", () => {
   function showStory(i) {
     const entry = story[i];
     if (!entry) return;
-// --- delayMs: hold text+audio until delay passes ---
-  /*  if (entry.delayMs && !entry._gateOpen) {
-      scheduleSubHide(); // hide the PREVIOUS subtitle
-      setTimeout(() => {
-        entry._gateOpen = true;
-        showStory(i);
-      }, entry.delayMs);
-      return;
-    }
-    if (entry._gateOpen) delete entry._gateOpen;
-
-    // --- waitForClicks: hold text+audio until N clicks in minigame ---
-    if (entry.waitForClicks && !entry._gateOpen) {
-      scheduleSubHide(); // hide the PREVIOUS subtitle
-      let clicksSoFar = 0;
-      const needed = entry.waitForClicks;
-      const handler = (event) => {
-        if (event.data?.type === "minigame_click") {
-          clicksSoFar++;
-          if (clicksSoFar >= needed) {
-            window.removeEventListener("message", handler);
-            entry._gateOpen = true;
-            showStory(i);
+    // --- delayMs: hold text+audio until delay passes ---
+    /*  if (entry.delayMs && !entry._gateOpen) {
+        scheduleSubHide(); // hide the PREVIOUS subtitle
+        setTimeout(() => {
+          entry._gateOpen = true;
+          showStory(i);
+        }, entry.delayMs);
+        return;
+      }
+      if (entry._gateOpen) delete entry._gateOpen;
+  
+      // --- waitForClicks: hold text+audio until N clicks in minigame ---
+      if (entry.waitForClicks && !entry._gateOpen) {
+        scheduleSubHide(); // hide the PREVIOUS subtitle
+        let clicksSoFar = 0;
+        const needed = entry.waitForClicks;
+        const handler = (event) => {
+          if (event.data?.type === "minigame_click") {
+            clicksSoFar++;
+            if (clicksSoFar >= needed) {
+              window.removeEventListener("message", handler);
+              entry._gateOpen = true;
+              showStory(i);
+            }
           }
-        }
-      };
-      window.addEventListener("message", handler);
-      return;
-    }
-    if (entry._gateOpen) delete entry._gateOpen;*/
+        };
+        window.addEventListener("message", handler);
+        return;
+      }
+      if (entry._gateOpen) delete entry._gateOpen;*/
 
 
-// --- delayMs: hold text+audio until delay passes ---
+    // --- delayMs: hold text+audio until delay passes ---
     if (entry.delayMs && !entry._delayDone) {
       scheduleSubHide();
       setTimeout(() => {
@@ -1489,7 +1498,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (entry.onStart && typeof storyActions[entry.onStart] === "function") {
       storyActions[entry.onStart]();
     }
-
+    // Send updated gamePrompt to the already-open iframe
+    if (entry.gamePrompt || entry.gamePromptEl) {
+      const key = currentLang === "el" && entry.gamePromptEl ? "gamePromptEl" : "gamePrompt";
+      const val = entry[key];
+      const prompt = typeof val === "function" ? val() : val;
+      const iframe = document.querySelector(".minigame-popup iframe");
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: "set_prompt", text: prompt }, "*");
+      }
+    }
 
     // update top prompt non-minigames odigies
     if (entry.prompt) {
@@ -2146,13 +2164,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   // ===== DEV SKIP SYSTEM =====
-  
+
   window.devSkipTo = function (mgNumber) {
     console.log("DEV SKIP to minigame", mgNumber);
-  
+
     // Fake required previous states
     choice = true;
-  
+
     window.selectedPlanet = {
       id: 4,
       index: 7,
@@ -2161,16 +2179,16 @@ document.addEventListener("DOMContentLoaded", () => {
       z: 200,
       date: new Date().toLocaleDateString("en-GB")
     };
-  
+
     // Fake MG1 values
     window.mg1Height = 50;
     window.mg1Water = 40;
     minigameState[1].submitted = true;
-  
+
     // Fake MG2 result
     pendingMG3Value = 2;
     minigameState[2].submitted = true;
-  
+
     // Fake MG3 world (minimal structure)
     storedMG3World = {
       landscape: {           // ADD landscape wrapper
@@ -2187,8 +2205,8 @@ document.addEventListener("DOMContentLoaded", () => {
       civil: []
     };
     minigameState[3].submitted = true;
-  
-  
+
+
     if (mgNumber > 4) minigameState[4].submitted = true;
     if (mgNumber > 5) minigameState[5].submitted = true;
     if (mgNumber > 6) minigameState[6].submitted = true;
