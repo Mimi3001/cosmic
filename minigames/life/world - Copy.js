@@ -306,18 +306,18 @@ window.addEventListener("message", (event) => {
     if (event.data.type === "set_mode") {
         setMode(event.data.mode);
     }
-    if (event.data?.type === "start_wipe_camera") {
-        console.log("[WORLD] received start_wipe_camera!");
-        if (typeof initWipeHandpose === "function") {
-            initWipeHandpose();
+      if (event.data?.type === "start_wipe_camera") {
+            console.log("[WORLD] received start_wipe_camera!");
+            if (typeof initWipeHandpose === "function") {
+                initWipeHandpose();
+            }
         }
-    }
-    if (event.data?.type === "stop_wipe_camera") {
-        console.log("[WORLD] received stop_wipe_camera");
-        if (typeof stopWipeHandpose === "function") {
-            stopWipeHandpose();
+      if (event.data?.type === "stop_wipe_camera") {
+            console.log("[WORLD] received stop_wipe_camera");
+            if (typeof stopWipeHandpose === "function") {
+                stopWipeHandpose();
+            }
         }
-    }
     if (event.data.type === "hide_ui") {
         currentMode = "view";
         document.querySelectorAll(".flora-tools, .flora-tools-toggle, .animal-tools, .animal-tools-toggle, .civil-tools, .civil-tools-toggle")
@@ -502,7 +502,7 @@ function windowResized() {//resize support
                 b.y2 *= sy;
             }
         }
-
+  
     }
 
     prevW = newW;
@@ -1021,16 +1021,14 @@ function handleCivilClick() {
 
     for (let i = 0; i < civilDetail; i++) {
 
-        let x = mouseX + random(-40, 50); //was -50 to 90---na einai fardi
-        let y = mouseY + random(-20, 10); // was -70 to 100---alla sto idio ipsos
+        let x = mouseX + random(-50, 90);
+        let y = mouseY + random(-70, 100);
         if (y < horizonLine) continue;
         civil.push({
             x,
             y,
             type: currentCivilType,
-            skinHue: random(1, 50),
-            skinSat: random(10, 60),
-            skinBright: random(50, 90),
+            skinHue: random(10, 40),
             shirtHue: random(360),
             depth: depth
         });
@@ -1128,55 +1126,6 @@ function draw() { // draw dinei sxima generate dinei dedomena
     push();
     scale(width / landscape.width, height / landscape.height);
 
-    // ── Build a unified draw list sorted by Y (depth) ──
-    let drawList = [];
-
-    // Add plants with their base Y
-    for (let p of plants) {
-        let baseY;
-        if (p.type === "tree") {
-            // tree base = the lowest (max Y) point among branches
-            baseY = 0;
-            for (let b of p.branches) {
-                if (b.y1 > baseY) baseY = b.y1;
-                if (b.y2 > baseY) baseY = b.y2;
-            }
-        } else {
-            baseY = p.y ?? 0;
-        }
-        drawList.push({ kind: "plant", obj: p, baseY: baseY });
-    }
-
-    // Add animals
-    for (let a of animals) {
-        drawList.push({ kind: "animal", obj: a, baseY: a.y });
-    }
-
-    // Add civil entities
-    for (let c of civil) {
-        if (c.y < horizonLine) continue;
-        drawList.push({ kind: "civil", obj: c, baseY: c.y });
-    }
-
-    // Sort by Y — lower baseY (higher on screen) drawn first = behind
-    drawList.sort((a, b) => a.baseY - b.baseY);
-
-    // ── Draw everything in sorted order ──
-    for (let item of drawList) {
-        if (item.kind === "plant") {
-            drawPlant(item.obj);
-        } else if (item.kind === "animal") {
-            drawSingleAnimal(item.obj);
-        } else if (item.kind === "civil") {
-            drawSingleCivil(item.obj);
-        }
-    }
-
-    drawSmudges();
-    pop();
-    /*push();
-    scale(width / landscape.width, height / landscape.height);
-
     drawAnimals();
     for (let p of plants) {
         if (p.type === "tree") {
@@ -1200,146 +1149,146 @@ function draw() { // draw dinei sxima generate dinei dedomena
             for (let i = 0; i < p.internodes; i++) {
                 rect(0, -yCursor - p.internodeH / 2, p.w, p.internodeH);// internode body
                 rect(0, -yCursor, p.w + 2, 2); // node ring
-*/
-    /*
-    rect(0, -p.h, p.w, p.h); // stalk
-    rect(p.w / 2, -p.h, p.w + 2, 2);// nodes
-    rect(p.w / 2, 0, p.w + 2, 2);*/
-    /*
-        // texture lines
-        for (let t of p.textureLines) {
-            stroke(hue(p.color), saturation(p.color), brightness(p.color), t.alpha);
-            line(t.x, yCursor, t.x, -yCursor - p.internodeH);
+
+                /*
+                rect(0, -p.h, p.w, p.h); // stalk
+                rect(p.w / 2, -p.h, p.w + 2, 2);// nodes
+                rect(p.w / 2, 0, p.w + 2, 2);*/
+
+                // texture lines
+                for (let t of p.textureLines) {
+                    stroke(hue(p.color), saturation(p.color), brightness(p.color), t.alpha);
+                    line(t.x, yCursor, t.x, -yCursor - p.internodeH);
+                }
+                yCursor += p.internodeH;
+                //stroke(hue(p.color), saturation(p.color), brightness(p.color), t.a);
+                //line(t.x, 0, t.x, -t.h);
+            }
+
+            // leaves
+            noStroke();
+            for (let l of p.leaves) {
+                push();
+                translate(p.w / 2, -p.h + 10);
+                rotate(l.angle);
+                fill(p.color);
+                beginShape();
+                vertex(0, 0);
+                quadraticVertex(
+                    l.len * 0.6,
+                    l.w,
+                    l.len,
+                    0
+                );
+                quadraticVertex(
+                    l.len * 0.6,
+                    -l.w,
+                    0,
+                    0
+                );
+                /*
+                curveVertex(l.len * 0.5, 6);
+                vertex(l.len, 0);
+                curveVertex(l.len * 0.5, -6);*/
+                endShape(CLOSE);
+                pop();
+            }
+            pop();
         }
-        yCursor += p.internodeH;
-        //stroke(hue(p.color), saturation(p.color), brightness(p.color), t.a);
-        //line(t.x, 0, t.x, -t.h);
+        else if (p.type === "lotus") {
+            push();
+            translate(p.x, p.y);
+            // scale(1);   // 1/4 size
+            scale(p.scale);//apply once
+            // leaves
+            noStroke();
+
+            fill(p.leafCol);
+            for (let l of p.leaves) {
+                arc(
+                    cos(l.a) * l.r,
+                    sin(l.a) * l.r,
+                    l.r * 2,
+                    l.r * 2,
+                    l.a - PI * 0.9,
+                    l.a + PI * 0.9
+                );
+            }
+
+            // flowers
+            for (let f of p.flowers) {
+                push();
+                translate(f.x, f.y);
+                scale(f.s);
+                fill(p.col);
+                if (p.hasFlower) {
+                    push();
+
+                    // outer petals (lighter)
+                    fill(hue(p.col), saturation(p.col) * 0.7, brightness(p.col));
+                    for (let i = 0; i < 8; i++) {
+                        rotate(TWO_PI / 8);
+                        ellipse(0, -8, 5, 14);
+                    }
+
+                    // inner petals (more saturated)
+                    fill(hue(p.col), saturation(p.col), brightness(p.col) * 0.95);
+                    for (let i = 0; i < 6; i++) {
+                        rotate(TWO_PI / 6);
+                        ellipse(0, -5, 4, 10);
+                    }
+                    // center
+                    fill(45, 60, 90);
+                    ellipse(0, 0, 4);
+                    pop();
+                }
+                pop();
+            }
+
+            pop();
+        }
+
+        else if (p.type === "flower") {
+            push();
+            translate(p.x, p.y);
+            // scale(0.5);   // 1/4 size
+
+            for (let f of p.flowers) {
+                push();
+                translate(f.x, f.y);
+                scale(f.s);
+                fill(p.col);
+                noStroke();
+
+                for (let j = 0; j < 5; j++) {
+                    rotate(TWO_PI / 5);
+                    ellipse(0, -6, 4, 8);
+                }
+
+                fill(50, 50, 90);
+                ellipse(0, 0, 3);
+                pop();
+            }
+            pop();
+        }
+        else if (p.type === "grass") {
+            if (p.grassStyle === "blade") {
+                drawGrassBlade(p);
+            } else {
+                drawGrassField(p);
+            }
+        }
     }
-    
-    // leaves
-    noStroke();
-    for (let l of p.leaves) {
-        push();
-        translate(p.w / 2, -p.h + 10);
-        rotate(l.angle);
-        fill(p.color);
-        beginShape();
-        vertex(0, 0);
-        quadraticVertex(
-            l.len * 0.6,
-            l.w,
-            l.len,
-            0
-        );
-        quadraticVertex(
-            l.len * 0.6,
-            -l.w,
-            0,
-            0
-        );*/
-    /*
-    curveVertex(l.len * 0.5, 6);
-    vertex(l.len, 0);
-    curveVertex(l.len * 0.5, -6);*/
-    /*  endShape(CLOSE);
-      pop();
-  }
-  pop();
-          }
-          else if (p.type === "lotus") {
-      push();
-      translate(p.x, p.y);
-      // scale(1);   // 1/4 size
-      scale(p.scale);//apply once
-      // leaves
-      noStroke();
-  
-      fill(p.leafCol);
-      for (let l of p.leaves) {
-          arc(
-              cos(l.a) * l.r,
-              sin(l.a) * l.r,
-              l.r * 2,
-              l.r * 2,
-              l.a - PI * 0.9,
-              l.a + PI * 0.9
-          );
-      }
-  
-      // flowers
-      for (let f of p.flowers) {
-          push();
-          translate(f.x, f.y);
-          scale(f.s);
-          fill(p.col);
-          if (p.hasFlower) {
-              push();
-  
-              // outer petals (lighter)
-              fill(hue(p.col), saturation(p.col) * 0.7, brightness(p.col));
-              for (let i = 0; i < 8; i++) {
-                  rotate(TWO_PI / 8);
-                  ellipse(0, -8, 5, 14);
-              }
-  
-              // inner petals (more saturated)
-              fill(hue(p.col), saturation(p.col), brightness(p.col) * 0.95);
-              for (let i = 0; i < 6; i++) {
-                  rotate(TWO_PI / 6);
-                  ellipse(0, -5, 4, 10);
-              }
-              // center
-              fill(45, 60, 90);
-              ellipse(0, 0, 4);
-              pop();
-          }
-          pop();
-      }
-  
-      pop();
-  }
-  
-  else if (p.type === "flower") {
-      push();
-      translate(p.x, p.y);
-      // scale(0.5);   // 1/4 size
-  
-      for (let f of p.flowers) {
-          push();
-          translate(f.x, f.y);
-          scale(f.s);
-          fill(p.col);
-          noStroke();
-  
-          for (let j = 0; j < 5; j++) {
-              rotate(TWO_PI / 5);
-              ellipse(0, -6, 4, 8);
-          }
-  
-          fill(50, 50, 90);
-          ellipse(0, 0, 3);
-          pop();
-      }
-      pop();
-  }
-  else if (p.type === "grass") {
-      if (p.grassStyle === "blade") {
-          drawGrassBlade(p);
-      } else {
-          drawGrassField(p);
-      }
-  }
-      }
-  drawCivil();
-  drawSmudges();
-  pop();*/
+    drawCivil();
+    drawSmudges();
+    pop();
 
     // draw pollution overlay
     if (pollutionLayers > 0) {
         noStroke();
         // slightly greenish-gray tint
-        fill(80, 8, 88, Math.min(pollutionLayers * 9, 200)); // HSB: muted olive-gray, capped at ~200 alpha
-        //The 13 per layer means 4 clicks = alpha 52, 8 clicks ≈ 104, 16 clicks hits the cap of 200 out of 255.
+        fill(80, 8, 88, Math.min(pollutionLayers * 13, 200)); // HSB: muted olive-gray, capped at ~200 alpha
+        //The 13 per layer means 4 clicks = alpha 52, 8 clicks ≈ 104, 16 clicks hits the cap of 200.
         rect(0, 0, width, height);
     }
 }
@@ -1906,140 +1855,6 @@ function generateGrassSegments(x, y, sizeNorm, detailNorm, scaledHeight) {
     return segs;
 }
 
-/******************** */
-// ── Draw a single plant (extracted from the draw() loop) ──
-function drawPlant(p) {
-    if (p.type === "tree") {
-        for (let b of p.branches) {
-            // Check if color is stored as HSB or RGB
-            if (b.color.h !== undefined) {
-                stroke(b.color.h, b.color.s, b.color.b);
-            } else {
-                stroke(b.color.r, b.color.g, b.color.b);
-            }
-            strokeWeight(b.width);
-            line(b.x1, b.y1, b.x2, b.y2);
-        }
-
-        /*
-        for (let b of p.branches) {
-            stroke(b.color.r, b.color.g, b.color.b);
-            strokeWeight(b.width);
-            line(b.x1, b.y1, b.x2, b.y2);
-        }*/
-    }
-    else if (p.type === "bamboo") {
-        push();
-        translate(p.x, p.y);
-        rotate(p.lean);
-        rectMode(CENTER);
-        noStroke();
-        fill(p.color);
-        let yCursor = 0;
-        for (let i = 0; i < p.internodes; i++) {
-            rect(0, -yCursor - p.internodeH / 2, p.w, p.internodeH);
-            rect(0, -yCursor, p.w + 2, 2);
-            for (let t of p.textureLines) {
-                stroke(hue(p.color), saturation(p.color), brightness(p.color), t.alpha);
-                line(t.x, yCursor, t.x, -yCursor - p.internodeH);
-            }
-            yCursor += p.internodeH;
-        }
-        noStroke();
-        for (let l of p.leaves) {
-            push();
-            translate(p.w / 2, -p.h + 10);
-            rotate(l.angle);
-            fill(p.color);
-            beginShape();
-            vertex(0, 0);
-            quadraticVertex(l.len * 0.6, l.w, l.len, 0);
-            quadraticVertex(l.len * 0.6, -l.w, 0, 0);
-            endShape(CLOSE);
-            pop();
-        }
-        pop();
-    }
-    else if (p.type === "lotus") {
-        push();
-        translate(p.x, p.y);
-        scale(p.scale);
-        noStroke();
-        fill(p.leafCol);
-        for (let l of p.leaves) {
-            arc(cos(l.a) * l.r, sin(l.a) * l.r, l.r * 2, l.r * 2, l.a - PI * 0.9, l.a + PI * 0.9);
-        }
-        for (let f of p.flowers) {
-            push();
-            translate(f.x, f.y);
-            scale(f.s);
-            fill(p.col);
-            if (p.hasFlower) {
-                push();
-                fill(hue(p.col), saturation(p.col) * 0.7, brightness(p.col));
-                for (let i = 0; i < 8; i++) { rotate(TWO_PI / 8); ellipse(0, -8, 5, 14); }
-                fill(hue(p.col), saturation(p.col), brightness(p.col) * 0.95);
-                for (let i = 0; i < 6; i++) { rotate(TWO_PI / 6); ellipse(0, -5, 4, 10); }
-                fill(45, 60, 90);
-                ellipse(0, 0, 4);
-                pop();
-            }
-            pop();
-        }
-        pop();
-    }
-    else if (p.type === "flower") {
-        push();
-        translate(p.x, p.y);
-        for (let f of p.flowers) {
-            push();
-            translate(f.x, f.y);
-            scale(f.s);
-            fill(p.col);
-            noStroke();
-            for (let j = 0; j < 5; j++) { rotate(TWO_PI / 5); ellipse(0, -6, 4, 8); }
-            fill(50, 50, 90);
-            ellipse(0, 0, 3);
-            pop();
-        }
-        pop();
-    }
-    else if (p.type === "grass") {
-        if (p.grassStyle === "blade") drawGrassBlade(p);
-        else drawGrassField(p);
-    }
-}
-
-// ── Draw a single animal (extracted from drawAnimals) ──
-function drawSingleAnimal(a) {
-    push();
-    noStroke();
-    let d = a.depth ?? depthScale(a.y);
-    let facing = a.facing ?? 1;
-    translate(a.x, a.y);
-    let s = map(a.size ?? 20, 10, 60, 0.8, 1.6);
-    scale(facing * d * s, d * s);
-    if (a.pale) {
-        drawingContext.filter = "saturate(30%) brightness(130%)";
-    } else if (a.dark) {
-        drawingContext.filter = "saturate(120%) brightness(70%)";
-    }
-    drawAnimal(0, 0, a.type, a ?? 0);
-    drawingContext.filter = "none";
-    pop();
-}
-
-// ── Draw a single civil entity (extracted from drawCivil) ──
-function drawSingleCivil(c) {
-    let d = c.depth ?? depthScale(c.y);
-    push();
-    noStroke();
-    translate(c.x, c.y);
-    scale(d);
-    drawHuman(0, 0, c.type, c.skinHue ?? 30, c.skinSat ?? 40, c.skinBright ?? 85, c.shirtHue ?? 210);
-    pop();
-}
-
 /* //PALIA LOGIKH
 function pickSpecies(zone, animalClass) {
     if (animalClass === "mammal") {
@@ -2081,7 +1896,7 @@ function drawCivil() {
         push();
         translate(c.x, c.y);
         scale(d);
-        drawHuman(0, 0, c.type, c.skinHue ?? 30, c.skinSat ?? 40, c.skinBright ?? 85, c.shirtHue ?? 210);
+        drawHuman(0, 0, c.type, c.skinHue ?? 30, c.shirtHue ?? 210);
         pop();
 
     }
@@ -2108,7 +1923,7 @@ function removeSmudges(count = 2) {
             }, 2000); // wait 2s for smudges to visually clear first*/
     }
 }
-function drawHuman(x, y, type, skinHue = 30, skinSat = 40, skinBright = 85, shirtHue = 210) {
+function drawHuman(x, y, type, skinHue = 30, shirtHue = 210) {
 
     if (type === "production") {
         push(); scale(3);
@@ -2135,7 +1950,7 @@ function drawHuman(x, y, type, skinHue = 30, skinSat = 40, skinBright = 85, shir
 
     else if (type === "human") {
         push(); scale(1.5);
-        fill(skinHue, skinSat, skinBright);
+        fill(skinHue, 40, 85);
         ellipse(x, y - 6, 5, 6);
 
         fill(shirtHue, 60, 80);
@@ -2173,9 +1988,9 @@ function drawAnimals() {
         translate(a.x, a.y);
 
         // let s = a.size / 20;
-        let s = map(a.size ?? 20, 10, 60, 0.8, 1.6)  // normalize: slider default 20 = scale 1.0
+       let s = map(a.size ?? 20, 10, 60, 0.8, 1.6)  // normalize: slider default 20 = scale 1.0
         scale(facing * d * s, d * s);
-        // scale(facing * d, d);
+      // scale(facing * d, d);
         if (a.pale) {
             drawingContext.filter = "saturate(30%) brightness(130%)";
         } else if (a.dark) {
@@ -3124,122 +2939,65 @@ function drawAnimal(x, y, type, animal) {
     pop();
 }
 function randomizeColors() {
-    colorMode(HSB, 360, 100, 100);
-
     for (let p of plants) {
-
-
-
-
-
-
+        //  p.color = { r: random(0, 20), g: random(200, 255), b: random(40, 100) };
         if (p.type === "tree") {
-            // Pick random target colors for trunk and tips
-            // Trunk: hsb(10-50, 10-50, 20-70) - dark brown to pale gray-brown
-            let trunkH = random(10, 50);
-            let trunkS = random(10, 50);
-            let trunkB = random(20, 70);
+            // new random base color
+            let newCol = {
+                r: random(0, 30),
+                g: random(170, 255),
+                b: random(40, 140)
+            };
 
-            // Tips: hsb(0-140, 45-60, 50-80) - autumn reds/oranges/yellows to vivid greens
-            let tipH = random(0, 140);
-            let tipS = random(45, 60);
-            let tipB = random(50, 80);
+            p.color = newCol;
 
+            // recolor tree branches
+            //if (p.type === "tree") {
+            
             // Find the thickest branch to know what's trunk vs tip
             let maxW = 0;
             for (let b of p.branches) { if (b.width > maxW) maxW = b.width; }
 
             for (let b of p.branches) {
                 let t = 1 - (b.width / maxW); // 0 = trunk, 1 = thinnest tip
-
-                // Add variation to each branch
-                let h = lerp(trunkH, tipH, t) + random(-10, 10);
-                let s = lerp(trunkS, tipS, t) + random(-5, 5);
-                let branchB = lerp(trunkB, tipB, t) + random(-5, 5);
-
-                // Constrain to valid ranges
-                h = constrain(h, 0, 140);
-                s = constrain(s, 10, 60);
-                branchB = constrain(branchB, 20, 80);
-
-                // Store as HSB values (not RGB!)
-                b.color = {
-                    h: h,
-                    s: s,
-                    b: branchB
-                };
-            }
-
-            // Store trunk color
-            p.color = {
-                h: trunkH,
-                s: trunkS,
-                b: trunkB
-            };
-        }
-
-
-
-
-
-        //  p.color = { r: random(0, 20), g: random(200, 255), b: random(40, 100) };
-        /*if (p.type === "tree") {
-                    // new random base color
-                    let newCol = {
-                        r: random(0, 30),
-                        g: random(170, 255),
-                        b: random(40, 140)
+                if (t > 0.5) {
+                    // Tips: green-yellow-orange-red range
+                    b.color = {
+                        r: random(0, 40),
+                        g: random(150, 255),
+                        b: random(30, 80)
                     };
-        
-                    p.color = newCol;
-        
-                    // recolor tree branches
-                    //if (p.type === "tree") {
-        
-                    // Find the thickest branch to know what's trunk vs tip
-                    let maxW = 0;
-                    for (let b of p.branches) { if (b.width > maxW) maxW = b.width; }
-        
-                    for (let b of p.branches) {
-                        let t = 1 - (b.width / maxW); // 0 = trunk, 1 = thinnest tip
-                        if (t > 0.5) {
-                            // Tips: green-yellow-orange-red range
-                            b.color = {
-                                r: random(0, 40),
-                                g: random(150, 255),
-                                b: random(30, 80)
-                            };
-                            // Shift some tips toward orange/red/yellow
-                            let shift = random();
-                            if (shift < 0.3) {
-                                // orange-red tip
-                                b.color.r = random(180, 255);
-                                b.color.g = random(80, 180);
-                                b.color.b = random(20, 60);
-                            } else if (shift < 0.5) {
-                                // yellow tip
-                                b.color.r = random(200, 255);
-                                b.color.g = random(200, 255);
-                                b.color.b = random(20, 60);
-                            }
-                        } else {
-                            // Trunk/thick branches: keep base color
-                            b.color = {
-                                r: newCol.r + random(-5, 5),
-                                g: newCol.g + random(-10, 10),
-                                b: newCol.b + random(-10, 10)
-                            };
-                        }
-                    }*/
-        /*
-        for (let b of p.branches) {
-            b.color = {
-                r: newCol.r + random(-5, 5),
-                g: newCol.g + random(-10, 10),
-                b: newCol.b + random(-10, 10)
-            };
-        }*/
-        /* }*/
+                    // Shift some tips toward orange/red/yellow
+                    let shift = random();
+                    if (shift < 0.3) {
+                        // orange-red tip
+                        b.color.r = random(180, 255);
+                        b.color.g = random(80, 180);
+                        b.color.b = random(20, 60);
+                    } else if (shift < 0.5) {
+                        // yellow tip
+                        b.color.r = random(200, 255);
+                        b.color.g = random(200, 255);
+                        b.color.b = random(20, 60);
+                    }
+                } else {
+                    // Trunk/thick branches: keep base color
+                    b.color = {
+                        r: newCol.r + random(-5, 5),
+                        g: newCol.g + random(-10, 10),
+                        b: newCol.b + random(-10, 10)
+                    };
+                }
+            }
+            /*
+            for (let b of p.branches) {
+                b.color = {
+                    r: newCol.r + random(-5, 5),
+                    g: newCol.g + random(-10, 10),
+                    b: newCol.b + random(-10, 10)
+                };
+            }*/
+        }
         else if (p.type === "bamboo") {
             p.color = color(
                 random(80, 120),   // hue
@@ -3261,6 +3019,7 @@ function randomizeColors() {
             ]);
         }
     }
+
 
 }
 function serializePlants(plants) {

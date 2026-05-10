@@ -27,7 +27,7 @@ canvas {
   /*font-family: 'Inter', sans-serif;*/
   font-weight: 700;
   font-size: clamp(16px, 1.5vw, 20px); /* scales with iframe size */
-
+ user-select: none;
   color: var(--ui-accent, #00ccff);
   background: rgba(10,10,30,0.55);
   backdrop-filter: blur(6px);
@@ -211,6 +211,11 @@ body.civil .civil-tools { display: block; }
   color: var(--ui-text);
 }
 
+.flora-tools-panel,
+.animal-tools-panel,
+.civil-tools-panel {
+  user-select: none;
+}
 /* MG6: both tools visible, stacked vertically not overlapping */
 /*body.mg6 .flora-tools { display: block; }
 body.mg6 .animal-tools { 

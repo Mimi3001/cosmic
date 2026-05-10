@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     {
       text: ["You can make the terrain, the climate, and a place for a new civilization."],
-      textEl: ["Διαμόρφωσε έδαφος, το κλίμα και την ανρθρωπότητα, το περιβάλλον."],
+      textEl: ["Διαμόρφωσε έδαφος, το κλίμα και την ανθρωπότητα, το περιβάλλον."],
       audio: "audio/en/12_terrain_climate.mp3",
       audioEl: "audio/el/12_terrain_climate.mp3"
     },
@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     {
       text: ["You have limitl—well, not limitless—but still many options to make the planet as you wish!"],
-      textEl: [" Έχεις ατελειτ- νταξει όχι ατελειωτες- αλλά πολλές επιλογές."],
+      textEl: [" Έχεις ατελειτ- ντάξει όχι ατελειωτες- αλλά πολλές επιλογές."],
       audio: "audio/en/13_limitless.mp3",
       audioEl: "audio/el/13_limitless.mp3"
     },
@@ -214,7 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     {
       text: ["What's the temperature range ? Are we getting hot or freezing?"],
-      textEl: ["Πάμε τώρα για τη θερμοκρασία. Θα ψηθούμε ή θα ξυλιασουμε;"],
+      textEl: ["Πάμε τώρα για τη θερμοκρασία. Θα ψηθούμε ή θα ξυλιάσουμε;"],
       audio: "audio/en/16_temperature.mp3",
       audioEl: "audio/el/16_temperature.mp3"
     },
@@ -2183,11 +2183,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Fake MG1 values
     window.mg1Height = 50;
     window.mg1Water = 40;
-    minigameState[1].submitted = true;
+    //minigameState[1].submitted = true;
 
     // Fake MG2 result
     pendingMG3Value = 2;
-    minigameState[2].submitted = true;
+   // minigameState[2].submitted = true;
 
     // Fake MG3 world (minimal structure)
     storedMG3World = {
@@ -2204,7 +2204,10 @@ document.addEventListener("DOMContentLoaded", () => {
       animals: [],
       civil: []
     };
-    minigameState[3].submitted = true;
+  //minigameState[3].submitted = true;
+    if (mgNumber > 1) minigameState[1].submitted = true;
+    if (mgNumber > 2) minigameState[2].submitted = true;
+    if (mgNumber > 3) minigameState[3].submitted = true;
 
 
     if (mgNumber > 4) minigameState[4].submitted = true;

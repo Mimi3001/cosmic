@@ -919,6 +919,7 @@ body {
   transition: opacity 0.5s ease;
   z-index: 10000;
   pointer-events: none;
+   user-select: none;
 }
 
 #prompt-text.visible {
@@ -1118,6 +1119,7 @@ filter: drop-shadow( 0 0 15px rgba(0, 200, 255, 0.8));
   font-size: 20px;
   font-family: Arial;
   margin-bottom: 10px;
+   user-select: none;
 }
 
 .choose-window button {
@@ -1130,6 +1132,7 @@ filter: drop-shadow( 0 0 15px rgba(0, 200, 255, 0.8));
   font-weight: bold;
   color: black;
   cursor: pointer;
+   user-select: none;
   transition: background 0.3s;
 }
 
@@ -1250,6 +1253,7 @@ filter: drop-shadow( 0 0 15px rgba(0, 200, 255, 0.8));
   color: black;
   font-weight: bold;
   cursor: pointer;
+   user-select: none;
   transition: background 0.3s;
 }
 
@@ -1283,6 +1287,7 @@ filter: drop-shadow( 0 0 15px rgba(0, 200, 255, 0.8));
   border-radius: 8px;
   color: black;
   cursor: pointer;
+   user-select: none;
   font-weight: bold;
   font-size: 20px;
 }
