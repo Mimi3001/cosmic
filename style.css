@@ -800,7 +800,7 @@ body {
 /* ============================================ pause Button === */
 .pause-hint {
   position: fixed;
-  bottom: 45px;
+  bottom: 46px;
   right: 15px;
   background: rgba(10, 10, 30, 0.6);
   color: #cdeeff;
@@ -820,6 +820,17 @@ body {
 .pause-hint.show {
   opacity: 1;
   transform: translateY(0);
+}
+/* ========================================================= credits === */
+
+#credits-panel {
+  position: fixed;
+  bottom: 82px;   /* sits above recenter-btn */
+  right: 16px;
+  top: auto;      /* override user-id-display top positioning */
+  left: auto;
+  text-align: left;
+  line-height: 1.8;
 }
 
 /* ========================================================= START BUTTON === */
@@ -973,6 +984,7 @@ filter: drop-shadow( 0 0 15px rgba(0, 200, 255, 0.8));
   opacity: 0.9;
   transition: transform 0.2s ease, opacity 0.2s ease;
   padding: 0;
+  user-select: none;
 }
 .lang-toggle:hover {
   transform: scale(1.2);
@@ -1019,6 +1031,7 @@ filter: drop-shadow( 0 0 15px rgba(0, 200, 255, 0.8));
   opacity: 0.9;
   transition: transform 0.2s ease, opacity 0.2s ease;
   padding: 0;
+  user-select: none;
 }
 .music-toggle:hover {
   transform: scale(1.2);
@@ -1065,6 +1078,7 @@ filter: drop-shadow( 0 0 15px rgba(0, 200, 255, 0.8));
   opacity: 0.9;
   transition: transform 0.2s ease, opacity 0.2s ease;
   padding: 0;
+  user-select: none;
 }
 .sound-toggle:hover {
   transform: scale(1.2);

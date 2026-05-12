@@ -1345,6 +1345,14 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     showReplayButton: () => {
       setTimeout(() => {//=======================replay
+
+        // === CREDITS ===
+        const credits = document.createElement("div");
+        credits.id = "credits-panel";
+        credits.className = "user-id-display"; // reuse same style
+        credits.innerHTML = `Scenario/Visualsation/Game Development:<br>Mimi Anastasiadou<br>Soundtrack-Music Production:<br>Arthur Dolzenko<br>Voice Over in Greek and English:<br>Konstantinos Sapountzis`;
+        document.body.appendChild(credits);
+
         const replayBtn = document.createElement("button");
         replayBtn.id = "replay-btn";
         replayBtn.className = "start-btn";  // same style as START
@@ -1366,6 +1374,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
           replayBtn.classList.add("hidden");// Hide replay button
           setTimeout(() => replayBtn.remove(), 600);
+          const oldCredits = document.getElementById("credits-panel");
+          if (oldCredits) oldCredits.remove();// credits disappear on restart
 
           // Reset story state
           choice = false;
@@ -1540,8 +1550,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const audioKey = (currentLang === "el" && entry.audioEl) ? "audioEl" : "audio";
     const audioSrc = entry[audioKey];
 
-    if (audioSrc && soundEnabled) {
+    if (audioSrc) {
       audio = new Audio(audioSrc);
+      audio.muted = !soundEnabled;
       //audio.play();
       if (!narrativePaused) audio.play();
 
@@ -1589,6 +1600,8 @@ document.addEventListener("DOMContentLoaded", () => {
   if (startBtn) {
     startBtn.addEventListener("click", () => {
       startBtn.classList.add("hidden");
+      bgMusic.play().catch(e => console.warn("Music blocked:", e));
+      musicEnabled = true;
       setTimeout(() => {
         btnNext.style.display = "block"; // show arrows when story starts
         btnPrev.style.display = "block"; // show arrows when story starts
@@ -1825,13 +1838,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (soundToggle && soundIcon) {
     soundToggle.addEventListener("click", () => {
       soundEnabled = !soundEnabled;
-      soundIcon.src = soundEnabled
-        ? "images/volume.svg"
-        : "images/mute.svg";
-
+      soundIcon.src = soundEnabled ? "images/volume.svg" : "images/mute.svg";
       soundIcon.alt = soundEnabled ? "Sound On" : "Sound Off";
-
-      if (!soundEnabled && audio) audio.pause();
+      if (audio) audio.muted = !soundEnabled; // ← mute instead of pause
+      //if (!soundEnabled && audio) audio.pause();
     });
   }
   if (soundToggle) {
@@ -1981,6 +1991,8 @@ document.addEventListener("DOMContentLoaded", () => {
         waitingForMG1Height = false;
 
         const popup = document.querySelector(".minigame-popup");
+         const iframe = popup.querySelector("iframe");
+  if (iframe) iframe.src = "about:blank";//kleinei kleinei
         if (popup) popup.remove();//MG1 closes after sending height
 
         minigameState[1].submitted = true;// Parent has the value before MG2 opens
@@ -2004,6 +2016,8 @@ document.addEventListener("DOMContentLoaded", () => {
       waitingForMG2Value = false;
 
       const popup = document.querySelector(".minigame-popup");
+       const iframe = popup.querySelector("iframe");
+  if (iframe) iframe.src = "about:blank";// kleinei kleinei
       if (popup) popup.remove();
 
       storyPaused = false;
@@ -2187,7 +2201,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Fake MG2 result
     pendingMG3Value = 2;
-   // minigameState[2].submitted = true;
+    // minigameState[2].submitted = true;
 
     // Fake MG3 world (minimal structure)
     storedMG3World = {
@@ -2204,7 +2218,7 @@ document.addEventListener("DOMContentLoaded", () => {
       animals: [],
       civil: []
     };
-  //minigameState[3].submitted = true;
+    //minigameState[3].submitted = true;
     if (mgNumber > 1) minigameState[1].submitted = true;
     if (mgNumber > 2) minigameState[2].submitted = true;
     if (mgNumber > 3) minigameState[3].submitted = true;
