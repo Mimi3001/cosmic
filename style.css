@@ -825,7 +825,7 @@ body {
 
 #credits-panel {
   position: fixed;
-  bottom: 82px;   /* sits above recenter-btn */
+  bottom: 81px;   /* sits above recenter-btn */
   right: 16px;
   top: auto;      /* override user-id-display top positioning */
   left: auto;

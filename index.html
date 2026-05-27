@@ -9,7 +9,10 @@
   <!--eikona-->
   <link rel="icon" type="image/svg+xml" href="images/union-2.svg">
   <!-- Google Font from Figma -->
-  <link href="https://fonts.googleapis.com/css?family=Inter&display=swap" rel="stylesheet" />
+ <!-- <link href="https://fonts.googleapis.com/css?family=Inter&display=swap" rel="stylesheet" />-->
+
+  <link rel="stylesheet" href="fonts/inter.css">
+
   <!-- Your main CSS file -->
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="ui.css">
@@ -21,7 +24,7 @@
 <body>
 
   <!-- USER ID DISPLAY -->
-  <div id="user-id-display" class="user-id-display">Φορτώνει user ID</div>
+  <!--<div id="user-id-display" class="user-id-display">Φορτώνει user ID</div>-->
 
   <!-- PLANET NAME DISPLAY (top right) -->
   <div id="planet-name-display" class="planet-name-display"></div>
@@ -257,7 +260,24 @@
 
 
   <script src="story-engine.js"></script>
+<script>
+  let inactivityTimer;
 
+  function resetTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+      window.location.href = "http://localhost:8000";
+    }, 400000); // 100 seconds---6 lepta
+  }
+
+  // Listen for any user activity
+  ["mousemove", "mousedown", "keypress", "touchstart", "click"].forEach(event => {
+    document.addEventListener(event, resetTimer, true);
+  });
+
+  // Start the timer on page load
+  resetTimer();
+</script> 
 </body>
 
 </html>

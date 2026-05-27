@@ -28,7 +28,16 @@ let handPreviewCtx = null;
 // ── called from p5 preload() ──
 function preloadHandpose() {
   // ml5 v1: load model in preload, flipped for mirror
-  handPoseModel = ml5.handPose({ flipped: true });
+
+  //handPoseModel = ml5.handPose({ flipped: true });
+  //allagh
+  handPoseModel = ml5.handPose({
+  flipped: true,
+  modelType: "full",
+  detectorModelUrl: "/models/detector-full/model.json",
+  landmarkModelUrl: "/models/landmark-full/model.json"
+});
+  
   console.log("[Handpose] model loading in preload...");
 }
 

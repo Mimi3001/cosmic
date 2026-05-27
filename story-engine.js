@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
     },
 
     {
-      text: ["You mission: make a planet interesting and clean."],
+      text: ["Your mission: make a planet interesting and clean."],
       textEl: ["Αποστολή σου: φτιάξε έναν πλανήτη όμορφο και καθαρό."],
       audio: "audio/en/02_your_mission.mp3",
       audioEl: "audio/el/02_your_mission.mp3"
@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
     */
     {
       text: ["Let's dive in and see how the world is in there shall we?"],
-      textEl: ["Ας ρίξουμε μία ματία να δούμε πως μπορούμε να το διαμορφώσουμε."],
+      textEl: ["Ας ρίξουμε μία ματιά να δούμε πως μπορούμε να το διαμορφώσουμε."],
       audio: "audio/en/09_dive_in.mp3",
       audioEl: "audio/el/09_dive_in.mp3"
     },
@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     {
       text: ["Manipulate it with the notion of your hand!"],
-      textEl: [" Ολά με μία κινηση του χεριού σου."],
+      textEl: ["Όλα με μία κίνηση του χεριού σου."],
       audio: "audio/en/12_hand.mp3",
       audioEl: "audio/el/12_hand.mp3"
     },
@@ -181,14 +181,14 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     {
       text: ["You have limitl—well, not limitless—but still many options to make the planet as you wish!"],
-      textEl: [" Έχεις ατελειτ- ντάξει όχι ατελειωτες- αλλά πολλές επιλογές."],
+      textEl: ["Έχεις ατελειτ- ντάξει όχι ατελείωτες- αλλά πολλές επιλογές."],
       audio: "audio/en/13_limitless.mp3",
       audioEl: "audio/el/13_limitless.mp3"
     },
     {
       text: ["Let's sculpt this planet and give it lands, oceans and some pretty clouds, shall we?"],
-      gamePrompt: "Move the bars with mouse. Adjust your terrain, atmosphere and water level",
-      gamePromptEl: "Κούνα τις μπάρες με το ποντίκι. Προσάρμοσε έδαφος, ατμόσφαιρα και επίπεδο νερού",
+      gamePrompt: "Click on controls to the left. Adjust your terrain, atmosphere and water level",
+      gamePromptEl: "Κλίκαρε τα χειριστήρια αριστερά. Προσάρμοσε έδαφος, ατμόσφαιρα και επίπεδο νερού",
       onEnd: "openMiniGame1",
       textEl: ["Πάμε να σμιλέψουμε τον πλανήτη. Βάλε στεριές, ωκεανούς και κανά ωραίο aesthetic σύννεφο."],
       audio: "audio/en/14_sculpt_planet.mp3",
@@ -213,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
     },
 
     {
-      text: ["What's the temperature range ? Are we getting hot or freezing?"],
+      text: ["What's the temperature range? Are we getting hot or freezing?"],
       textEl: ["Πάμε τώρα για τη θερμοκρασία. Θα ψηθούμε ή θα ξυλιάσουμε;"],
       audio: "audio/en/16_temperature.mp3",
       audioEl: "audio/el/16_temperature.mp3"
@@ -228,9 +228,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     {
       text: ["Move your hand(slider) for temperature adjustments. Yes, you are the thermostat now."],
-      textEl: ["Κούνα το χέρι σου για να ρύθμισεις τη θερμοκρασία. Ναι, θα κάνεις το θερμοστάτη τώρα."],
+      textEl: ["Κούνα το χέρι σου για να ρυθμίσεις τη θερμοκρασία. Ναι, θα κάνεις το θερμοστάτη τώρα."],
       gamePrompt: "Move your hand up/down or move the bar with mouse to adjust temperature",
-      gamePromptEl: "Κούνα το χέρι σου πάνω/κάτω, ή  χρησιμοποίσε ποντίκι, για να αλλάξεις θερμοκρασία.",
+      gamePromptEl: "Κούνα το χέρι σου πάνω/κάτω, ή χρησιμοποίησε ποντίκι, για να αλλάξεις θερμοκρασία.",
       onEnd: "openMiniGame2",
       audio: "audio/en/18_thermostat.mp3",
       audioEl: "audio/el/18_thermostat.mp3"
@@ -278,7 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     {
       text: ["Build your landscape, plants, trees, you know.. po ta toes."],
-      textEl: ["Βάλε λίγα δέντρα, λουλουδία, you know.. po ta toes."],
+      textEl: ["Βάλε λίγα δέντρα, λουλούδια, you know.. po ta toes."],
       audio: "audio/en/24_potatoes.mp3",
       audioEl: "audio/el/24_potatoes.mp3"
     },
@@ -286,7 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
     {
       text: ["Time for cosmic gardening."],
       textEl: ["Ώρα για cosmic gardening."],
-      gamePrompt: "Click on the landscape to draw flowers and trees. Adjust size and detail and randomise colors. Submit your design.",
+      gamePrompt: "Click on the landscape to draw flowers and trees. Adjust size and detail and randomize colors.",
       gamePromptEl: "Κάνε κλικ στο τοπίο για να τοποθετήσεις λουλούδια και δέντρα. Ρύθμισε μέγεθος και χρώματα.",
       onEnd: "openMiniGame3",
       audio: "audio/en/24_cosmic_gardening.mp3",
@@ -307,7 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
     },
 
     {
-      text: ["Beautyfull. like a true urban architect"],
+      text: ["Beautifull. like a true urban architect."],
       textEl: ["Πανέμορφα. Μα τι αρχιτέκτων."],
       audio: "audio/en/26_beautiful.mp3",
       audioEl: "audio/el/26_beautiful.mp3"
@@ -323,13 +323,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     {
       text: ["Let's make some noisy animals..."],
-      textEl: ["Πάμε να βάλουμε λίγα ζωντανά. Λίγη τσαχπινία!"],
+      textEl: ["Πάμε να βάλουμε λίγα ζωντανά. Λίγη τσαχπινιά!"],
       audio: "audio/en/28_noisy_animals.mp3",
       audioEl: "audio/el/28_noisy_animals.mp3"
     },
 
     {
-      text: ["Birds, fish, incects, mammals, you name it!"],
+      text: ["Birds, fish, insects, mammals, you name it!"],
       textEl: ["Πουλιά, έντομα, ψάρια, θηλαστικά, λογιών λογιών!"],
       audio: "audio/en/29_birds_fish.mp3",
       audioEl: "audio/el/29_birds_fish.mp3"
@@ -345,7 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
     {
       text: ["Place animals, on your planet!"],
       textEl: ["Τοποθέτησε ζώα στον πλανήτη!"],
-      gamePrompt: "Click on the landscape to draw flowers and trees. Adjust size and detail and randomise colors. Submit your design.",
+      gamePrompt: "Click on the land, water and sky to plant.. animals",
       gamePromptEl: "Κάνε κλικ σε γη, ουρανό και νερό για να.. φυτρώσουν ζωακια.",
       onEnd: "openMiniGame4",
       audio: "audio/en/30_place_animals.mp3",
@@ -365,8 +365,8 @@ document.addEventListener("DOMContentLoaded", () => {
     },
 
     {
-      text: ["What a national geografic documentary is this?!"],
-      textEl: ["Τι ντοκιμαντέρ national geografic είναι αυτό!"],
+      text: ["What a national geographic documentary is this?!"],
+      textEl: ["Τι ντοκιμαντέρ national geographic είναι αυτό!"],
       onEnd: "waitForMiniGame4",
       audio: "audio/en/32_natgeo.mp3",
       audioEl: "audio/el/32_natgeo.mp3",
@@ -374,7 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
     },
 
     {
-      text: ["it is lonely for the explorer"],
+      text: ["It is lonely for the explorer.."],
       textEl: ["Χμμ… ακόμα όμως έχει λίγο μοναξιά για τον εξερευνητή."],
       audio: "audio/en/33_lonely.mp3",
       audioEl: "audio/el/33_lonely.mp3"
@@ -429,8 +429,8 @@ document.addEventListener("DOMContentLoaded", () => {
     {
       text: ["phew phew! push them away!"],
       textEl: ["φου φου - διώξ' τα γρήγορα!"],
-      gamePrompt: "Click on the smudges to clean them from the solar system",
-      gamePromptEl: "Κάνε κλικ στους ρύπους για να καθαρίσεις το ηλιακό σύστημα",
+     // gamePrompt: "Click on the smudges to clean them from the solar system",
+     // gamePromptEl: "Κάνε κλικ στους ρύπους για να καθαρίσεις το ηλιακό σύστημα",
       audio: "audio/en/38_phew_phew.mp3",
       audioEl: "audio/el/38_phew_phew.mp3"
     },
@@ -443,7 +443,7 @@ document.addEventListener("DOMContentLoaded", () => {
     },
 
     {
-      text: ["Your paradise will become a dumbster if you don't clean it"],
+      text: ["Your paradise will become a dumpster if you don't clean it."],
       textEl: ["Ο παράδεισός σου πάει για τα μπάζα. Τώρα καθάριζε."],
       gamePrompt: "Wipe. Move your hand left and right to clean the pollution",
       gamePromptEl: "Σκούπισε. Κούνα το χέρι δεξία-αριστερά για να καθαρίσεις τους ρύπους",
@@ -453,7 +453,7 @@ document.addEventListener("DOMContentLoaded", () => {
     },
 
     {
-      text: ["Wait a minute —the plants and the animals go away too"],
+      text: ["Wait a minute —the plants and the animals go away too!"],
       textEl: ["Μισό λεπτο -και τα φυτά και τα ζώα εξαφανίζονται!"],
       audio: "audio/en/41_plants_disappear.mp3",
       audioEl: "audio/el/41_plants_disappear.mp3"
@@ -499,9 +499,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     {
       text: ["Fix the balance between humans and nature."],
-      textEl: ["Βρες την ισορρπία μεταξύ των ανθρώπων και της φύσης."],
+      textEl: ["Βρες την ισορροπία μεταξύ των ανθρώπων και της φύσης."],
       gamePrompt: "generate MOooORE plants, mOOoooOre green, moOore ANiMAls",
-      gamePromptEl: "βάλε ΠΕΡΙΣΣΟΤΕΡΗ φυση, πιο πολύ πράσινάδα, περισσότερα ΖΩΑ",
+      gamePromptEl: "βάλε ΠΕΡΙΣΣΟΤΕΡΗ φύση, πιο πολύ πρασινάδα, περισσότερα ΖΩΑ",
       onEnd: "openMiniGame6",
       audio: "audio/en/46_fix_balance.mp3",
       audioEl: "audio/el/46_fix_balance.mp3"
@@ -728,6 +728,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       if (id === 6) {
         existingPopup.querySelector(".submit-minigame").style.display = "none";
+        existingPopup.querySelector(".close-minigame").style.display = "none";
         iframe.contentWindow.postMessage({
           type: "set_mode", mode: "mg6",
           // gamePrompt: "generate MOooORE plants, mOOoooOre green"
@@ -824,8 +825,9 @@ document.addEventListener("DOMContentLoaded", () => {
       class="mg-iframe" allow="camera">
     </iframe>
     <div class="minigame-buttons">
+    
       <button class="submit-minigame">${currentLang === "el" ? "Υποβολή" : "Submit"}</button>
-      <button class="close-minigame">${currentLang === "el" ? "Κλείσιμο" : "Close"}</button>
+<button class="close-minigame" ${id === 6 ? 'style="display:none"' : ''}>${currentLang === "el" ? "Κλείσιμο" : "Close"}</button>
     </div>
   </div>
 `;
@@ -1804,7 +1806,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const musicIcon = document.getElementById("music-icon");
   const bgMusic = new Audio("audio/music.mp3");
   bgMusic.loop = true;
-  bgMusic.volume = 0.4;
+  bgMusic.volume = 0.3;
   let musicEnabled = false;
 
 
@@ -1991,8 +1993,8 @@ document.addEventListener("DOMContentLoaded", () => {
         waitingForMG1Height = false;
 
         const popup = document.querySelector(".minigame-popup");
-         const iframe = popup.querySelector("iframe");
-  if (iframe) iframe.src = "about:blank";//kleinei kleinei
+        const iframe = popup.querySelector("iframe");
+        if (iframe) iframe.src = "about:blank";//kleinei kleinei
         if (popup) popup.remove();//MG1 closes after sending height
 
         minigameState[1].submitted = true;// Parent has the value before MG2 opens
@@ -2016,8 +2018,8 @@ document.addEventListener("DOMContentLoaded", () => {
       waitingForMG2Value = false;
 
       const popup = document.querySelector(".minigame-popup");
-       const iframe = popup.querySelector("iframe");
-  if (iframe) iframe.src = "about:blank";// kleinei kleinei
+      const iframe = popup.querySelector("iframe");
+      if (iframe) iframe.src = "about:blank";// kleinei kleinei
       if (popup) popup.remove();
 
       storyPaused = false;
@@ -2119,6 +2121,13 @@ document.addEventListener("DOMContentLoaded", () => {
       smudgesPending = true;
       // capture final world state including MG6 plants/animals
       const popup = document.getElementById("minigame-popup");
+      if (popup) {
+       const closeBtn = popup?.querySelector(".close-minigame");
+  if (closeBtn) {
+    closeBtn.style.display = "";
+      closeBtn.style.removeProperty("display");  // belt and suspenders
+    }
+  }
       const iframe = popup?.querySelector("iframe");
       if (iframe) {
         waitingForMG3Value = true; // reuse existing snapshot mechanism
