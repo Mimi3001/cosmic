@@ -34,8 +34,8 @@ function preloadHandpose() {
   handPoseModel = ml5.handPose({
   flipped: true,
   modelType: "full",
-  detectorModelUrl: "/models/detector-full/model.json",
-  landmarkModelUrl: "/models/landmark-full/model.json"
+  detectorModelUrl: "../../models/detector-full/model.json",
+  landmarkModelUrl: "../../models/landmark-full/model.json"
 });
   
   console.log("[Handpose] model loading in preload...");

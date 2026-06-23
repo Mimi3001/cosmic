@@ -74,7 +74,7 @@ function initWipeHandpose() {
   const script = document.createElement("script");
   //script.src = "https://unpkg.com/ml5@1/dist/ml5.js";
   //allagh
-  script.src = "/libs/ml5.js";
+  script.src = "../../libs/ml5.js";
   script.onload = () => {
     console.log("[Wipe] ml5 loaded dynamically");
 
@@ -102,8 +102,8 @@ function initWipeHandpose() {
       wipeHandPose = ml5.handPose({
   flipped: true,
   modelType: "full",
-  detectorModelUrl: "/models/detector-full/model.json",
-  landmarkModelUrl: "/models/landmark-full/model.json"
+  detectorModelUrl: "../../models/detector-full/model.json",
+  landmarkModelUrl: "../../models/landmark-full/model.json"
 }, () => {
       console.log("[Wipe] model ready, starting detection");
       wipeHandPose.detectStart(wipeVideo, (results) => {
