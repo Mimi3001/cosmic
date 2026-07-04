@@ -27,6 +27,7 @@ let cloudLayer;
 let horizonRatio = 0.42;  // 42% 
 let horizonLine;
 let prevW, prevH;//
+let plantCanvasW, plantCanvasH; // canvas size when plants were first drawn
 
 let treeMin;
 let treeMax;
@@ -483,12 +484,14 @@ function windowResized() {//resize support
     const newW = window.innerWidth;
     const newH = window.innerHeight;
 
+      resizeCanvas(newW, newH);
+
     const sx = newW / prevW;
     const sy = newH / prevH;
     resizeCanvas(newW, newH);
 
     //  remap plant positions
-    for (let p of plants) {
+   /* for (let p of plants) {
         if (p.x !== undefined) {
             p.x *= sx;
             p.y *= sy;
@@ -503,8 +506,9 @@ function windowResized() {//resize support
             }
         }
 
-    }
-
+    }*/
+    plantCanvasW = newW;
+    plantCanvasH = newH;
     prevW = newW;
     prevH = newH;
     // resizeCanvas(window.innerWidth, window.innerHeight);
@@ -1126,8 +1130,13 @@ function draw() { // draw dinei sxima generate dinei dedomena
       drawHumans(worldData);*/
 
     push();
-    scale(width / landscape.width, height / landscape.height);
-
+   // scale(width / landscape.width, height / landscape.height);
+// lock plant scale to the canvas size at the time they were placed
+if (!plantCanvasW || !plantCanvasH) {
+    plantCanvasW = width;
+    plantCanvasH = height;
+}
+scale(plantCanvasW / landscape.width, plantCanvasH / landscape.height);
     // ── Build a unified draw list sorted by Y (depth) ──
     let drawList = [];
 
